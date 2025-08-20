@@ -1,0 +1,65 @@
+﻿@model TaskEditViewModel
+
+
+<form asp-action="Edit" enctype="multipart/form-data" id="EditEmployeeForm">
+    <div class="input-field">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" readonly />
+    </div>
+    <div class="input-field">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label>Status</label>
+        <select asp-for="Status" class="form-control" id="statusSelect">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+        </select>
+    </div>
+
+    <div id="extraFields" style="display:none;">
+        @if (!string.IsNullOrEmpty(Model.FilePath))
+        {
+            <p>
+                Current Attachment:
+                <a href="@Model.FilePath" target="_blank">
+                    @System.IO.Path.GetFileName(Model.FilePath)
+                </a>
+            </p>
+        }
+        <div class="form-group">
+            <label>Upload new Attachment</label>
+            <input type="file" asp-for="Attachment" multiple class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label>Add Comment</label>
+            <textarea asp-for="Comment" class="form-control"></textarea>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center text-center mt-2">
+        <input type="submit" value="Save" class="btn btn-primary mx-2" />
+        <a class="btn btn-danger mx-2" asp-action="Task">Back</a>
+    </div>
+</form>
+
+
+    <script>
+
+        function toggleExtra() {
+            let status = document.getElementById("statusSelect").value;
+            let extra = document.getElementById("extraFields");
+            if (status === "In Progress") {
+                extra.style.display = "block";
+            } else {
+                extra.style.display = "none";
+            }
+        }
+
+        document.getElementById("statusSelect").addEventListener("change", toggleExtra);
+        window.onload = toggleExtra;
+    </script>

@@ -1,0 +1,37 @@
+﻿@model CreateTaskViewModel
+
+
+
+<form asp-action="Create" id="CreateTaskForm">
+	<div>
+		<label asp-for="Title" class="form-label"></label>
+		<input asp-for="Title" class="form-control" placeholder="Enter Title" value="@Model?.Title" />
+		<span asp-validation-for="Title" class="text-danger"></span>
+	</div>
+	<div>
+		<label asp-for="Description" class="form-label"></label>
+		<input asp-for="Description" class="form-control" placeholder="Enter Description" value="@Model?.Description" />
+		<span asp-validation-for="Description" class="text-danger"></span>
+	</div>
+
+
+	<div>
+		<label asp-for="EmployeeId" class="form-label"></label>
+		<select asp-items="ViewBag._Employees" asp-for="EmployeeId" class="form-select">
+			<option value="">Select Employee</option>
+		</select>
+		<span asp-validation-for="EmployeeId" class="text-danger"></span>
+	</div>
+	<div class="d-flex justify-content-center text-center mt-2">
+		<input type="submit" value="Create Task" class="btn btn-primary mx-2" />
+		<a class="btn btn-danger mx-2" asp-action="Index">Back</a>
+	</div>
+</form>
+
+
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+}

@@ -1,0 +1,68 @@
+﻿
+@model LoginViewModel
+@{
+	Layout = null;
+
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modern Login Form | CodingStella </title>
+    <link rel="stylesheet" href="~/css/Login.css">
+    <link rel='stylesheet' href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Poppins&amp;display=swap'>
+   
+</head>
+<body>
+    <div class="wrapper">
+      
+        <div class="login_box">
+           
+            <div class="login-header">
+                <span>Login</span>
+            </div>
+            <form asp-action="Index" >
+                <div>@ViewBag.error</div>
+            <div class="input_box">
+                <input asp-for="UserName" class="input-field" >
+                    <label asp-for="UserName" class="label"></label>
+                <i class="bx bx-user icon"></i>
+                <span asp-validation-for="UserName"></span>
+            </div>
+            <div class="input_box">
+                    <input asp-for="Password" class="input-field" >
+                    <label asp-for="Password" class="label"></label>
+                <i class="bx bx-lock-alt icon"></i>
+                    <span asp-validation-for="Password"></span>
+            </div>
+            <div class="remember-forgot">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <div class="forgot">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>
+            <div class="input_box">
+                <input type="submit" class="input-submit" value="Login">
+            </div>
+            <div class="register">
+                <span>Don't have an account? <a href="#">Register</a></span>
+            </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@section Scripts {
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+}

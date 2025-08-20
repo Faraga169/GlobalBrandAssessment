@@ -1,0 +1,85 @@
+﻿@model IEnumerable<Tasks>
+@{
+    ViewData["Title"] = "Tasks List";
+	Layout = "_EmployeeRoleLayOut";
+}
+
+@functions {
+    string StatusBadge(string status) => status switch
+    {
+        "Completed" => "badge bg-success",
+        "In Progress" => "badge bg-warning text-dark",
+        "Pending" => "badge bg-info text-dark",
+        _ => "badge bg-secondary"
+
+   
+    };
+}
+
+@if (!string.IsNullOrEmpty(TempData["Message"] as string))
+{
+    <!-- Toast Container -->
+    <div aria-live="polite" aria-atomic="true" style="position: relative;">
+        <div id="myToast" class="toast shadow-lg custom-toast" data-autohide="false" style="background-color: #f0f8ff; border: 1px solid #007bff;">
+            <div class="toast-header" style="background-color: #007bff; color: white;">
+                <strong class="mr-auto">🔔 Notification</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" style="color: white;">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="toast-body" style="color: #00008b; font-weight: bold;">
+                @TempData["Message"]
+            </div>
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-center">
+    <h2 class="text-secondary fs-3">Display Tasks</h2>
+</div>
+
+@if (@Model.Count() > 0)
+{
+    <table class="table table-hover table-striped table-responsive text-center table-dark rounded-2">
+        <thead>
+            <tr>
+                <th scope="col">@Html.DisplayNameFor(X => X.Title)</th>
+                <th scope="col">@Html.DisplayNameFor(X => X.Description)</th>
+                <th scope="col">@Html.DisplayNameFor(X => X.Status)</th>
+                <th scope="col">@Html.DisplayNameFor(X => X.AssignedEmployee.Manager.FullName)</th>
+                <th scope="col" colspan="2">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="text-center">
+            @foreach (var task in Model)
+            {
+                <tr>
+                    
+                  
+                    <td scope="col">@task.Title</td>
+                    <td scope="col">@task.Description</td>
+                    <td scope="col"><span class="@StatusBadge(task.Status)">@task.Status</span></td>
+                    <td scope="col">@task.AssignedEmployee.Manager.FullName</td>
+                    <td scope="col">
+                        <a class="btn btn-outline-success " asp-action="Edit" asp-route-id="@task?.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit Status</a>
+                    </td>
+
+                   
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+else
+{
+    <div class="alert alert-info mt-3">
+        <h3 class="text-center">No Tasks Found</h3>
+    </div>
+}
+
+
+
+
+

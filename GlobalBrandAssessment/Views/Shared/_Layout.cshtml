@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GlobalBrandAssessment</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Font Awesome Free CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GlobalBrandAssessment.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-gradient shadow-sm mb-4" style="background: linear-gradient(to right, #4e73df, #1cc88a);">
+            <div class="container-fluid">
+                <!-- Logo -->
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Manager" asp-action="Index">
+                    <img src="~/Images/GlobalBrands.jpg" alt="GlobalBrands" style="height:40px; width:auto; margin-right:8px;" />
+                    <span class="text-white fw-bold">Global Brands</span>
+                </a>
+
+                <!-- Toggle button for mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+                </button>
+
+                <!-- Navbar links -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item me-3">
+                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Manager" asp-action="Index">Employees</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Department" asp-action="Index">Department</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Task" asp-action="Index">Tasks</a>
+                        </li>
+                        
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                    <li class="nav-item ">
+                        <a class="btn btn-danger text-light fw-semibold" asp-area="" asp-controller="Login" asp-action="Index">Log Out</a>
+                    </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer-distributed">
+
+        <div class="footer-left">
+
+            <h3>Global<span>Brands</span></h3>
+
+            <p class="footer-links">
+                <a asp-controller="Manager" asp-action="Index">Employees</a>
+                ·
+                <a asp-controller="Department" asp-action="Index">Department</a>
+                ·
+                <a asp-controller ="Task" asp-action="Index">Task</a>
+                · 
+            </p>
+
+            <p class="footer-company-name">GlobalBrands &copy; 2025</p>
+        </div>
+
+        <div class="footer-center">
+
+            <div>
+                <i class="fa fa-map-marker"></i>
+                <p><span>21 Revolution Street</span> Cairo, Egypt</p>
+            </div>
+
+            <div>
+                <i class="fa fa-phone"></i>
+                <p>+1 555 123456</p>
+            </div>
+
+            <div>
+                <i class="fa fa-envelope"></i>
+                <p><a href="">contact@GlobalBrands.com</a></p>
+            </div>
+
+        </div>
+
+        <div class="footer-right">
+
+            <p class="footer-company-about">
+                <span>About the company</span>
+                GlobalBrands Trick is a blog for web designers, graphic designers, web developers &amp; SEO Learner.
+            </p>
+
+            <div class="footer-icons">
+
+                <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#"><i class="fa-brands fa-github"></i></a>
+
+            </div>
+
+        </div>
+
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

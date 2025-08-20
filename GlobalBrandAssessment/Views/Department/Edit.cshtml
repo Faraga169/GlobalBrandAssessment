@@ -1,0 +1,44 @@
+﻿@model Department
+
+@{
+	ViewData["Title"] = "Edit Department";
+}
+
+<div class="d-flex justify-content-center">
+	<h2 class="text-secondary fs-3">Edit Department</h2>
+</div>
+
+<div id="formContainer">
+    @await Html.PartialAsync("_EditDepartmentPartial", Model)
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#EditDepartmentForm").on("submit", function (e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: '@Url.Action("Edit", "Department")',
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                    if (response.success) {
+                        window.location.href = '@Url.Action("Index", "Department")';
+                    } else {
+                    $("#formContainer").html(response);
+                    }
+                } ,
+                 error: function () {
+                alert("Something went wrong. Please try again.");
+            }
+
+        });
+    });
+         });
+
+</script>

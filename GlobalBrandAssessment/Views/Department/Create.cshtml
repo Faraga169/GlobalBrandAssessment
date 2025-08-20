@@ -1,0 +1,39 @@
+﻿@model CreateDepartmentViewModel
+
+<div class="d-flex justify-content-center">
+    <h2 class="text-secondary fs-3">Create Department</h2>
+</div>
+
+<div id="formContainer">
+    @await Html.PartialAsync("_CreateDepartmentPartial", Model)
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+      $("#CreateDepartmentForm").on("submit", function (e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+
+        $.ajax({
+          url: '@Url.Action("Create", "Department")',
+          type: "POST",
+          data: formData,
+          processData: false,  
+          contentType: false,   
+          success: function (response) {
+            if (response && response.success) {
+              window.location.href = '@Url.Action("Index", "Department")';
+            } else {
+             
+              $("#formContainer").html(response);
+            }
+          },
+          error: function () {
+            alert("Something went wrong. Please try again.");
+          }
+        });
+      });
+    });
+</script>

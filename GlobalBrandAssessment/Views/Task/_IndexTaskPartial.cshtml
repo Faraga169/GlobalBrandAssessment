@@ -1,0 +1,70 @@
+﻿@model IEnumerable<Tasks>
+@functions {
+    string StatusBadge(string status) => status switch
+    {
+        "Completed" => "badge bg-success",
+        "In Progress" => "badge bg-warning text-dark",
+        "Pending" => "badge bg-info text-dark",
+        _ => "badge bg-secondary"
+    };
+}
+@if (Model.Count() > 0)
+
+    @foreach (var task in Model)
+    {
+        <tr>
+            <td scope="col">@task.AssignedEmployee?.FirstName</td>
+            <td scope="col">@task.AssignedEmployee?.LastName</td>
+            <td scope="col"><span class="@StatusBadge(task.Status)">@task.Status</span></td>
+            <td scope="col">@task.Title</td>
+            <td scope="col">@task.Description</td>
+            <td scope="col">
+                @if (task.Attachments != null && !string.IsNullOrEmpty(task.Attachments.FilePath))
+                {
+                    <a href="@task.Attachments.FilePath" target="_blank">
+                        @System.IO.Path.GetFileName(task.Attachments.FilePath)
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">No Attachment</span>
+                }
+            </td>
+            <td scope="col">
+                @if (task.Comments != null && !string.IsNullOrEmpty(task.Comments.Content))
+                {
+                    @task.Comments.Content
+                }
+                else
+                {
+                    <span class="text-muted">No comment</span>
+                }
+            </td>
+
+            <td scope="col">
+                <a class="btn btn-outline-secondary " asp-action="Edit" asp-route-id="@task?.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit</a>
+            </td>
+
+            <td>
+                <button class="btn btn-outline-danger deletebtn" data-id="@task?.Id">
+                    <i class="fa-solid fa-delete-left mx-2"></i>
+                    Delete
+                </button>
+            </td>
+        </tr>
+    }
+      
+
+    
+
+
+else
+{
+    <tr>
+        <td colspan="9" class="alert alert-danger mt-2">No tasks</td>
+    </tr>
+}
+
+
+
+

@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Department>
+@{
+    ViewData["Title"] = "Department List";
+    Layout = "_EmployeeRoleLayOut";
+}
+
+
+<div class="d-flex justify-content-center">
+    <h2 class="text-secondary fs-3">Display Departments</h2>
+</div>
+
+<table class="table table-hover table-striped table-responsive text-center table-dark rounded-2">
+    <thead>
+        <tr>
+            <th scope="col">@Html.DisplayNameFor(X => X.Name)</th>
+            <th scope="col">@Html.DisplayNameFor(X => X.EmployeeCount)</th>
+            <th scope="col">@Html.DisplayNameFor(X => X.SumSalary)</th>
+            <th scope="col">@Html.DisplayNameFor(X => X.Manager.FullName)</th>
+        </tr>
+    </thead>
+    <tbody class="text-center">
+        @foreach (var department in Model)
+        {
+            <tr>
+                <td scope="col">@department.Name</td>
+                <td scope="col">@department.EmployeeCount</td>
+                <td scope="col">@department.SumSalary</td>
+                <td scope="col">@department.Manager?.FullName</td>
+
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+

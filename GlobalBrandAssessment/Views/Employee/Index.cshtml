@@ -1,0 +1,36 @@
+﻿@model Employee
+@{
+	ViewData["Title"] = "Employee Details";
+	Layout = "_EmployeeRoleLayOut";
+}
+
+<div class="d-flex justify-content-center">
+	<h2 class="text-secondary fs-3">Employee Details</h2>
+</div>
+@if (Model != null && Model.Id > 0)
+{
+<!-- Display Employee Details -->
+
+<div class="card mb-3">
+	<div class="row g-0">
+		<div class="col-md-4">
+			<img src="@Model.ImageURL" class="img-fluid rounded-start" alt="@Model.FullName" style="width: 100%; height: 100%; object-fit: cover;">
+		</div>
+		<div class="col-md-8">
+			<div class="card-body">
+				<h5 class="card-title">@Model.FullName</h5>
+				<p class="card-text">Department: @Model.Department?.Name</p>
+				<p class="card-text">ManagerName: @Model.Manager?.FullName</p>
+				<p class="card-text">Salary: @Model.Salary</p>
+				<p class="card-text"><small class="text-muted">Employee ID: @Model.Id</small></p>
+			</div>
+		</div>
+	</div>
+	</div>
+	}
+else
+{
+<div class="alert alert-info mt-3">
+	<h3 class="text-center">No Profile you are rejected</h3>
+</div>
+}
