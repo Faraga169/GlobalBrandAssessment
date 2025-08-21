@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.BL.Services;
 using System.Threading.Tasks;
+using GlobalBrandAssessment.GlobalBrandDbContext;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -14,12 +15,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly IManagerService managerService;
         private readonly IEmployeeService employeeService;
         private readonly IDepartmentService departmentService;
+        private readonly IUserService userService;
 
-        public ManagerController(IManagerService managerService,IEmployeeService employeeService,IDepartmentService departmentService)
+        public ManagerController(IManagerService managerService,IEmployeeService employeeService,IDepartmentService departmentService,IUserService userService)
         {
             this.managerService = managerService;
             this.employeeService = employeeService;
             this.departmentService = departmentService;
+            this.userService = userService;
         }
 
         [HttpGet]
@@ -72,6 +75,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public IActionResult Create(DAL.Data.Models.Employee employee)
         {
+            
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             if (mangerId == null)
             {
@@ -79,7 +83,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             }
 
             employee.ManagerId = mangerId;
-
+            
             if (ModelState.IsValid)
             {
                 if (employee.Image != null)
@@ -99,6 +103,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 }
 
                 int result = managerService.Add(employee);
+                var user = new User()
+                {
+                    UserName = employee.FirstName,
+                    Password = employee.Password,
+                    Role = "Employee",
+                    EmployeeId = employee.Id
+                };
+
+                userService.Add(user);
 
                 if (result > 0)
                 {

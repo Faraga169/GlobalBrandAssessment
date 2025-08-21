@@ -37,9 +37,12 @@ namespace GlobalBrandAssessment
             builder.Services.AddScoped<ITaskRepository, TaskRepository>();
             builder.Services.AddScoped<ITaskService, TaskService>();
             builder.Services.AddScoped<IAttachmentRepository, AttachmentRepository>();
-            builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
+            builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
 
 
             var app = builder.Build();

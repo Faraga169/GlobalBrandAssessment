@@ -76,9 +76,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public List<Employee> GetAllManagers()
         {
             return globalbrandDbContext.Employees
-         .Where(m => globalbrandDbContext.Employees
-             .Any(e => e.ManagerId == m.Id))
-         .ToList();
+         .Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToList();
         }
     }
 }

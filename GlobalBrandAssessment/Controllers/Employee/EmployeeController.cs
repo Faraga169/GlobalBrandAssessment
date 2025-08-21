@@ -15,23 +15,26 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly ITaskService taskService;
         private readonly ICommentService commentService;
         private readonly IAttachmentService attachmentService;
+        private readonly IUserService userService;
 
-        public EmployeeController(IEmployeeService employeeService, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService)
+        public EmployeeController(IEmployeeService employeeService, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IUserService userService)
         {
             this.employeeService = employeeService;
             this.departmentService = departmentService;
             this.taskService = taskService;
             this.commentService = commentService;
             this.attachmentService = attachmentService;
+            this.userService = userService;
         }
         public IActionResult Index()
         {
-            int? employeeId = HttpContext.Session.GetInt32("UserId");
-            if (employeeId == null)
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
             {
                 return RedirectToAction("Index", "Login");
             }
-            var employee = employeeService.GetEmployeeById(employeeId);
+            var user = userService.GetEmployeeIdByUserId(userId);
+            var employee = employeeService.GetEmployeeById(user);
             return View(employee);
         }
 

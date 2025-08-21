@@ -9,10 +9,15 @@
         <span asp-validation-for="FirstName" class="text-danger"></span>
         </div> 
         <div> 
-            <label asp-for="LastName" class="form-label"></label> 
-            <input asp-for="LastName" class="form-control" placeholder="Enter Last Name" value="@Model?.LastName" /> 
-            <span asp-validation-for="LastName" class="text-danger"></span> 
-        </div> 
+            <label asp-for="LastName" class="form-label"></label>
+        <input asp-for="LastName" class="form-control" placeholder="Enter Last Name" value="@Model?.LastName" autocomplete="off" />
+        <span asp-validation-for="LastName" class="text-danger"></span> 
+        </div>
+    <div >
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" placeholder="Enter Password" autocomplete="new-password">
+        <span asp-validation-for="Password"></span>
+    </div>
         <div> 
             <label asp-for="Salary" class="form-label"></label> 
             <input asp-for="Salary" class="form-control" placeholder="Enter Salary" value="@Model?.Salary" /> 
