@@ -24,7 +24,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public IActionResult Index()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -39,7 +40,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public IActionResult Search(string searchname)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -56,7 +58,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public IActionResult Create()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -69,7 +72,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         {
 
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -109,7 +113,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 return RedirectToAction("Index", "Department");
             }
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -128,7 +133,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public IActionResult Edit(DAL.Data.Models.Department department)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -166,8 +172,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 TempData["Message"] = "Department Id is not exist";
                 return Json(new { success = true });
             }
-            var manager = HttpContext.Session.GetInt32("UserId");
-            if (manager is null)
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }

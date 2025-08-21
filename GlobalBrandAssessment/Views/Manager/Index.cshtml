@@ -96,7 +96,7 @@ else
 		var value=$(".searchvalue").val();
          $.ajax({
                 url: '@Url.Action("Search", "Manager")',
-                type: "GET",
+                type: "POST",
                 data: { searchname: value },
                 success: function (result) {
                         $("#employeeTable").html(result); 

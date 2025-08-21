@@ -1,4 +1,5 @@
-﻿using GlobalBrandAssessment.BL.Services;
+﻿using System;
+using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
@@ -29,7 +30,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public IActionResult Index()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role=="Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -42,7 +44,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public IActionResult DepartmentDetails()
         {
             int? employeeId = HttpContext.Session.GetInt32("UserId");
-            if (employeeId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (employeeId == null||Role == "Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -54,7 +57,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public IActionResult Task()
         {
             int? employeeId = HttpContext.Session.GetInt32("UserId");
-            if (employeeId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (employeeId == null || Role == "Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -75,7 +79,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 return RedirectToAction("Index", "Employee");
             }
             int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
@@ -99,7 +104,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public IActionResult Edit(TaskEditViewModel taskEditViewModel)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
