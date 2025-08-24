@@ -27,7 +27,7 @@
             contentType: false,
             success: function (response) {
                     if (response.success) {
-                        window.location.href = '@Url.Action("Task", "Employee")';
+                        window.location.href = response.redirecturl;
                     } else {
                     $("#formContainer").html(response);
                     }

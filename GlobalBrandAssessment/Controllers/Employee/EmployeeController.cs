@@ -74,16 +74,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public IActionResult Edit(int? id)
         {
-            if (id is null || id < 0)
-            {
-                return RedirectToAction("Index", "Employee");
-            }
             int? userId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
             if (userId == null || Role == "Manager")
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null || id < 0)
+            {
+                return RedirectToAction("Index", "Employee");
+            }
+           
             var Taskemployee = taskService.GetTaskById(id.Value);
             var existingTask = new TaskEditViewModel()
             {
@@ -155,7 +156,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             if (result > 0)
             {
                 TempData["Message"] = "status updated successfully.";
-                return Json(new { success = true });
+                return Json(new { success = true ,redirecturl=Url.Action("Task","Employee")});
             }
             else
             {

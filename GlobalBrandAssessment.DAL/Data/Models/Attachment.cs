@@ -19,14 +19,17 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         [NotMapped]
         public IFormFile? File { get; set; }
 
-        [ForeignKey("Task")]
-        public int TaskId { get; set; }
-        public Tasks Task { get; set; }
+        /*Navigation property*/
+        public Tasks Task { get; set; } = null!;
+        public User UploadedBy { get; set; }=null!;
 
+
+        /*Foreign keys*/
         [ForeignKey("UploadedBy")]
         public int UploadedById { get; set; }
-        public User UploadedBy { get; set; }
 
-       
+        [ForeignKey("Task")]
+        public int TaskId { get; set; }
+
     }
 }

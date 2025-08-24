@@ -36,7 +36,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 return RedirectToAction("Index", "Login");
             }
 
-            var manager = employeeService.GetEmployeesByManager(mangerId.Value).ToList();
+            var manager = employeeService.GetEmployeesByManager(mangerId).ToList();
             return View(manager);
         }
 
@@ -91,6 +91,16 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             
             if (ModelState.IsValid)
             {
+                var user = new User()
+                {
+                    UserName = employee.FirstName,
+                    Password = employee.Password,
+                    Role = "Employee",
+                    EmployeeId = employee.Id
+                };
+
+                userService.Add(user);
+
                 if (employee.Image != null)
                 {
                     string rootPath = Directory.GetCurrentDirectory();
@@ -108,25 +118,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 }
 
                 int result = managerService.Add(employee);
-                var user = new User()
-                {
-                    UserName = employee.FirstName,
-                    Password = employee.Password,
-                    Role = "Employee",
-                    EmployeeId = employee.Id
-                };
-
-                userService.Add(user);
-
                 if (result > 0)
                 {
                     TempData["Message"] = "Employee created successfully.";
-                    return Json(new { success = true });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }
                 else
                 {
                     TempData["Message"] = "Failed to create employee.";
-                    return Json(new { success = false});
+                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Manager") });
                 }
             }
             ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name");
@@ -136,16 +136,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
         [HttpGet]
         public IActionResult Edit(int? id) {
-            if (id is null || id<0) { 
-            return RedirectToAction("Index", "Manager");
-            }
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null||Role=="Employee")
+            if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
-            var employee = employeeService.GetEmployeeById(id.Value);
+            if (id is null || id<0) { 
+            return RedirectToAction("Index", "Manager");
+            }
+           
+            var employee = employeeService.GetEmployeeById(id);
             if (employee == null)
             {
                 TempData["Message"] = "Employee not found.";
@@ -164,6 +165,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
+            ModelState.Remove("Password");
             var existingEmployee = employeeService.GetEmployeeById(employee.Id);
             existingEmployee.FirstName = employee.FirstName;
             existingEmployee.LastName = employee.LastName;
@@ -203,12 +205,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 if (result > 0)
                 {
                     TempData["Message"] = "Employee updated successfully.";
-                    return Json(new { success = true });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }
                 else
                 {
                     TempData["Message"] = "Failed to update employee.";
-                    return Json(new { success = false });
+                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Manager") });
                     
                 }
               
@@ -222,29 +224,30 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public IActionResult Delete(int? id)
         {
-            if (id is null)
-            {
-                TempData["Message"] =  "Invalid employee id.";
-                return Json(new { success = false});
-            }
-
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
             if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null)
+            {
+                TempData["Message"] =  "Invalid employee id.";
+                return Json(new { success = false});
+            }
+
+           
 
             var result = managerService.Delete(id);
             if (result > 0)
             {
                 TempData["Message"] = "Employee deleted successfully.";
-                return Json(new { success = true});
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
             }
             else
             {
                 TempData["Message"] = "Employee deleted failed.";
-                return Json(new { success = false});
+                return Json(new { success = false, redirectUrl = Url.Action("Index", "Manager") });
             }
         }
     }

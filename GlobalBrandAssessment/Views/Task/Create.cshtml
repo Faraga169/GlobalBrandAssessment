@@ -26,7 +26,7 @@
             contentType: false,
             success: function (response) {
                     if (response.success) {
-                        window.location.href = '@Url.Action("Index", "Task")';
+                        window.location.href =response.redirecturl;
                     } else {
                     $("#formContainer").html(response);
                     }

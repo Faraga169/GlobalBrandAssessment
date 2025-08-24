@@ -19,21 +19,13 @@ namespace GlobalBrandAssessment.DAL.Repositories
         }
         public Employee GetEmployeeById(int? employeeId)
         {
-            
-
-            return globalbrandDbContext.Employees
-                .Include(e => e.Department)
-                .Include(e => e.Manager)
-                .FirstOrDefault(e => e.Id == employeeId);
+            return globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).FirstOrDefault(e => e.Id == employeeId);
         }
 
 
         public List<Employee> GetEmployeesByManager(int? ManagerId)
         {
-            return globalbrandDbContext.Employees
-                .Include(e => e.Department)
-                .Include(e => e.Manager).Where(e => e.ManagerId == ManagerId)
-                .ToList();
+            return globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).Where(e => e.ManagerId == ManagerId).ToList();
         }
     }
 }

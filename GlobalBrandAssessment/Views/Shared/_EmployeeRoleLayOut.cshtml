@@ -17,7 +17,7 @@
                 <!-- Logo -->
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Employee" asp-action="Index">
                     <img src="~/Images/GlobalBrands.jpg" alt="GlobalBrands" style="height:40px; width:auto; margin-right:8px;" />
-                    <span class="text-white fw-bold">Global Brands</span>
+                    <span class="text-dark fw-bold">Global Brands</span>
                 </a>
 
                 <!-- Toggle button for mobile -->
@@ -43,6 +43,9 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <button id="darkModeToggle" class="btn btn-dark px-2 mx-1 rounded-pill">Dark Mode</button>
+                        </li>
                         <li class="nav-item ">
                             <a class="btn btn-danger text-light fw-semibold" asp-area="" asp-controller="Login" asp-action="Index">Log Out</a>
                         </li>

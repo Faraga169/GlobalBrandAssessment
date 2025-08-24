@@ -7,10 +7,29 @@
 $(document).ready(function () {
     var toastElement = $('#myToast');
     toastElement.toast('show'); // Show toast automatically
-
     setTimeout(function () {
         toastElement.fadeOut(); // Hide the toast after 5 seconds
     }, 5000);
 });
 
+
+$(document).ready(function () {
+    // check saved mode in localStorage
+    if (localStorage.getItem("dark-mode") === "enabled") {
+        $("body").addClass("dark-mode");
+        $(".navbar-brand span").removeClass("text-dark").addClass("text-light");
+    }
+
+    $("#darkModeToggle").click(function () {
+        $("body").toggleClass("dark-mode");
+
+        if ($("body").hasClass("dark-mode")) {
+            $(".navbar-brand span").removeClass("text-dark").addClass("text-light");
+            localStorage.setItem("dark-mode", "enabled");
+        } else {
+            $(".navbar-brand span").removeClass("text-light").addClass("text-dark");
+            localStorage.setItem("dark-mode", "disabled");
+        }
+    });
+});
 

@@ -26,10 +26,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         public int Delete(int? id)
         {
-            var department = globalbrandDbContext.Departments
-        .Include(d => d.Employees) 
-        .FirstOrDefault(d => d.Id == id);
-
+            var department = globalbrandDbContext.Departments.Include(d => d.Employees) .FirstOrDefault(d => d.Id == id);
             if (department == null)
             {
                 return 0; 
@@ -65,10 +62,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public Department GetDepartmentById(int? id)
         {
 
-                
-            return globalbrandDbContext.Departments
-                .Include(d => d.Manager)
-                .FirstOrDefault(d => d.Id == id);
+             return globalbrandDbContext.Departments.Include(d => d.Manager).FirstOrDefault(d => d.Id == id);
         }
     }
 }

@@ -80,7 +80,7 @@ else
 				data: { id: employeeId },
 				success: function (response) {
 					if (response.success) {
-						window.location.href = '@Url.Action("Index", "Manager")';
+                        window.location.href = response.redirectUrl;
 					} 
 				},
 				error: function () {

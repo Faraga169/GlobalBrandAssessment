@@ -27,6 +27,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         public virtual Attachment Attachments{ get; set; }
 
 
+        /*Foreign key*/
         [ForeignKey("AssignedEmployee")]
         [DisplayName("Employee Name")]
         [Required(ErrorMessage = "Employee is required.")]

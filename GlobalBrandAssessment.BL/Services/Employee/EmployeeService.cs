@@ -18,9 +18,7 @@ namespace GlobalBrandAssessment.BL.Services
         }
         public Employee GetEmployeeById(int? employeeId)
         {
-            if (!employeeId.HasValue || employeeId <= 0)
-                throw new ArgumentException("Employee ID cannot be null, negative, or zero.", nameof(employeeId));
-            return employeeRepository.GetEmployeeById(employeeId)?? throw new ArgumentException("Employee not found in the system.", nameof(employeeId));
+            return employeeRepository.GetEmployeeById(employeeId);
         }
 
         public List<Employee> GetEmployeesByManager(int? ManagerId)

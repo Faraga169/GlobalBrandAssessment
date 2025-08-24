@@ -17,15 +17,16 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         public DateTime CreatedAt { get; set; }= DateTime.Now;
 
 
-        [ForeignKey("Task")]
-        public int TaskId { get; set; }
-        public Tasks Task { get; set; }
+       /*Navigation property*/
+        public Tasks Task { get; set; } = null!;
+        public User User { get; set; } = null!;
 
-
+        /*Foreign keys*/
         [ForeignKey("User")]
         public int UserId { get; set; }
-        public User User { get; set; }
+        [ForeignKey("Task")]
+        public int TaskId { get; set; }
 
-      
+
     }
 }

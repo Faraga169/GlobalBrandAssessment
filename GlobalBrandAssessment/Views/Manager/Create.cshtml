@@ -15,9 +15,7 @@
         $(document).ready(function () {
         $("#createEmployeeForm").on("submit", function (e) {
         e.preventDefault();
-
         var formData = new FormData(this);
-
         $.ajax({
             url: '@Url.Action("Create", "Manager")',
             type: "POST",
@@ -26,7 +24,7 @@
             contentType: false,
             success: function (response) {
                     if (response.success) {
-                        window.location.href = '@Url.Action("Index", "Manager")';
+                          window.location.href = response.redirectUrl; 
                     } else {
                     $("#formContainer").html(response);
                     }

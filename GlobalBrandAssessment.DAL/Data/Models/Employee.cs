@@ -27,7 +27,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         [DataType(DataType.Password)]
         [Required(ErrorMessage = "Password is required.")]
         [NotMapped]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,12}$", ErrorMessage = "Password must be 6-12 characters long, contain at least one uppercase letter, one lowercase letter, and one digit and special character")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$#!%*?&])[A-Za-z\d@$#!%*?&]{6,12}$", ErrorMessage = "Password must be 6-12 characters long, contain at least one uppercase letter, one lowercase letter, and one digit and special character")]
         public string Password { get; set; } = null!;
 
         [DisplayName("Image")]
@@ -40,9 +40,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         [DisplayName("Manager Name")]
         public string FullName {
 
-            get { 
-            return $"{FirstName} {LastName}";
-            }
+            get {return $"{FirstName} {LastName}";}
                 
                 }
 
@@ -55,7 +53,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         public virtual ICollection<Tasks> Tasks { get; set; } = new HashSet<Tasks>();
 
 
-
+        /*Foreign keys*/
         [ForeignKey("Manager")]
         [DisplayName("Manager")]
         public int? ManagerId { get; set; }

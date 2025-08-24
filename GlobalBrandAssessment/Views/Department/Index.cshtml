@@ -82,11 +82,11 @@ else
                 data: { id: departmentId  },
                 success: function (response) {
                     if (response.success) {
-                        window.location.href = '@Url.Action("Index", "Department")';
+                        window.location.href =response.redirecturl;
                     }
                 },
                 error: function () {
-                    alert("Something went wrong. Please try again.");
+                     alert("Something went wrong. Please try again.");
                 }
             });
         }

@@ -47,7 +47,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
 
         public Employee GetManagerByDepartmentId(int? deptId)
         {
-            return managerRepository.GetManagerByDepartmentId(deptId) ?? throw new ArgumentException("Manager not found for the specified department ID.", nameof(deptId));
+            return managerRepository.GetManagerByDepartmentId(deptId) ;
         }
 
         public List<Employee> GetAllManagers()

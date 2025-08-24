@@ -19,10 +19,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         }
         public int? GetEmployeeIdByUserId(int? userId)
         {
-            return globalbrandDbContext.Users
-                .Where(u => u.UserId == userId)
-                .Select(u => u.EmployeeId)
-                .FirstOrDefault();
+            return globalbrandDbContext.Users.Where(u => u.UserId == userId).Select(u => u.EmployeeId).FirstOrDefault();
         }
         public int Add(User user)
         {

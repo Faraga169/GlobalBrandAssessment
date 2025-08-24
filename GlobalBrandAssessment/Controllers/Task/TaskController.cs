@@ -90,13 +90,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 if (result > 0)
                 {
                     TempData["Message"] = "Task created successfully.";
-                    return Json(new { success =true});
+                    return Json(new { success =true,redirecturl=Url.Action("Index","Task")});
                 }
                 else
                 {
                     TempData["Message"] = "Failed to create Task.";
-                    ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FullName");
-                    return PartialView("_CreateTaskPartial",taskCreateViewModel);
+                    return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
                 }
 
 
@@ -108,15 +107,16 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpGet]
         public IActionResult Edit(int? id)
         {
-            if (id is null || id<0)
-            {
-                return RedirectToAction("Index", "Task");
-            }
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             if (mangerId == null)
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null || id<0)
+            {
+                return RedirectToAction("Index", "Task");
+            }
+          
             var task = taskService.GetTaskById(id.Value);
             if (task == null)
             {
@@ -150,12 +150,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 if (result > 0)
                 {
                     TempData["Message"] = "Task updated successfully.";
-                    return Json(new { success = true });
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
                 }
                 else
                 {
                     TempData["Message"] = "Failed to update Task.";
-                    return PartialView("_EditTaskPartial", taskCreateViewModel);
+                    return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
                 }
             }
 
@@ -166,26 +166,27 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public IActionResult Delete(int? id)
         {
-            if (id is null)
-            {
-                TempData["Message"] = "Task not found.";
-                return PartialView("_IndexTaskPartial");
-            }
             var manager = HttpContext.Session.GetInt32("UserId");
             if (manager is null)
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null)
+            {
+                TempData["Message"] = "Task not found.";
+                return PartialView("_IndexTaskPartial");
+            }
+          
             var result = taskService.Delete(id);
             if (result > 0)
             {
                 TempData["Message"] = "Task delete successfully.";
-                return Json(new { success = true });
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
             }
             else
             {
                 TempData["Message"] = "Task delete fail.";
-                return PartialView("_IndexTaskPartial");
+                return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
             }
         }
     }

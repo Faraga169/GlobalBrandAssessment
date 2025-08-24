@@ -43,7 +43,8 @@ namespace GlobalBrandAssessment.DAL.Repositories
                 query = query.Where(e => e.FirstName.ToLower().Contains(searchname.ToLower())
                 ||
                 e.LastName.ToLower().Contains(searchname.ToLower())
-                || e.Department.Name.ToLower().Contains(searchname.ToLower()));
+                || 
+                e.Department.Name.ToLower().Contains(searchname.ToLower()));
                
             }
 
@@ -75,8 +76,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         public List<Employee> GetAllManagers()
         {
-            return globalbrandDbContext.Employees
-         .Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToList();
+            return globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToList();
         }
     }
 }

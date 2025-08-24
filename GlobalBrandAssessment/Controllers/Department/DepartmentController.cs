@@ -90,13 +90,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 if (result > 0)
                 {
                     TempData["Message"] = "Department created successfully.";
-                    return Json(new { success = true });
+                    return Json(new { success = true ,redirecturl=Url.Action("Index","Department")});
                 }
                 else
                 {
                     TempData["Message"] = "Failed to create Department.";
-                    ViewBag._Manager = new SelectList(managerService.GetAllManagers(), "Id", "FullName");
-                    return PartialView("_CreateDepartmentPartial",department);
+                    return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
                 }
 
 
@@ -108,16 +107,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpGet]
         public IActionResult Edit(int? id)
         {
-            if (id is null|| id<0)
-            {
-                return RedirectToAction("Index", "Department");
-            }
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
             if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null|| id<0)
+            {
+                return RedirectToAction("Index", "Department");
+            }
+           
 
             var department = departmentService.GetDepartmentById(id);
             if (department == null)
@@ -151,12 +151,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 if (result > 0)
                 {
                     TempData["Message"] = "Department updated successfully.";
-                    return Json(new { success = true });
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
                 }
                 else
                 {
                     TempData["Message"] = "Failed to update Department.";
-                    return PartialView("_EditDepartmentPartial", department);
+                    return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
                 }
             }
 
@@ -167,27 +167,28 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpPost]
         public IActionResult Delete(int? id)
         {
-            if (id is null)
-            {
-                TempData["Message"] = "Department Id is not exist";
-                return Json(new { success = true });
-            }
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
             if (mangerId == null || Role == "Employee")
             {
                 return RedirectToAction("Index", "Login");
             }
+            if (id is null)
+            {
+                TempData["Message"] = "Department Id is not exist";
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+            }
+           
             var result = departmentService.Delete(id);
             if (result > 0)
             {
                 TempData["Message"] = "Department delete successfully.";
-                return Json(new { success = true });
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
             }
             else
             {
                 TempData["Message"] = "You Cant Delete Because Department exist employees";
-                return Json(new { success = false });
+                return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
             }
         }
     }

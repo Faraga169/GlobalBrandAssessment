@@ -24,9 +24,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Login
         {
             if (ModelState.IsValid)
             {
-                var user = globalbrandDbContext.Users
-                    .FirstOrDefault(u => u.UserName == loginViewModel.UserName
-                                      && u.Password == loginViewModel.Password);
+                var user = globalbrandDbContext.Users.FirstOrDefault(u => u.UserName == loginViewModel.UserName && u.Password == loginViewModel.Password);
 
                 if (user == null)
                 {

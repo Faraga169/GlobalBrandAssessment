@@ -15,8 +15,9 @@ namespace GlobalBrandAssessment.DAL.Data.Models
         public string Name { get; set; } = null!;
 
         /*Navigation property*/
+       
         public virtual ICollection<Employee> Employees { get; set; } = new HashSet<Employee>();
-
+      
         public virtual Employee? Manager { get; set; } = null!;
 
 
@@ -45,6 +46,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
             }
         }
 
+        /*Foreign key*/
         [ForeignKey("Manager")]
         [DisplayName("Manager")]
         //[Required(ErrorMessage = "Manager is required.")]
