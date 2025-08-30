@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.DAL.Data.Models;
@@ -49,7 +50,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             if (department == null ||!department.Any())
             {
                 TempData["Message"] = "No departments found.";
-                return PartialView("_IndexDepartmentPartial",new List<DAL.Data.Models.Department>());
+                return PartialView("_IndexDepartmentPartial",new List<GetAllandSearchDepartmentDTO>());
             }
             return PartialView("_IndexDepartmentPartial",department);
         }
@@ -68,7 +69,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpPost]
-        public IActionResult Create(CreateDepartmentViewModel department)
+        public IActionResult Create(AddAndUpdateDepartmentDTO department)
         {
 
             int? mangerId = HttpContext.Session.GetInt32("UserId");
@@ -77,16 +78,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 return RedirectToAction("Index", "Login");
             }
+           
             if (ModelState.IsValid)
             {
-                var existingDepartment = new DAL.Data.Models.Department()
-                {
-                    Name = department.Name,
-                    ManagerId = department.ManagerId
-                };
-                int result = departmentService.Add(existingDepartment);
-
-
+                int result = departmentService.Add(department);
                 if (result > 0)
                 {
                     TempData["Message"] = "Department created successfully.";
@@ -130,7 +125,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpPost]
-        public IActionResult Edit(DAL.Data.Models.Department department)
+        public IActionResult Edit(AddAndUpdateDepartmentDTO department)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -138,16 +133,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 return RedirectToAction("Index", "Login");
             }
+
             if (ModelState.IsValid)
             {
-                var existingdepartment = departmentService.GetDepartmentById(department.Id);
 
-
-                if (existingdepartment == null)
-                    return RedirectToAction("Edit"); ;
-                existingdepartment.Name = department.Name;
-                existingdepartment.ManagerId = department.ManagerId;
-                int result = departmentService.Update(existingdepartment);
+                int result = departmentService.Update(department);
                 if (result > 0)
                 {
                     TempData["Message"] = "Department updated successfully.";

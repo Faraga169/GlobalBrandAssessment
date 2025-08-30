@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
@@ -12,16 +14,19 @@ using GlobalBrandAssessment.GlobalBrandDbContext;
 public class DepartmentService : IDepartmentService
 {
     private readonly IDepartmentRepository departmentrepository;
+    private readonly IMapper mapper;
 
-    public DepartmentService(IDepartmentRepository departmentrepository)
+    public DepartmentService(IDepartmentRepository departmentrepository,IMapper mapper)
     {
 
         this.departmentrepository = departmentrepository;
+        this.mapper = mapper;
     }
 
-    public int Add(Department department)
+    public int Add(AddAndUpdateDepartmentDTO department)
     {
-        return departmentrepository.Add(department);
+        var result=mapper.Map<AddAndUpdateDepartmentDTO, Department>(department);
+        return departmentrepository.Add(result);
     }
 
     public int Delete(int? id)
@@ -30,25 +35,32 @@ public class DepartmentService : IDepartmentService
     }
 
 
-    public List<Department> Search(string searchname)
+    public List<GetAllandSearchDepartmentDTO> Search(string searchname)
     {
-        return departmentrepository.Search(searchname);
+        var departmentlist = departmentrepository.Search(searchname);
+        var SearchDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
+        return SearchDepartmentDTO;
     }
-    public int Update(Department department)
+    public int Update(AddAndUpdateDepartmentDTO department)
     {
-        return departmentrepository.Update(department);
+        var result = mapper.Map<AddAndUpdateDepartmentDTO, Department>(department);
+        return departmentrepository.Update(result);
     }
 
 
-    public List<Department> GetAll()
+    public List<GetAllandSearchDepartmentDTO> GetAll()
     {
-        return departmentrepository.GetAll();
+        var departmentlist = departmentrepository.GetAll();
+        var GetAllDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
+        return GetAllDepartmentDTO;
     }
 
     
 
-    public Department GetDepartmentById(int? id)
+    public AddAndUpdateDepartmentDTO GetDepartmentById(int? id)
     {
-        return departmentrepository.GetDepartmentById(id);
+        var department = departmentrepository.GetDepartmentById(id);
+        var GetDepartmentDTO = mapper.Map<Department, AddAndUpdateDepartmentDTO>(department);
+        return GetDepartmentDTO ;
     }
 }

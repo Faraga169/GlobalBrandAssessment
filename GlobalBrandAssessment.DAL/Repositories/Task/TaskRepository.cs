@@ -63,10 +63,8 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         public int Update(TaskModel task)
         {
-            globalbrandDbContext.Tasks.Update(task);
-            var result = globalbrandDbContext.SaveChanges();
-            return result;
-
+            globalbrandDbContext.Entry(task).State = EntityState.Modified;
+            return globalbrandDbContext.SaveChanges();
         }
 
         public List<TaskModel> GetTaskbyEmployeeId(int? id)

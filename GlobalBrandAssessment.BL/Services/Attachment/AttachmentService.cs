@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using GlobalBrandAssessment.BL.DTOS.AttachmentDTO;
+using GlobalBrandAssessment.BL.DTOS.CommentDTO;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 
@@ -11,16 +14,18 @@ namespace GlobalBrandAssessment.BL.Services
     public class AttachmentService : IAttachmentService
     {
         private readonly IAttachmentRepository attachmentRepository;
+        private readonly IMapper mapper;
 
-        public AttachmentService(IAttachmentRepository attachmentRepository)
+        public AttachmentService(IAttachmentRepository attachmentRepository,IMapper mapper)
         {
             this.attachmentRepository = attachmentRepository;
+            this.mapper =mapper;
         }
-        public int Add(Attachment attachment)
+        public int AddOrUpdate(AddAndUpdateAttachmentDTO attachment)
         {
-            if(attachment==null)
-                return 0;
-            return attachmentRepository.Add(attachment);
+            var result = mapper.Map<AddAndUpdateAttachmentDTO, Attachment>(attachment);
+
+            return attachmentRepository.AddOrUpdate(result);
         }
     }
 }

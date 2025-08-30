@@ -21,7 +21,8 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public int Add(Employee employee)
         {
             globalbrandDbContext.Employees.Add(employee);
-            return globalbrandDbContext.SaveChanges();
+            globalbrandDbContext.SaveChanges();
+            return employee.Id;
         }
 
         public int Delete(int? id)

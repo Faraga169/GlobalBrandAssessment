@@ -1,4 +1,5 @@
-﻿using GlobalBrandAssessment.BL.Services;
+﻿using GlobalBrandAssessment.BL.DTOS.TaskDTO;
+using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
@@ -44,7 +45,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             if (task == null||!task.Any()) 
             {
                 TempData["Message"] = "No tasks found.";
-                return PartialView("_IndexTaskPartial",new List<Tasks>());
+                return PartialView("_IndexTaskPartial",new List<GetAllandSearchTaskDTO>());
             }
             return PartialView("_IndexTaskPartial", task);
         }
@@ -58,12 +59,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             {
                 return RedirectToAction("Index", "Login");
             }
-            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FullName");
+            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FirstName");
             return View();
         }
 
         [HttpPost]
-        public IActionResult Create(CreateTaskViewModel taskCreateViewModel)
+        public IActionResult Create(AddandUpdateTaskDTO createtaskdto)
         {
 
             int? mangerId = HttpContext.Session.GetInt32("UserId");
@@ -72,20 +73,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             {
                 return RedirectToAction("Index", "Login");
             }
-            var tasks = new Tasks()
-            {
-                Id = taskCreateViewModel.Id,
-                Title = taskCreateViewModel.Title,
-                Description = taskCreateViewModel.Description,
-                EmployeeId = taskCreateViewModel.EmployeeId
 
-            };
+            
+
             if (ModelState.IsValid)
             {
-               
 
-                int result = taskService.Add(tasks);
-
+                int result = taskService.Add(createtaskdto);
 
                 if (result > 0)
                 {
@@ -100,8 +94,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
 
             }
-            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FullName");
-            return PartialView("_CreateTaskPartial", taskCreateViewModel);
+            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FirstName");
+            return PartialView("_CreateTaskPartial", createtaskdto);
         }
 
         [HttpGet]
@@ -123,30 +117,23 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 TempData["Message"] = "Task not found.";
                 return RedirectToAction("Index");
             }
-            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FullName",task.EmployeeId);
+            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FirstName", task.EmployeeId);
             return View(task);
         }
 
         [HttpPost]
-        public IActionResult Edit(CreateTaskViewModel taskCreateViewModel)
+        public IActionResult Edit(AddandUpdateTaskDTO Edittaskdto)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             if (mangerId == null)
             {
                 return RedirectToAction("Index", "Login");
             }
-            var tasks = new Tasks()
-            {
-                Id = taskCreateViewModel.Id,
-                Title = taskCreateViewModel.Title,
-                Description = taskCreateViewModel.Description,
-                EmployeeId = taskCreateViewModel.EmployeeId
-
-            };
+            
             if (ModelState.IsValid)
             {
                
-                int result = taskService.Update(tasks);
+                int result = taskService.Update(Edittaskdto);
                 if (result > 0)
                 {
                     TempData["Message"] = "Task updated successfully.";
@@ -159,8 +146,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 }
             }
 
-            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FullName");
-            return PartialView("_EditTaskPartial", taskCreateViewModel);
+            ViewBag._Employees = new SelectList(employeeService.GetEmployeesByManager(mangerId), "Id", "FirstName");
+            return PartialView("_EditTaskPartial", Edittaskdto);
         }
 
         [HttpPost]

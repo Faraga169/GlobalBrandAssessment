@@ -1,4 +1,4 @@
-﻿@model Department
+﻿@model AddAndUpdateDepartmentDTO
 
 
 <form id="EditDepartmentForm" asp-action="Edit" >
@@ -14,7 +14,7 @@
 		<select asp-items="ViewBag._Manager" asp-for="ManagerId" class="form-select">
 			@if (Model.ManagerId == null)
 			{
-				<option value="">select Department</option>
+				<option value="">select	Manager</option>
 			}
 
 		</select>

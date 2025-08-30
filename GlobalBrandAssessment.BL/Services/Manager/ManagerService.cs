@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.GlobalBrandDbContext;
@@ -14,15 +16,29 @@ namespace GlobalBrandAssessment.BL.Services.Manager
     {
         
         private readonly IManagerRepository managerRepository;
+        private readonly IMapper mapper;
 
-        public ManagerService(IManagerRepository managerRepository)
+        public ManagerService(IManagerRepository managerRepository,IMapper mapper)
         {
             
             this.managerRepository = managerRepository;
+            this.mapper = mapper;
         }
-        public int Add(Employee employee)
+        public int Add(AddAndUpdateManagerDTO employee)
         {
-            return managerRepository.Add(employee);
+            var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
+
+            //var result = managerRepository.Add(new Employee()
+            //{
+            //    FirstName = employee.FirstName,
+            //    LastName = employee.LastName,
+            //    Salary = employee.Salary,
+            //    Password = employee.Password,
+            //    ImageURL = employee.ImageURL,
+            //    DeptId = employee.DeptId,
+            //});
+                
+            return managerRepository.Add(result);
         }
 
         public int Delete(int? id)
@@ -32,15 +48,27 @@ namespace GlobalBrandAssessment.BL.Services.Manager
 
        
 
-        public List<Employee> Search(string searchname, int? managerid)
+        public List<GetAllAndSearchManagerDTO> Search(string searchname, int? managerid)
         {
+            var managerlist = managerRepository.Search(searchname, managerid);
+            var SearchManagerDTO= mapper.Map<List<Employee>,List<GetAllAndSearchManagerDTO>>(managerlist);
 
-            return managerRepository.Search(searchname,managerid);
+            //var result = managerlist.Select(m => new SearchManagerDTO
+            //{
+            //    FirstName = m.FirstName,
+            //    LastName = m.LastName,
+            //    Salary = m.Salary,
+            //    ImageURL = m.ImageURL,
+            //    Department = m.Department.Name
+            //}).ToList();
+
+            return SearchManagerDTO;
         }
 
-        public int Update(Employee employee)
+        public int Update(AddAndUpdateManagerDTO employee)
         {
-            return managerRepository.Update(employee);
+            var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
+            return managerRepository.Update(result);
         }
 
        
@@ -54,5 +82,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
         {
             return managerRepository.GetAllManagers();
         }
+
+       
     }
 }

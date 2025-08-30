@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Employee>
+﻿@model IEnumerable<GetAllAndSearchManagerDTO>
 
 @if (Model.Count() > 0)
 
@@ -13,10 +13,10 @@
             <td>@employee.Salary</td>
             <td>
                 <img src="@(employee.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))"
-                alt="@employee.FullName"
+                alt="@employee.FirstName"
                 style="width:100px;height:100px;object-fit:cover;" />
             </td>
-            <td>@employee.Department?.Name</td>
+            <td>@employee.Department</td>
             <td>
                 <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@employee.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit</a>
             </td>

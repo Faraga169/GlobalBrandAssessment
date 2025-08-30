@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services
@@ -11,6 +12,6 @@ namespace GlobalBrandAssessment.BL.Services
     {
         public Employee GetEmployeeById(int? employeeId);
 
-        public List<Employee> GetEmployeesByManager(int? ManagerId);
+        public List<GetAllAndSearchManagerDTO> GetEmployeesByManager(int? ManagerId);
     }
 }

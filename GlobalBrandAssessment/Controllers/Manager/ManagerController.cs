@@ -8,6 +8,8 @@ using GlobalBrandAssessment.BL.Services;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using System.Data;
+using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
+using AutoMapper;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -17,13 +19,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly IEmployeeService employeeService;
         private readonly IDepartmentService departmentService;
         private readonly IUserService userService;
+        private readonly IMapper mapper;
 
-        public ManagerController(IManagerService managerService,IEmployeeService employeeService,IDepartmentService departmentService,IUserService userService)
+        public ManagerController(IManagerService managerService,IEmployeeService employeeService,IDepartmentService departmentService,IUserService userService,IMapper mapper)
         {
             this.managerService = managerService;
             this.employeeService = employeeService;
             this.departmentService = departmentService;
             this.userService = userService;
+            this.mapper = mapper;
         }
 
         [HttpGet]
@@ -54,7 +58,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             var manager = managerService.Search(searchname, mangerId).ToList();
             if (manager == null || !manager.Any())
             {
-                return PartialView("_IndexManagerPartial", new List<DAL.Data.Models.Employee>());
+                return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
             }
             
             
@@ -77,7 +81,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
 
         [HttpPost]
-        public IActionResult Create(DAL.Data.Models.Employee employee)
+        public IActionResult Create(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
             
             int? mangerId = HttpContext.Session.GetInt32("UserId");
@@ -86,40 +90,36 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
+         
+            addORUpdateManagerDTO.ManagerId = managerService.GetManagerByDepartmentId(addORUpdateManagerDTO.DeptId).Id;
 
-            employee.ManagerId = mangerId;
-            
             if (ModelState.IsValid)
             {
-                var user = new User()
-                {
-                    UserName = employee.FirstName,
-                    Password = employee.Password,
-                    Role = "Employee",
-                    EmployeeId = employee.Id
-                };
 
-                userService.Add(user);
-
-                if (employee.Image != null)
+                if (addORUpdateManagerDTO.Image != null)
                 {
                     string rootPath = Directory.GetCurrentDirectory();
                     string wwwRootPath = Path.Combine(rootPath, "wwwroot");
-                    string fileName = Path.GetFileNameWithoutExtension(employee.Image.FileName);
-                    string extension = Path.GetExtension(employee.Image.FileName);
+                    string fileName = Path.GetFileNameWithoutExtension(addORUpdateManagerDTO.Image.FileName);
+                    string extension = Path.GetExtension(addORUpdateManagerDTO.Image.FileName);
                     fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
                     string path = Path.Combine(wwwRootPath + "/Images/", fileName);
 
                     using (var fileStream = new FileStream(path, FileMode.Create))
                     {
-                        employee.Image.CopyTo(fileStream);
+                        addORUpdateManagerDTO.Image.CopyTo(fileStream);
                     }
-                    employee.ImageURL = "/images/" + fileName;
+                    addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
                 }
 
-                int result = managerService.Add(employee);
-                if (result > 0)
+                int newEmployeeId = managerService.Add(addORUpdateManagerDTO);
+                if (newEmployeeId > 0)
                 {
+                    var user=mapper.Map<AddAndUpdateManagerDTO, User>(addORUpdateManagerDTO);
+                    user.Role = "Employee";
+                    user.EmployeeId = newEmployeeId;
+
+                    userService.Add(user);
                     TempData["Message"] = "Employee created successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }
@@ -130,7 +130,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 }
             }
             ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name");
-            return PartialView("_CreateManagerPartial", employee);
+            return PartialView("_CreateManagerPartial", addORUpdateManagerDTO);
         }
 
 
@@ -157,7 +157,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpPost]
-        public IActionResult Edit(DAL.Data.Models.Employee employee)
+        public IActionResult Edit(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -165,43 +165,31 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
+            addORUpdateManagerDTO.ManagerId = managerService.GetManagerByDepartmentId(addORUpdateManagerDTO.DeptId).Id;
             ModelState.Remove("Password");
-            var existingEmployee = employeeService.GetEmployeeById(employee.Id);
-            existingEmployee.FirstName = employee.FirstName;
-            existingEmployee.LastName = employee.LastName;
-            existingEmployee.Salary = employee.Salary;
-            existingEmployee.DeptId = employee.DeptId;
-            existingEmployee.ManagerId = managerService.GetManagerByDepartmentId(employee.DeptId).Id;
-
-            if (existingEmployee == null)
-                return PartialView("_EditManagerPartial", existingEmployee);
-
-
-
-
+           
             if (ModelState.IsValid)
             {
                 
-                
-                if (employee.Image != null)
+                if (addORUpdateManagerDTO.Image != null)
                 {
                     // Save new image
                     string rootPath = Directory.GetCurrentDirectory();
                     string wwwRootPath = Path.Combine(rootPath, "wwwroot");
-                    string fileName = Path.GetFileNameWithoutExtension(employee.Image.FileName);
-                    string extension = Path.GetExtension(employee.Image.FileName);
+                    string fileName = Path.GetFileNameWithoutExtension(addORUpdateManagerDTO.Image.FileName);
+                    string extension = Path.GetExtension(addORUpdateManagerDTO.Image.FileName);
                     fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
                     string path = Path.Combine(wwwRootPath + "/images/", fileName);
 
                     using (var fileStream = new FileStream(path, FileMode.Create))
                     {
-                        employee.Image.CopyTo(fileStream);
+                        addORUpdateManagerDTO.Image.CopyTo(fileStream);
                     }
-                    existingEmployee.ImageURL= employee.ImageURL = "/images/" + fileName;
+                    addORUpdateManagerDTO.ImageURL= addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
                 }
 
-               
-                int result = managerService.Update(existingEmployee);
+                int result = managerService.Update(addORUpdateManagerDTO);
+
                 if (result > 0)
                 {
                     TempData["Message"] = "Employee updated successfully.";
@@ -217,8 +205,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
               
             }
 
-            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name", employee.DeptId);
-            return PartialView("_EditManagerPartial", existingEmployee);
+            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name", addORUpdateManagerDTO.DeptId);
+            return PartialView("_EditManagerPartial", addORUpdateManagerDTO);
         }
 
         [HttpPost]
@@ -235,8 +223,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 TempData["Message"] =  "Invalid employee id.";
                 return Json(new { success = false});
             }
-
-           
 
             var result = managerService.Delete(id);
             if (result > 0)

@@ -10,6 +10,6 @@ namespace GlobalBrandAssessment.DAL.Repositories
 {
     public interface IAttachmentRepository
     {
-        public int Add(Data.Models.Attachment attachment);
+        public int AddOrUpdate(DAL.Data.Models.Attachment attachment);
     }
 }

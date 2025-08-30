@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Tasks>
+﻿@model IEnumerable<GetAllandSearchTaskDTO>
 @functions {
     string StatusBadge(string status) => status switch
     {
@@ -13,16 +13,16 @@
     @foreach (var task in Model)
     {
         <tr>
-            <td scope="col">@task.AssignedEmployee?.FirstName</td>
-            <td scope="col">@task.AssignedEmployee?.LastName</td>
+            <td scope="col">@task.FirstName</td>
+            <td scope="col">@task.LastName</td>
             <td scope="col"><span class="@StatusBadge(task.Status)">@task.Status</span></td>
             <td scope="col">@task.Title</td>
             <td scope="col">@task.Description</td>
             <td scope="col">
-                @if (task.Attachments != null && !string.IsNullOrEmpty(task.Attachments.FilePath))
+                @if (!string.IsNullOrEmpty(task.FilePath))
                 {
-                    <a href="@task.Attachments.FilePath" target="_blank">
-                        @System.IO.Path.GetFileName(task.Attachments.FilePath)
+                    <a href="@task.FilePath" target="_blank">
+                        @System.IO.Path.GetFileName(task.FilePath)
                     </a>
                 }
                 else
@@ -31,9 +31,9 @@
                 }
             </td>
             <td scope="col">
-                @if (task.Comments != null && !string.IsNullOrEmpty(task.Comments.Content))
+                @if (!string.IsNullOrEmpty(task.Content))
                 {
-                    @task.Comments.Content
+                    @task.Content
                 }
                 else
                 {

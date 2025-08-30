@@ -1,4 +1,9 @@
-﻿using GlobalBrandAssessment.BL.Services;
+﻿using GlobalBrandAssessment.BL.Profiles.AttachmentProfile;
+using GlobalBrandAssessment.BL.Profiles.CommentProfile;
+using GlobalBrandAssessment.BL.Profiles.DepartmentProfile;
+using GlobalBrandAssessment.BL.Profiles.ManagerProfile;
+using GlobalBrandAssessment.BL.Profiles.TaskProfile;
+using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
@@ -42,8 +47,11 @@ namespace GlobalBrandAssessment
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
-
-
+            builder.Services.AddAutoMapper(m=>m.AddProfile(new ManagerMapping()));
+            builder.Services.AddAutoMapper(m => m.AddProfile(new DepartmentMapping()));
+            builder.Services.AddAutoMapper(m => m.AddProfile(new TaskMapping()));
+            builder.Services.AddAutoMapper(m => m.AddProfile(new AttachmentMapping()));
+            builder.Services.AddAutoMapper(m => m.AddProfile(new CommentMapping()));
 
             var app = builder.Build();
 

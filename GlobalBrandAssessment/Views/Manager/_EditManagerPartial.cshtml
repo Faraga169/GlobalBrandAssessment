@@ -1,4 +1,4 @@
-﻿@model Employee
+﻿@model AddAndUpdateManagerDTO
 
 
 <form asp-action="Edit" enctype="multipart/form-data" id="EditEmployeeForm">
@@ -18,7 +18,7 @@
 		<span asp-validation-for="Salary" class="text-danger"></span>
 	</div>
 	<div class="mt-2">
-		<img src="@(Model.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))" alt="@Model.FullName" style="width: 100px; height: 100px; object-fit:cover;" />
+		<img src="@(Model.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))" alt="@Model.FirstName" style="width: 100px; height: 100px; object-fit:cover;" />
 	</div>
 	<div class="input-field">
 		<label asp-for="Image" class="form-label"></label>

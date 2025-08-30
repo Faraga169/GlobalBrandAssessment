@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services
 {
     public interface IDepartmentService
     {
-        public List<Department> GetAll();
+        public List<GetAllandSearchDepartmentDTO> GetAll();
 
-        public int Add(Department department);
+        public int Add(AddAndUpdateDepartmentDTO department);
 
-        public int Update(Department department);
+        public int Update(AddAndUpdateDepartmentDTO department);
 
         public int Delete(int? id);
 
-        public List<Department> Search(string searchname);
+        public List<GetAllandSearchDepartmentDTO> Search(string searchname);
 
-        public Department GetDepartmentById(int? id);
+        public AddAndUpdateDepartmentDTO GetDepartmentById(int? id);
        
     }
 }

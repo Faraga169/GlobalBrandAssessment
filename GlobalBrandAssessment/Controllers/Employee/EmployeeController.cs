@@ -1,8 +1,13 @@
 ﻿using System;
+using AutoMapper;
+using GlobalBrandAssessment.BL.DTOS.AttachmentDTO;
+using GlobalBrandAssessment.BL.DTOS.CommentDTO;
+using GlobalBrandAssessment.BL.DTOS.TaskDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.PL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,8 +22,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly ICommentService commentService;
         private readonly IAttachmentService attachmentService;
         private readonly IUserService userService;
+        private readonly IMapper mapper;
 
-        public EmployeeController(IEmployeeService employeeService, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IUserService userService)
+        public EmployeeController(IEmployeeService employeeService, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IUserService userService,IMapper mapper)
         {
             this.employeeService = employeeService;
             this.departmentService = departmentService;
@@ -26,6 +32,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             this.commentService = commentService;
             this.attachmentService = attachmentService;
             this.userService = userService;
+            this.mapper = mapper;
         }
         public IActionResult Index()
         {
@@ -86,19 +93,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             }
            
             var Taskemployee = taskService.GetTaskById(id.Value);
-            var existingTask = new TaskEditViewModel()
-            {
-                Title = Taskemployee.Title,
-                Description = Taskemployee.Description,
-                Status = Taskemployee.Status,
-                Id=Taskemployee.Id
-            };
-            if (Taskemployee.Status == "In Progress") {
-                existingTask.Comment = Taskemployee.Comments.Content;
-                existingTask.FilePath = Taskemployee.Attachments.FilePath;
-                return View(existingTask);
+            var result=mapper.Map<AddandUpdateTaskDTO,TaskEditViewModel>(Taskemployee);
+            if (result.Status == "In Progress") {
+                return View(result);
             }
-            return View(existingTask);
+            return View(result);
         }
 
         [HttpPost]
@@ -110,49 +109,42 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            var existingTask = taskService.GetTaskById(taskEditViewModel.Id);
 
 
-            if (existingTask == null)
+            if (taskEditViewModel == null)
                 return Json(new { success=false}); 
 
 
-            existingTask.Status = taskEditViewModel.Status;
+       
             
-            if (existingTask.Status == "In Progress")
+            if (taskEditViewModel.Status == "In Progress")
             {
                 // Save comment
-                if (!string.IsNullOrEmpty(taskEditViewModel.Comment))
+                if (!string.IsNullOrEmpty(taskEditViewModel.Content))
                 {
-                    commentService.Add(new Comment
-                    {
-                        TaskId = existingTask.Id,
-                        Content = taskEditViewModel.Comment,
-                        UserId = userId.Value
-
-                    });
+                    var addCommentDTO = mapper.Map<TaskEditViewModel, AddAndUpdateCommentDTO>(taskEditViewModel);
+                    addCommentDTO.UserId = userId.Value;
+                    commentService.AddOrUpdate(addCommentDTO);
                 }
 
                 // Save attachment
                 if (taskEditViewModel.Attachment != null)
                 {
-                    var filePath = Path.Combine("wwwroot/uploads", taskEditViewModel.Attachment.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    taskEditViewModel.FilePath = Path.Combine("wwwroot/uploads", taskEditViewModel.Attachment.FileName);
+                    using (var stream = new FileStream(taskEditViewModel.FilePath, FileMode.Create))
                     {
                         taskEditViewModel.Attachment.CopyTo(stream);
                     }
-
-                    attachmentService.Add(new Attachment
-                    {
-                        TaskId = existingTask.Id,
-                        FilePath = "/uploads/" + taskEditViewModel.Attachment.FileName,
-                        UploadedById = userId.Value
-                    });
+                    var attachmentDto=mapper.Map<TaskEditViewModel, AddAndUpdateAttachmentDTO>(taskEditViewModel);
+                    attachmentDto.UploadedById = userId.Value;
+                    attachmentService.AddOrUpdate(attachmentDto);
 
 
                 } 
             }
-            int result = taskService.Update(existingTask);
+            var AddandUpdateTaskDTO= mapper.Map<TaskEditViewModel, AddandUpdateTaskDTO>(taskEditViewModel);
+            AddandUpdateTaskDTO.EmployeeId = userId;
+            int result = taskService.Update( AddandUpdateTaskDTO);
             if (result > 0)
             {
                 TempData["Message"] = "status updated successfully.";

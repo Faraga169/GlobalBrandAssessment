@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Department>
+﻿@model IEnumerable<GetAllandSearchDepartmentDTO>
 @{
     ViewData["Title"] = "Department List";
 }
@@ -47,7 +47,7 @@
             <th scope="col">@Html.DisplayNameFor(X => X.Name)</th>
             <th scope="col">@Html.DisplayNameFor(X => X.EmployeeCount)</th>
             <th scope="col">@Html.DisplayNameFor(X => X.SumSalary)</th>
-            <th scope="col">@Html.DisplayNameFor(X => X.Manager.FullName)</th>
+            <th scope="col">@Html.DisplayNameFor(X => X.Manager)</th>
             <th scope="col" colspan="2">Actions</th>
         </tr>
     </thead>

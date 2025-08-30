@@ -17,12 +17,25 @@ namespace GlobalBrandAssessment.DAL.Repositories
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-        public int Add(Comment comment)
+        public int AddOrUpdate(Comment comment)
         {
-         globalbrandDbContext.Comments.Add(comment);
-         return globalbrandDbContext.SaveChanges();
+            var existingComment = globalbrandDbContext.Comments
+                .FirstOrDefault(c => c.TaskId == comment.TaskId);
 
+            if (existingComment != null)
+            {
+               
+                existingComment.Content = comment.Content;
+                existingComment.UserId= comment.UserId; 
+                globalbrandDbContext.Comments.Update(existingComment);
+            }
+            else
+            {
+               
+                globalbrandDbContext.Comments.Add(comment);
+            }
 
+            return globalbrandDbContext.SaveChanges();
         }
     }
 }
