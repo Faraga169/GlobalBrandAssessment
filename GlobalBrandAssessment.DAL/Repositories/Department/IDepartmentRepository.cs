@@ -4,22 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public interface IDepartmentRepository
+    public interface IDepartmentRepository:IGenericRepository<Department>
     {
-        public List<Department> GetAll();
+        public Task<List<Department>> GetAllAsync();
 
-        public int Add(Department department);
 
-        public int Update(Department department);
+        public Task<int> DeleteAsync(int? id);
 
-        public int Delete(int? id);
+        public Task<List<Department>> SearchAsync(string searchname);
 
-        public List<Department> Search(string searchname);
-
-        public Department GetDepartmentById(int? id);
+        public Task<Department> GetDepartmentById(int? id);
 
 
         

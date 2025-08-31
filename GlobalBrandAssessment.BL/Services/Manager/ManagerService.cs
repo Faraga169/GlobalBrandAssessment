@@ -24,7 +24,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             this.managerRepository = managerRepository;
             this.mapper = mapper;
         }
-        public int Add(AddAndUpdateManagerDTO employee)
+        public Task<int> AddAsync(AddAndUpdateManagerDTO employee)
         {
             var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
 
@@ -38,19 +38,19 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             //    DeptId = employee.DeptId,
             //});
                 
-            return managerRepository.Add(result);
+            return managerRepository.AddAsync(result);
         }
 
-        public int Delete(int? id)
+        public Task<int> DeleteAsync(int? id)
         {
-            return managerRepository.Delete(id);
+            return managerRepository.DeleteAsync(id);
         }
 
        
 
-        public List<GetAllAndSearchManagerDTO> Search(string searchname, int? managerid)
+        public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid)
         {
-            var managerlist = managerRepository.Search(searchname, managerid);
+            var managerlist = await managerRepository.SearchAsync(searchname, managerid);
             var SearchManagerDTO= mapper.Map<List<Employee>,List<GetAllAndSearchManagerDTO>>(managerlist);
 
             //var result = managerlist.Select(m => new SearchManagerDTO
@@ -65,22 +65,22 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             return SearchManagerDTO;
         }
 
-        public int Update(AddAndUpdateManagerDTO employee)
+        public Task<int> UpdateAsync(AddAndUpdateManagerDTO employee)
         {
             var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
-            return managerRepository.Update(result);
+            return managerRepository.UpdateAsync(result);
         }
 
        
 
-        public Employee GetManagerByDepartmentId(int? deptId)
+        public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId)
         {
-            return managerRepository.GetManagerByDepartmentId(deptId) ;
+            return managerRepository.GetManagerByDepartmentIdAsync(deptId) ;
         }
 
-        public List<Employee> GetAllManagers()
+        public Task<List<Employee>> GetAllManagersAsync()
         {
-            return managerRepository.GetAllManagers();
+            return managerRepository.GetAllManagersAsync();
         }
 
        

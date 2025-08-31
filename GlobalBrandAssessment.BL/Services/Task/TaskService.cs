@@ -5,67 +5,63 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using GlobalBrandAssessment.BL.DTOS.TaskDTO;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 namespace GlobalBrandAssessment.BL.Services.Task
 {
-    public class TaskService : ITaskService
+    public class TaskService : GenericService<Tasks>, ITaskService
     {
-        private readonly ITaskRepository taskRepository;
+        private readonly ITaskRepository taskrepository;
         private readonly IMapper mapper;
 
-        public TaskService(ITaskRepository taskRepository,IMapper mapper)
+        public TaskService(ITaskRepository taskrepository,IMapper mapper) : base(taskrepository)
         {
-            this.taskRepository = taskRepository;
+            this.taskrepository = taskrepository;
             this.mapper = mapper;
         }
 
-        public int Add(AddandUpdateTaskDTO task)
+        public Task<int> AddAsync(AddandUpdateTaskDTO entity)
         {
-            
-            var existtask=mapper.Map<AddandUpdateTaskDTO, Tasks>(task);
-            var result = taskRepository.Add(existtask);
-            return result;
-
+            return taskrepository.AddAsync(mapper.Map<AddandUpdateTaskDTO, Tasks>(entity));
         }
 
-        public int Delete(int? id)
+        public Task<int> DeleteAsync(int? id)
         {
-            var result = taskRepository.Delete(id);
+            var result =taskrepository.DeleteAsync(id);
             return result;
         }
 
-        public List<GetAllandSearchTaskDTO> GetAllTasks(int? managerid)
+        public async Task<List<GetAllandSearchTaskDTO>> GetAllTasksAsync(int? managerid)
         {
-            var tasks = taskRepository.GetAllTasks(managerid);
+            var tasks =await taskrepository.GetAllTasksAsync(managerid);
             var result=mapper.Map<List<Tasks>, List<GetAllandSearchTaskDTO>>(tasks);
             return result;
         }
 
-        public List<Tasks> GetTaskbyEmployeeId(int? id)
+        public async Task<List<Tasks>> GetTaskbyEmployeeIdAsync(int? id)
         {
 
-            return taskRepository.GetTaskbyEmployeeId(id);
+            return await taskrepository.GetTaskbyEmployeeIdAsync(id);
         }
 
-        public AddandUpdateTaskDTO GetTaskById(int id)
+        public async Task<AddandUpdateTaskDTO> GetTaskByIdAsync(int id)
         {
-            var task = taskRepository.GetTaskById(id);
+            var task = await taskrepository.GetTaskByIdAsync(id);
             var result = mapper.Map<Tasks,AddandUpdateTaskDTO>(task);
             return result;
         }
 
-        public List<GetAllandSearchTaskDTO> Search(string searchname,int? managerid)
+        public async Task<List<GetAllandSearchTaskDTO>> SearchAsync(string searchname,int? managerid)
         {
-            var task = taskRepository.Search(searchname, managerid);
+            var task = await taskrepository.SearchAsync(searchname, managerid);
             var result = mapper.Map<List<Tasks>, List<GetAllandSearchTaskDTO>>(task);
             return result;
         }
 
-        public int Update(AddandUpdateTaskDTO task)
+        public Task< int> UpdateAsync(AddandUpdateTaskDTO entity)
         {
-            var mapping = mapper.Map<AddandUpdateTaskDTO, Tasks>(task);
-            var result = taskRepository.Update(mapping);
-            return result;
+            return taskrepository.UpdateAsync(mapper.Map<AddandUpdateTaskDTO, Tasks>(entity));
         }
     }
 }

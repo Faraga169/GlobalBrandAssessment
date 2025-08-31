@@ -6,61 +6,72 @@ using System.Threading.Tasks;
 using AutoMapper;
 using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.Services;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 
 
-public class DepartmentService : IDepartmentService
+
+public class DepartmentService : GenericService<Department>,IDepartmentService
+
+
 {
-    private readonly IDepartmentRepository departmentrepository;
+    private readonly IDepartmentRepository departmentRepository;
     private readonly IMapper mapper;
 
-    public DepartmentService(IDepartmentRepository departmentrepository,IMapper mapper)
+    public DepartmentService(IDepartmentRepository genericRepository,IMapper mapper): base(genericRepository)
     {
-
-        this.departmentrepository = departmentrepository;
+        this.departmentRepository = genericRepository;
         this.mapper = mapper;
     }
-
-    public int Add(AddAndUpdateDepartmentDTO department)
+    public async Task<int> AddAsync(AddAndUpdateDepartmentDTO department)
     {
         var result=mapper.Map<AddAndUpdateDepartmentDTO, Department>(department);
-        return departmentrepository.Add(result);
+        return await departmentRepository.AddAsync(result);
     }
 
-    public int Delete(int? id)
+    public async Task<int> DeleteAsync(int? id)
     {
-        return departmentrepository.Delete(id);
+        if (id == null)
+            return 0;
+
+       
+           
+
+        return await departmentRepository.DeleteAsync(id);
     }
 
 
-    public List<GetAllandSearchDepartmentDTO> Search(string searchname)
+    public async Task<List<GetAllandSearchDepartmentDTO>> SearchAsync(string searchname)
     {
-        var departmentlist = departmentrepository.Search(searchname);
+        var departmentlist = await departmentRepository.SearchAsync(searchname);
         var SearchDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
-        return SearchDepartmentDTO;
+        return  SearchDepartmentDTO;
     }
-    public int Update(AddAndUpdateDepartmentDTO department)
+    public async Task<int> UpdateAsync(AddAndUpdateDepartmentDTO department)
     {
         var result = mapper.Map<AddAndUpdateDepartmentDTO, Department>(department);
-        return departmentrepository.Update(result);
+        return await departmentRepository.UpdateAsync(result);
     }
 
 
-    public List<GetAllandSearchDepartmentDTO> GetAll()
+    public async Task< List<GetAllandSearchDepartmentDTO>> GetAllAsync()
     {
-        var departmentlist = departmentrepository.GetAll();
+        var departmentlist = await departmentRepository.GetAllAsync();
         var GetAllDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
         return GetAllDepartmentDTO;
     }
 
     
 
-    public AddAndUpdateDepartmentDTO GetDepartmentById(int? id)
+    public async Task<AddAndUpdateDepartmentDTO> GetDepartmentByIdAsync(int? id)
     {
-        var department = departmentrepository.GetDepartmentById(id);
+        var department =await departmentRepository.GetDepartmentById(id);
         var GetDepartmentDTO = mapper.Map<Department, AddAndUpdateDepartmentDTO>(department);
         return GetDepartmentDTO ;
     }
+
+   
 }

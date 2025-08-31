@@ -5,42 +5,26 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.Repositories.Attachment
 {
-    public class AttachmentRepository : IAttachmentRepository
+    public class AttachmentRepository:GenericRepository<DAL.Data.Models.Attachment>, IAttachmentRepository
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
 
-        public AttachmentRepository(GlobalbrandDbContext globalbrandDbContext)
+        public AttachmentRepository(GlobalbrandDbContext globalbrandDbContext): base(globalbrandDbContext)
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
+       
 
-        public int AddOrUpdate(DAL.Data.Models.Attachment attachment)
+        public async Task<DAL.Data.Models.Attachment?> GetByTaskId(int taskId)
         {
-            var existingAttachment = globalbrandDbContext.Attachments
-                .FirstOrDefault(a => a.TaskId == attachment.TaskId);
-
-            if (existingAttachment != null)
-            {
-
-                existingAttachment.File = attachment.File;
-                existingAttachment.FilePath = attachment.FilePath;
-                existingAttachment.UploadedById = attachment.UploadedById;
-                globalbrandDbContext.Attachments.Update(existingAttachment);
-            }
-            else
-            {
-
-                globalbrandDbContext.Attachments.Add(attachment);
-            }
-
-            return globalbrandDbContext.SaveChanges();
-
-
+            return await globalbrandDbContext.Attachments.AsNoTracking().FirstOrDefaultAsync(c => c.TaskId == taskId);
         }
     }
 }

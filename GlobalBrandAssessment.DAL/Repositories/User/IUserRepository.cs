@@ -9,8 +9,8 @@ namespace GlobalBrandAssessment.DAL.Repositories
 {
     public interface IUserRepository
     {
-        public int Add(User user);
-        public int? GetEmployeeIdByUserId(int? userId);
+        public Task<int> AddAsync(User user);
+        public Task<int?> GetEmployeeIdByUserIdAsync(int? userId);
        
     }
 }

@@ -7,26 +7,21 @@ using TaskModel = GlobalBrandAssessment.DAL.Data.Models.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public class TaskRepository : ITaskRepository
+    public class TaskRepository :GenericRepository<Tasks>, ITaskRepository
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
 
-        public TaskRepository(GlobalbrandDbContext globalbrandDbContext)
+        public TaskRepository(GlobalbrandDbContext globalbrandDbContext):base(globalbrandDbContext)
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
-        public int Add(TaskModel task)
-        {
-            globalbrandDbContext.Tasks.Add(task);
-            var result=globalbrandDbContext.SaveChanges();
-            return result;
-
-        }
-        public List<TaskModel> Search(string searchname,int? managerid)
+       
+        public async Task<List<TaskModel>> SearchAsync(string searchname,int? managerid)
         {
             var query = globalbrandDbContext.Tasks.Include(e => e.AssignedEmployee).Include(e=>e.Attachments).Include(e=>e.Comments).Where(t=>t.AssignedEmployee.ManagerId == managerid).AsQueryable();
             if (!string.IsNullOrEmpty(searchname))
@@ -34,9 +29,9 @@ namespace GlobalBrandAssessment.DAL.Repositories
                 query = query.Where(e => e.Title.ToLower().Contains(searchname.ToLower()));
             }
 
-            return query.ToList();
+            return await query.ToListAsync();
         }
-        public int Delete(int? id)
+        public async Task<int> DeleteAsync(int? id)
         {
             var task = globalbrandDbContext.Tasks.Find(id);
             if (task == null)
@@ -44,32 +39,28 @@ namespace GlobalBrandAssessment.DAL.Repositories
                 return 0 ;
             }
             globalbrandDbContext.Tasks.Remove(task);
-            var result = globalbrandDbContext.SaveChanges();
-            return result;
+            var result = globalbrandDbContext.SaveChangesAsync();
+            return await result;
         }
 
-        public List<TaskModel> GetAllTasks(int? managerid)
+        public async Task<List<TaskModel>> GetAllTasksAsync(int? managerid)
         {
-            var tasks = globalbrandDbContext.Tasks.Include(T=>T.AssignedEmployee).Include(T=>T.Attachments).Include(T=>T.Comments).Where(T=>T.AssignedEmployee.ManagerId==managerid).ToList();
-            return tasks;
+            var tasks = globalbrandDbContext.Tasks.Include(T=>T.AssignedEmployee).Include(T=>T.Attachments).Include(T=>T.Comments).Where(T=>T.AssignedEmployee.ManagerId==managerid).ToListAsync();
+            return await tasks;
         }
 
        
-        public TaskModel GetTaskById(int id)
+        public async Task<TaskModel> GetTaskByIdAsync(int id)
         {
-            var task = globalbrandDbContext.Tasks.Include(T=>T.Attachments).Include(T=>T.Comments).FirstOrDefault(T=>T.Id==id);
-            return task;
+            var task = globalbrandDbContext.Tasks.Include(T=>T.Attachments).Include(T=>T.Comments).FirstOrDefaultAsync(T=>T.Id==id);
+            return await task;
         }
 
-        public int Update(TaskModel task)
-        {
-            globalbrandDbContext.Entry(task).State = EntityState.Modified;
-            return globalbrandDbContext.SaveChanges();
-        }
+      
 
-        public List<TaskModel> GetTaskbyEmployeeId(int? id)
+        public async Task<List<TaskModel>> GetTaskbyEmployeeIdAsync(int? id)
         {
-            return globalbrandDbContext.Tasks.Include(T=>T.AssignedEmployee).Include(T=>T.AssignedEmployee.Manager).Include(T=>T.Attachments).Include(T=>T.Comments).Where(T=>T.EmployeeId==id).ToList();
+            return await globalbrandDbContext.Tasks.Include(T=>T.AssignedEmployee).Include(T=>T.AssignedEmployee.Manager).Include(T=>T.Attachments).Include(T=>T.Comments).Where(T=>T.EmployeeId==id).ToListAsync();
         }
 
        

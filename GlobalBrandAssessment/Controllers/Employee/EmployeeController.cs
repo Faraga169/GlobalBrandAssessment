@@ -34,7 +34,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             this.userService = userService;
             this.mapper = mapper;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -42,13 +42,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            var user = userService.GetEmployeeIdByUserId(userId);
-            var employee = employeeService.GetEmployeeById(user);
+            var user = await userService.GetEmployeeIdByUserIdAsync(userId);
+            var employee = await employeeService.GetEmployeeByIdAsync(user);
             return View(employee);
         }
 
         [HttpGet]
-        public IActionResult DepartmentDetails()
+        public async Task<IActionResult> DepartmentDetails()
         {
             int? employeeId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -56,12 +56,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            var employee = departmentService.GetAll();
+            var employee = await departmentService.GetAllAsync();
             return View(employee);
         }
 
         [HttpGet]
-        public IActionResult Task()
+        public async Task<IActionResult> Task()
         {
             int? employeeId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -69,7 +69,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            var employeetask = taskService.GetTaskbyEmployeeId(employeeId);
+            var employeetask =await taskService.GetTaskbyEmployeeIdAsync(employeeId);
             if (employeetask == null)
             {
                 TempData["Message"] = "You dont have Tasks";
@@ -79,7 +79,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -92,7 +92,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 return RedirectToAction("Index", "Employee");
             }
            
-            var Taskemployee = taskService.GetTaskById(id.Value);
+            var Taskemployee = await taskService.GetTaskByIdAsync(id.Value);
             var result=mapper.Map<AddandUpdateTaskDTO,TaskEditViewModel>(Taskemployee);
             if (result.Status == "In Progress") {
                 return View(result);
@@ -101,7 +101,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpPost]
-        public IActionResult Edit(TaskEditViewModel taskEditViewModel)
+        public async Task<IActionResult> Edit(TaskEditViewModel taskEditViewModel)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -122,9 +122,24 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 // Save comment
                 if (!string.IsNullOrEmpty(taskEditViewModel.Content))
                 {
+
+
+                    var existingComment = await commentService.GetByTaskIdAsync(taskEditViewModel.Id);
+
                     var addCommentDTO = mapper.Map<TaskEditViewModel, AddAndUpdateCommentDTO>(taskEditViewModel);
-                    addCommentDTO.UserId = userId.Value;
-                    commentService.AddOrUpdate(addCommentDTO);
+                    
+                    if (existingComment != null)
+                    {
+                        
+                        addCommentDTO.UserId = userId.Value;
+                        addCommentDTO.CommentId = existingComment.CommentId;
+                       await commentService.UpdateAsync(addCommentDTO);
+                    }
+                    else
+                    {
+                        await commentService.AddAsync(addCommentDTO);
+                    }
+
                 }
 
                 // Save attachment
@@ -135,16 +150,28 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     {
                         taskEditViewModel.Attachment.CopyTo(stream);
                     }
+                    var existattachment = await attachmentService.GetByTaskIdAsync(taskEditViewModel.Id);
                     var attachmentDto=mapper.Map<TaskEditViewModel, AddAndUpdateAttachmentDTO>(taskEditViewModel);
-                    attachmentDto.UploadedById = userId.Value;
-                    attachmentService.AddOrUpdate(attachmentDto);
+
+
+                    if (existattachment != null)
+                    {
+                        attachmentDto.UploadedById = userId.Value;
+                        attachmentDto.AttachmentId = existattachment.AttachmentId;
+                       await attachmentService.UpdateAsync(attachmentDto);
+                    }
+                    else
+                    {
+                     await  attachmentService.AddAsync(attachmentDto);
+                    }
+                 
 
 
                 } 
             }
             var AddandUpdateTaskDTO= mapper.Map<TaskEditViewModel, AddandUpdateTaskDTO>(taskEditViewModel);
             AddandUpdateTaskDTO.EmployeeId = userId;
-            int result = taskService.Update( AddandUpdateTaskDTO);
+            int result = await taskService.UpdateAsync(AddandUpdateTaskDTO);
             if (result > 0)
             {
                 TempData["Message"] = "status updated successfully.";

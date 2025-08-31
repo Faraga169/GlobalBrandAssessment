@@ -4,11 +4,13 @@ using GlobalBrandAssessment.BL.Profiles.DepartmentProfile;
 using GlobalBrandAssessment.BL.Profiles.ManagerProfile;
 using GlobalBrandAssessment.BL.Profiles.TaskProfile;
 using GlobalBrandAssessment.BL.Services;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.DAL.Repositories.Attachment;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,6 +49,8 @@ namespace GlobalBrandAssessment
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
             builder.Services.AddAutoMapper(m=>m.AddProfile(new ManagerMapping()));
             builder.Services.AddAutoMapper(m => m.AddProfile(new DepartmentMapping()));
             builder.Services.AddAutoMapper(m => m.AddProfile(new TaskMapping()));

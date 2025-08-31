@@ -9,7 +9,7 @@ namespace GlobalBrandAssessment.BL.Services
 {
     public interface IUserService
     {
-        public int? GetEmployeeIdByUserId(int? userId);
-        public int Add(User user);
+        public Task<int?> GetEmployeeIdByUserIdAsync(int? userId);
+        public Task<int> AddAsync(User user);
     }
 }

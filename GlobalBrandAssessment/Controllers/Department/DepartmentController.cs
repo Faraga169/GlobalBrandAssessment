@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.Services;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.PL.ViewModels;
@@ -22,7 +23,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
 
         }
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -31,14 +32,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 return RedirectToAction("Index", "Login");
             }
 
-            var department = departmentService.GetAll();
+            var department = await departmentService.GetAllAsync();
             return View(department);
         }
 
 
 
         [HttpPost]
-        public IActionResult Search(string searchname)
+        public async Task<IActionResult> Search(string searchname)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -46,7 +47,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 return RedirectToAction("Index", "Login");
             }
-            var department = departmentService.Search(searchname).ToList();
+            var department =await departmentService.SearchAsync(searchname);
             if (department == null ||!department.Any())
             {
                 TempData["Message"] = "No departments found.";
@@ -56,7 +57,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -64,12 +65,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 return RedirectToAction("Index", "Login");
             }
-            ViewBag._Manager = new SelectList(managerService.GetAllManagers(), "Id", "FullName");
+            var managers = await managerService.GetAllManagersAsync();
+            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
             return View();
         }
 
         [HttpPost]
-        public IActionResult Create(AddAndUpdateDepartmentDTO department)
+        public async Task<IActionResult> Create(AddAndUpdateDepartmentDTO department)
         {
 
             int? mangerId = HttpContext.Session.GetInt32("UserId");
@@ -81,7 +83,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
            
             if (ModelState.IsValid)
             {
-                int result = departmentService.Add(department);
+                int result =await departmentService.AddAsync(department);
                 if (result > 0)
                 {
                     TempData["Message"] = "Department created successfully.";
@@ -95,12 +97,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
 
 
             }
-            ViewBag._Manager = new SelectList(managerService.GetAllManagers(), "Id", "FullName");
+            var managers = await managerService.GetAllManagersAsync();
+            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
             return PartialView("_CreateDepartmentPartial", department);
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task< IActionResult> Edit(int? id)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -114,18 +117,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             }
            
 
-            var department = departmentService.GetDepartmentById(id);
+            var department =await departmentService.GetDepartmentByIdAsync(id);
             if (department == null)
             {
                 TempData["Message"] = "Department not found.";
                 return RedirectToAction("Index");
             }
-            ViewBag._Manager = new SelectList(managerService.GetAllManagers(), "Id", "FullName", department.ManagerId);
+            var managers = await managerService.GetAllManagersAsync();
+            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
             return View(department);
         }
 
         [HttpPost]
-        public IActionResult Edit(AddAndUpdateDepartmentDTO department)
+        public async Task<IActionResult> Edit(AddAndUpdateDepartmentDTO department)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -137,7 +141,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             if (ModelState.IsValid)
             {
 
-                int result = departmentService.Update(department);
+                int result =await departmentService.UpdateAsync(department);
                 if (result > 0)
                 {
                     TempData["Message"] = "Department updated successfully.";
@@ -150,12 +154,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 }
             }
 
-            ViewBag._Manager = new SelectList(managerService.GetAllManagers(), "Id", "FullName", department.ManagerId);
+            var managers = await managerService.GetAllManagersAsync();
+            ViewBag._Manager = new SelectList(managers, "Id", "FullName",department.ManagerId); ;
             return PartialView("_EditDepartmentPartial", department);
         }
 
         [HttpPost]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -169,7 +174,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
             }
            
-            var result = departmentService.Delete(id);
+            var result =await departmentService.DeleteAsync(id);
             if (result > 0)
             {
                 TempData["Message"] = "Department delete successfully.";
@@ -178,7 +183,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             else
             {
                 TempData["Message"] = "You Cant Delete Because Department exist employees";
-                return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
             }
         }
     }

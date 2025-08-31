@@ -4,65 +4,62 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepository :GenericRepository<Department>, IDepartmentRepository
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
 
-        public DepartmentRepository(GlobalbrandDbContext globalbrandDbContext)
+        public DepartmentRepository(GlobalbrandDbContext globalbrandDbContext) : base(globalbrandDbContext)
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-        public int Add(Department department)
-        {
-            globalbrandDbContext.Departments.Add(department);
-            return globalbrandDbContext.SaveChanges();
-        }
+      
 
-        public int Delete(int? id)
+        public async Task<int> DeleteAsync(int? id)
         {
-            var department = globalbrandDbContext.Departments.Include(d => d.Employees) .FirstOrDefault(d => d.Id == id);
+            var department = globalbrandDbContext.Departments.Include(d => d.Employees).FirstOrDefault(d => d.Id == id);
+
             if (department == null)
             {
                 return 0; 
             }
-
+            if (department.EmployeeCount > 0) {
+                return -1;
+            }
+               
             globalbrandDbContext.Departments.Remove(department);
-            return globalbrandDbContext.SaveChanges();
+            return await globalbrandDbContext.SaveChangesAsync();
         }
 
 
-        public List<Department> Search(string searchname)
+        public async Task<List<Department>> SearchAsync(string searchname)
         {
             var query = globalbrandDbContext.Departments.Include(e=>e.Manager).Include(e=>e.Employees).AsQueryable();
             if (!string.IsNullOrEmpty(searchname))
             {
                 query = query.Where(e => e.Name.ToLower().Contains(searchname.ToLower()));
             }
-            return query.ToList();
+            return await query.ToListAsync();
         }
-        public int Update(Department department)
-        {
-            globalbrandDbContext.Departments.Update(department);
-            return globalbrandDbContext.SaveChanges();
-        }
+      
 
 
-        public List<Department> GetAll()
+        public async Task<List<Department>> GetAllAsync()
         {
-            return globalbrandDbContext.Departments.Include(d=>d.Manager).Include(d=> d.Employees).ToList();
+            return await globalbrandDbContext.Departments.Include(d=>d.Manager).Include(d=> d.Employees).ToListAsync();
 
         }
 
-        public Department GetDepartmentById(int? id)
+        public async Task<Department> GetDepartmentById(int? id)
         {
 
-             return globalbrandDbContext.Departments.Include(d => d.Manager).FirstOrDefault(d => d.Id == id);
+             return await globalbrandDbContext.Departments.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
         }
     }
 }

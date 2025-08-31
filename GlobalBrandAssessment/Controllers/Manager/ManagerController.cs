@@ -31,7 +31,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -40,14 +40,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 return RedirectToAction("Index", "Login");
             }
 
-            var manager = employeeService.GetEmployeesByManager(mangerId).ToList();
+            var manager =await employeeService.GetEmployeesByManagerAsync(mangerId);
             return View(manager);
         }
 
 
 
         [HttpPost]
-        public IActionResult Search(string searchname)
+        public async Task<IActionResult> Search(string searchname)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -55,7 +55,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            var manager = managerService.Search(searchname, mangerId).ToList();
+            var manager =await managerService.SearchAsync(searchname, mangerId);
             if (manager == null || !manager.Any())
             {
                 return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
@@ -66,7 +66,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
         
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -74,14 +74,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name");
+            var departments = await departmentService.GetAllAsync();
+            ViewBag._Department = new SelectList(departments, "Id", "Name");
             return View();
         }
 
 
 
         [HttpPost]
-        public IActionResult Create(AddAndUpdateManagerDTO addORUpdateManagerDTO)
+        public async Task<IActionResult> Create(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
             
             int? mangerId = HttpContext.Session.GetInt32("UserId");
@@ -90,8 +91,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-         
-            addORUpdateManagerDTO.ManagerId = managerService.GetManagerByDepartmentId(addORUpdateManagerDTO.DeptId).Id;
+
+             var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
+            if (manager == null)
+            {
+                ModelState.AddModelError("", "No manager found for the selected department.");
+            }
+            else
+            {
+                addORUpdateManagerDTO.ManagerId = manager.Id;
+            }
+
 
             if (ModelState.IsValid)
             {
@@ -107,19 +117,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
                     using (var fileStream = new FileStream(path, FileMode.Create))
                     {
-                        addORUpdateManagerDTO.Image.CopyTo(fileStream);
+                       await addORUpdateManagerDTO.Image.CopyToAsync(fileStream);
                     }
                     addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
                 }
 
-                int newEmployeeId = managerService.Add(addORUpdateManagerDTO);
+                int newEmployeeId =await managerService.AddAsync(addORUpdateManagerDTO);
                 if (newEmployeeId > 0)
                 {
                     var user=mapper.Map<AddAndUpdateManagerDTO, User>(addORUpdateManagerDTO);
                     user.Role = "Employee";
                     user.EmployeeId = newEmployeeId;
 
-                    userService.Add(user);
+                   await userService.AddAsync(user);
                     TempData["Message"] = "Employee created successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }
@@ -129,13 +139,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     return Json(new { success = false, redirectUrl = Url.Action("Index", "Manager") });
                 }
             }
-            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name");
+            var departments = await departmentService.GetAllAsync();
+            ViewBag._Department = new SelectList(departments, "Id", "Name");
             return PartialView("_CreateManagerPartial", addORUpdateManagerDTO);
         }
 
 
         [HttpGet]
-        public IActionResult Edit(int? id) {
+        public async Task<IActionResult> Edit(int? id) {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
             if (mangerId == null || Role == "Employee")
@@ -146,18 +157,20 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             return RedirectToAction("Index", "Manager");
             }
            
-            var employee = employeeService.GetEmployeeById(id);
-            if (employee == null)
+            var employee =await employeeService.GetEmployeeByIdAsync(id);
+            var result = mapper.Map<DAL.Data.Models.Employee, AddAndUpdateManagerDTO>(employee);
+            if (result == null)
             {
                 TempData["Message"] = "Employee not found.";
                 return RedirectToAction("Index");
             }
-            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name",employee.DeptId);
-            return View(employee);
+            var departments = await departmentService.GetAllAsync();
+            ViewBag._Department = new SelectList(departments, "Id", "Name",employee.DeptId);
+            return View(result);
         }
 
         [HttpPost]
-        public IActionResult Edit(AddAndUpdateManagerDTO addORUpdateManagerDTO)
+        public async Task<IActionResult> Edit(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -165,8 +178,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 return RedirectToAction("Index", "Login");
             }
-            addORUpdateManagerDTO.ManagerId = managerService.GetManagerByDepartmentId(addORUpdateManagerDTO.DeptId).Id;
             ModelState.Remove("Password");
+            var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
+            if (manager == null)
+            {
+                ModelState.AddModelError("", "No manager found for the selected department.");
+            }
+            else
+            {
+                addORUpdateManagerDTO.ManagerId = manager.Id;
+            }
+           
            
             if (ModelState.IsValid)
             {
@@ -188,7 +210,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     addORUpdateManagerDTO.ImageURL= addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
                 }
 
-                int result = managerService.Update(addORUpdateManagerDTO);
+                int result = await managerService.UpdateAsync(addORUpdateManagerDTO);
 
                 if (result > 0)
                 {
@@ -205,12 +227,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
               
             }
 
-            ViewBag._Department = new SelectList(departmentService.GetAll(), "Id", "Name", addORUpdateManagerDTO.DeptId);
+            var departments = await departmentService.GetAllAsync();
+            ViewBag._Department = new SelectList(departments, "Id", "Name", addORUpdateManagerDTO.DeptId);
             return PartialView("_EditManagerPartial", addORUpdateManagerDTO);
         }
 
         [HttpPost]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             int? mangerId = HttpContext.Session.GetInt32("UserId");
             var Role = HttpContext.Session.GetString("Role");
@@ -224,7 +247,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 return Json(new { success = false});
             }
 
-            var result = managerService.Delete(id);
+            var result =await managerService.DeleteAsync(id);
             if (result > 0)
             {
                 TempData["Message"] = "Employee deleted successfully.";

@@ -4,24 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.BL.DTOS.TaskDTO;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services.Task
 {
-    public interface ITaskService
+    public interface ITaskService:IGenericService<AddandUpdateTaskDTO>
     {
-        public List<GetAllandSearchTaskDTO> GetAllTasks(int? managerid);
+        public Task<List<GetAllandSearchTaskDTO>> GetAllTasksAsync(int? managerid);
 
-        public AddandUpdateTaskDTO GetTaskById(int id);
+        public Task<AddandUpdateTaskDTO> GetTaskByIdAsync(int id);
 
-        public int Add(AddandUpdateTaskDTO task);
 
-        public int Update(AddandUpdateTaskDTO task);
+        public Task<int> DeleteAsync(int? id);
 
-        public int Delete(int? id);
+        public Task<List<GetAllandSearchTaskDTO>> SearchAsync(string searchname, int? managerid);
 
-        public List<GetAllandSearchTaskDTO> Search(string searchname, int? managerid);
-
-        public List<Tasks> GetTaskbyEmployeeId(int? id);
+        public Task<List<Tasks>> GetTaskbyEmployeeIdAsync(int? id);
     }
 }

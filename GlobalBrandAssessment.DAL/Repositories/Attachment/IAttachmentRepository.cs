@@ -5,11 +5,14 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public interface IAttachmentRepository
+    public interface IAttachmentRepository : IGenericRepository<DAL.Data.Models.Attachment>
     {
-        public int AddOrUpdate(DAL.Data.Models.Attachment attachment);
+
+
+        public Task<DAL.Data.Models.Attachment?> GetByTaskId(int taskId);
     }
 }

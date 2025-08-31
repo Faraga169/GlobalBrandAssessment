@@ -4,25 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.Data.Models
 {
-    public interface IManagerRepository
+    public interface IManagerRepository:IGenericRepository<Employee>
     {
 
-        public int Add(Employee employee);
 
-        public int Update(Employee employee);
+        public Task<int> DeleteAsync(int? id);
 
-        public int Delete(int? id);
-
-        public List<Employee> Search(string searchname,int?managerid);
+        public Task<List<Employee>> SearchAsync(string searchname,int?managerid);
 
 
-        public Employee GetManagerByDepartmentId(int? deptId);
+        public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId);
 
-        public List<Employee> GetAllManagers();
+        public Task<List<Employee>> GetAllManagersAsync();
 
     }
 }

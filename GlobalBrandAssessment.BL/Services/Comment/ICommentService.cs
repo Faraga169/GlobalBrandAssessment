@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GlobalBrandAssessment.BL.DTOS.AttachmentDTO;
 using GlobalBrandAssessment.BL.DTOS.CommentDTO;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services
 {
-    public interface ICommentService
+    public interface ICommentService:IGenericService<AddAndUpdateCommentDTO>
     {
-        public int AddOrUpdate(AddAndUpdateCommentDTO Comment);
-       
+
+
+
+        public Task<Comment?> GetByTaskIdAsync(int taskId);
+
     }
 }

@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 namespace GlobalBrandAssessment.DAL.Data.Models
 
 {
-    public interface ITaskRepository
+    public interface ITaskRepository:IGenericRepository<Tasks>
     {
-        public List<Tasks> GetAllTasks(int? managerid);
+        public Task<List<Tasks>> GetAllTasksAsync(int? managerid);
 
-        public Tasks GetTaskById(int id);
+        public Task<Tasks> GetTaskByIdAsync(int id);
 
-        public int Add(Tasks task);
 
-        public int Update(Tasks task);
 
-        public int Delete(int? id);
-        public List<Tasks> Search(string searchname,int? managerid);
+        public Task<int> DeleteAsync(int? id);
+        public Task<List<Tasks>> SearchAsync(string searchname,int? managerid);
 
-        public List<Tasks> GetTaskbyEmployeeId(int? id);
+        public Task<List<Tasks>> GetTaskbyEmployeeIdAsync(int? id);
 
 
     }

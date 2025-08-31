@@ -4,28 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public class ManagerRepository : IManagerRepository
+    public class ManagerRepository :GenericRepository<Employee> ,IManagerRepository
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
 
-        public ManagerRepository(GlobalbrandDbContext globalbrandDbContext)
+        public ManagerRepository(GlobalbrandDbContext globalbrandDbContext):base(globalbrandDbContext) 
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-        public int Add(Employee employee)
+        public async Task<int> AddAsync(Employee employee)
         {
             globalbrandDbContext.Employees.Add(employee);
-            globalbrandDbContext.SaveChanges();
+            await globalbrandDbContext.SaveChangesAsync();
             return employee.Id;
         }
 
-        public int Delete(int? id)
+        public async Task<int> DeleteAsync(int? id)
         {
             var employee = globalbrandDbContext.Employees.Find(id);
             if (employee == null)
@@ -33,10 +34,10 @@ namespace GlobalBrandAssessment.DAL.Repositories
                 return 0;
             }
             globalbrandDbContext.Employees.Remove(employee);
-            return globalbrandDbContext.SaveChanges();
+            return await globalbrandDbContext.SaveChangesAsync();
         }
 
-        public List<Employee> Search(string searchname, int? managerid)
+        public async Task<List<Employee>> SearchAsync(string searchname, int? managerid)
         {
             var query = globalbrandDbContext.Employees.Include(e=>e.Department).Where(e=>e.ManagerId==managerid).AsQueryable();
             if (!string.IsNullOrEmpty(searchname))
@@ -49,35 +50,31 @@ namespace GlobalBrandAssessment.DAL.Repositories
                
             }
 
-            return query.ToList();
+            return await query.ToListAsync();
         }
 
 
-        public int Update(Employee employee)
-        {
-            globalbrandDbContext.Employees.Update(employee);
-            return globalbrandDbContext.SaveChanges();
-        }
+      
 
        
 
         
 
-        public Employee GetManagerByDepartmentId(int? deptId)
+        public async Task<Employee> GetManagerByDepartmentIdAsync(int? deptId)
         {
            
-            return (from emp in globalbrandDbContext.Employees
+            return await (from emp in globalbrandDbContext.Employees
                     join dept in globalbrandDbContext.Departments
                         on emp.Id equals dept.ManagerId
                     where dept.Id == deptId
                     select emp)
-                   .FirstOrDefault();
+                   .FirstOrDefaultAsync();
         
     }
 
-        public List<Employee> GetAllManagers()
+        public async Task<List<Employee>> GetAllManagersAsync()
         {
-            return globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToList();
+            return await globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToListAsync();
         }
     }
 }

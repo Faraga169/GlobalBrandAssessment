@@ -17,14 +17,14 @@ namespace GlobalBrandAssessment.DAL.Repositories
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
-        public int? GetEmployeeIdByUserId(int? userId)
+        public async Task<int?> GetEmployeeIdByUserIdAsync(int? userId)
         {
-            return globalbrandDbContext.Users.Where(u => u.UserId == userId).Select(u => u.EmployeeId).FirstOrDefault();
+            return await globalbrandDbContext.Users.Where(u => u.UserId == userId).Select(u => u.EmployeeId).FirstOrDefaultAsync();
         }
-        public int Add(User user)
+        public async Task<int> AddAsync(User user)
         {
             globalbrandDbContext.Users.Add(user);
-            return globalbrandDbContext.SaveChanges();
+            return await globalbrandDbContext.SaveChangesAsync();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace GlobalBrandAssessment.BL.DTOS.AttachmentDTO
     public class AddAndUpdateAttachmentDTO
     {
        
-
+        public int AttachmentId { get; set; }
         public int TaskId { get; set; }
 
         [Display(Name = "Attachment")]

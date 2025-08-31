@@ -4,28 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 
 namespace GlobalBrandAssessment.BL.Services.Manager
 {
-    public interface IManagerService
+    public interface IManagerService :IGenericService<AddAndUpdateManagerDTO>
     {
 
 
-        public int Add(AddAndUpdateManagerDTO employee);
+        public Task<int> DeleteAsync(int? id);
 
-        public int Update(AddAndUpdateManagerDTO employee);
-
-        public int Delete(int? id);
-
-        public List<GetAllAndSearchManagerDTO> Search(string searchname, int? managerid);
+        public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid);
 
 
 
-        public List<Employee> GetAllManagers();
+        public Task<List<Employee>> GetAllManagersAsync();
 
-        public Employee GetManagerByDepartmentId(int? deptId);
+        public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId);
        
     }
 }

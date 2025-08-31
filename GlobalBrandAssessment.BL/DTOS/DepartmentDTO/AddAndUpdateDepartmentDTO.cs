@@ -12,6 +12,7 @@ namespace GlobalBrandAssessment.BL.DTOS.DepartmentDTO
 {
     public class AddAndUpdateDepartmentDTO
     {
+        
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Department Name is required.")]

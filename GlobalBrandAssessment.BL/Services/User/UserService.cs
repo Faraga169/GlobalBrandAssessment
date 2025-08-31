@@ -17,17 +17,17 @@ namespace GlobalBrandAssessment.BL.Services
             this.userRepository = userRepository;
         }
 
-        public int? GetEmployeeIdByUserId(int? userId)
+        public Task<int?> GetEmployeeIdByUserIdAsync(int? userId)
         {
-            return userRepository.GetEmployeeIdByUserId(userId);
+            return userRepository.GetEmployeeIdByUserIdAsync(userId);
         }
 
-        public int Add(User user)
+        public async Task<int> AddAsync(User user)
         {
             if (user == null) { 
             return 0;
             }
-            return userRepository.Add(user);
+            return await userRepository.AddAsync(user);
         }
     }
 }
