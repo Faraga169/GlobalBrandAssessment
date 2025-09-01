@@ -24,7 +24,7 @@
           processData: false,  
           contentType: false,   
           success: function (response) {
-            if (response && response.success) {
+            if (response.success) {
               window.location.href = '@Url.Action("Index", "Department")';
             } else {
              

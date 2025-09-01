@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,7 +75,13 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         public async Task<List<Employee>> GetAllManagersAsync()
         {
-            return await globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any(e => e.ManagerId == m.Id)).ToListAsync();
+            return await globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any( e=>e.ManagerId == m.Id)).Select(
+                m=> new Employee
+                {
+                    Id = m.Id,
+                    FirstName = $"{m.FirstName} {m.LastName}"
+                }
+                ).ToListAsync();
         }
     }
 }

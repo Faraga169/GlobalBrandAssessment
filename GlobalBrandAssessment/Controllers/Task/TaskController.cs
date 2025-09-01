@@ -14,170 +14,234 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         private readonly ITaskService taskService;
         private readonly IManagerService managerService;
         private readonly IEmployeeService employeeService;
+        private readonly ILogger<TaskController> logger;
 
-        public TaskController(ITaskService taskService,IEmployeeService employeeService)
+        public TaskController(ITaskService taskService,IEmployeeService employeeService,ILogger<TaskController> logger)
         {
             this.taskService = taskService;
             this.employeeService = employeeService;
+            this.logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var managerId = HttpContext.Session.GetInt32("UserId");
-            if (managerId == null)
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                var managerId = HttpContext.Session.GetInt32("UserId");
+                if (managerId == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                var tasks = await taskService.GetAllTasksAsync(managerId);
+                return View(tasks);
             }
-            var tasks = await taskService.GetAllTasksAsync(managerId);
-            return View(tasks);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred in Task Index action.");
+                return StatusCode(500, "Internal server error");
+            }
+            
         }
 
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            try
             {
-                return RedirectToAction("Index", "Login");
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                if (mangerId == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                var task = await taskService.SearchAsync(searchname, mangerId);
+                if (task == null || !task.Any())
+                {
+                    TempData["Message"] = "No tasks found.";
+                    return PartialView("_IndexTaskPartial", new List<GetAllandSearchTaskDTO>());
+                }
+                return PartialView("_IndexTaskPartial", task);
             }
-            var task =await taskService.SearchAsync(searchname,mangerId);
-            if (task == null||!task.Any()) 
-            {
-                TempData["Message"] = "No tasks found.";
-                return PartialView("_IndexTaskPartial",new List<GetAllandSearchTaskDTO>());
+
+            catch (Exception ex) { 
+            logger.LogError(ex, "An error occurred in Task Search action.");
+                return StatusCode(500, "Internal server error");
             }
-            return PartialView("_IndexTaskPartial", task);
+            
         }
 
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
+            try
             {
-                return RedirectToAction("Index", "Login");
+
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                if (mangerId == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                var employees = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                return View();
             }
-            var employees = await employeeService.GetEmployeesByManagerAsync(mangerId);
-            ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
-            return View();
+            catch (Exception ex) { 
+            logger.LogError(ex, "An error occurred in Task Create GET action.");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
         [HttpPost]
         public async  Task<IActionResult> Create(AddandUpdateTaskDTO createtaskdto)
         {
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
 
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-        
-            if (mangerId == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            
-
-            if (ModelState.IsValid)
-            {
-
-                int result = await taskService.AddAsync(createtaskdto);
-
-                if (result > 0)
+                if (mangerId == null)
                 {
-                    TempData["Message"] = "Task created successfully.";
-                    return Json(new { success =true,redirecturl=Url.Action("Index","Task")});
-                }
-                else
-                {
-                    TempData["Message"] = "Failed to create Task.";
-                    return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
+                    return RedirectToAction("Index", "Login");
                 }
 
 
+
+                if (ModelState.IsValid)
+                {
+
+                    int result = await taskService.AddAsync(createtaskdto);
+
+                    if (result > 0)
+                    {
+                        TempData["Message"] = "Task created successfully.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Failed to create Task.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    }
+
+
+                }
+                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
+                return PartialView("_CreateTaskPartial", createtaskdto);
             }
-            var employee =  await employeeService.GetEmployeesByManagerAsync(mangerId);
-            ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
-            return PartialView("_CreateTaskPartial", createtaskdto);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred in Task Create POST action.");
+                TempData["Message"] = "Failed to create Task.";
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+            }
+
+           
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                if (mangerId == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                if (id is null || id < 0)
+                {
+                    return RedirectToAction("Index", "Task");
+                }
+
+                var task = await taskService.GetTaskByIdAsync(id.Value);
+                if (task == null)
+                {
+                    TempData["Message"] = "Task not found.";
+                    return RedirectToAction("Index");
+                }
+                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                ViewBag._Employees = new SelectList(employee, "Id", "FirstName", task.EmployeeId);
+                return View(task);
+
             }
-            if (id is null || id<0)
-            {
-                return RedirectToAction("Index", "Task");
+            catch (Exception ex) { 
+            logger.LogError(ex, "An error occurred in Task Edit GET action.");
+                return StatusCode(500, "Internal server error");
             }
-          
-            var task =await taskService.GetTaskByIdAsync(id.Value);
-            if (task == null)
-            {
-                TempData["Message"] = "Task not found.";
-                return RedirectToAction("Index");
-            }
-            var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
-            ViewBag._Employees = new SelectList(employee, "Id", "FirstName", task.EmployeeId);
-            return View(task);
+           
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(AddandUpdateTaskDTO Edittaskdto)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-            
-            if (ModelState.IsValid)
-            {
-               
-                int result = await taskService.UpdateAsync(Edittaskdto);
-                if (result > 0)
+            try {
+
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                if (mangerId == null)
                 {
-                    TempData["Message"] = "Task updated successfully.";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    return RedirectToAction("Index", "Login");
                 }
-                else
+
+                if (ModelState.IsValid)
                 {
-                    TempData["Message"] = "Failed to update Task.";
-                    return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
+
+                    int result = await taskService.UpdateAsync(Edittaskdto);
+                    if (result > 0)
+                    {
+                        TempData["Message"] = "Task updated successfully.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Failed to update Task.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    }
                 }
+                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
+                return PartialView("_EditTaskPartial", Edittaskdto);
             }
-            var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
-            ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
-            return PartialView("_EditTaskPartial", Edittaskdto);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred in Task Edit POST action.");
+                TempData["Message"] = "Failed to update Task.";
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+            }
+           
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
-            var manager = HttpContext.Session.GetInt32("UserId");
-            if (manager is null)
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+
+                var manager = HttpContext.Session.GetInt32("UserId");
+                if (manager is null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                if (id is null)
+                {
+                    TempData["Message"] = "Task not found.";
+                    return PartialView("_IndexTaskPartial");
+                }
+
+                var result = await taskService.DeleteAsync(id);
+                if (result > 0)
+                {
+                    TempData["Message"] = "Task delete successfully.";
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                }
+                else
+                {
+                    TempData["Message"] = "Task delete fail.";
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                }
             }
-            if (id is null)
-            {
-                TempData["Message"] = "Task not found.";
-                return PartialView("_IndexTaskPartial");
-            }
-          
-            var result =await taskService.DeleteAsync(id);
-            if (result > 0)
-            {
-                TempData["Message"] = "Task delete successfully.";
+            catch (Exception ex)
+            { 
+            logger.LogError(ex, "An error occurred in Task Delete action.");
+                TempData["Message"] = "Task delete fail.";
                 return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
             }
-            else
-            {
-                TempData["Message"] = "Task delete fail.";
-                return Json(new { success = false, redirecturl = Url.Action("Index", "Task") });
-            }
+                
         }
     }
 }

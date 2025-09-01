@@ -99,7 +99,10 @@ else
                 type: "POST",
                 data: { searchname: value },
                 success: function (result) {
-                        $("#employeeTable").html(result); 
+                 
+                     $("#employeeTable").html(result);
+                    
+                   
                 },
                 error: function () {
                     alert("Something went wrong.");

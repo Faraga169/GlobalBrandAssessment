@@ -9,6 +9,7 @@ using GlobalBrandAssessment.BL.DTOS.CommentDTO;
 using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 
 namespace GlobalBrandAssessment.BL.Services

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -50,8 +51,16 @@ namespace GlobalBrandAssessment.BL.Services.Manager
 
         public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid)
         {
+            //.And .Or Extension Methods for Expression Func Predicate
+            //Expression<Func<Employee, bool>> searchExpression = x => true;
+            //if (string.IsNullOrEmpty(searchname)) {
+                
+            //    searchExpression = x => x.FirstName.Contains(searchname) || x.LastName.Contains(searchname);
+            //}
+
             var managerlist = await managerRepository.SearchAsync(searchname, managerid);
             var SearchManagerDTO= mapper.Map<List<Employee>,List<GetAllAndSearchManagerDTO>>(managerlist);
+
 
             //var result = managerlist.Select(m => new SearchManagerDTO
             //{
@@ -78,9 +87,10 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             return managerRepository.GetManagerByDepartmentIdAsync(deptId) ;
         }
 
-        public Task<List<Employee>> GetAllManagersAsync()
+        public async Task<List<Employee>> GetAllManagersAsync()
         {
-            return managerRepository.GetAllManagersAsync();
+            
+            return await managerRepository.GetAllManagersAsync();
         }
 
        

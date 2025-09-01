@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
@@ -30,6 +31,11 @@ namespace GlobalBrandAssessment.DAL.Repositories.Generic
         {
             globalbrandDbContext.Set<T>().Update(entity);
             return await globalbrandDbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<T>> Search(Expression<Func<T, bool>> expression,int?value)
+        {
+            return (await globalbrandDbContext.Set<T>().Where(expression).ToListAsync());
         }
     }
 }

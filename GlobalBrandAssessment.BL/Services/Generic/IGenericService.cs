@@ -12,5 +12,7 @@ namespace GlobalBrandAssessment.BL.Services.Generic
 
         public Task<int> UpdateAsync(T entity);
 
+
+
     }
 }

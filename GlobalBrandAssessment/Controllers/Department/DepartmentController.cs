@@ -15,25 +15,36 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
     {
         private readonly IDepartmentService departmentService;
         private readonly IManagerService managerService;
+        private readonly ILogger<DepartmentController> logger;
 
-        public DepartmentController(IDepartmentService departmentService,IManagerService managerService)
+        public DepartmentController(IDepartmentService departmentService,IManagerService managerService,ILogger<DepartmentController> logger)
         {
             this.departmentService = departmentService;
             this.managerService = managerService;
-
+            this.logger = logger;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+
+                var department = await departmentService.GetAllAsync();
+                return View(department);
             }
 
-            var department = await departmentService.GetAllAsync();
-            return View(department);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error happened while Display department");
+                TempData["Message"] = "Something went wrong, please try again later.";
+                return RedirectToAction("Index", "Department");
+            }
+
         }
 
 
@@ -41,150 +52,216 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                var department = await departmentService.SearchAsync(searchname);
+                if (department == null || !department.Any())
+                {
+                    TempData["Message"] = "No departments found.";
+                    return PartialView("_IndexDepartmentPartial", new List<GetAllandSearchDepartmentDTO>());
+                }
+                return PartialView("_IndexDepartmentPartial", department);
             }
-            var department =await departmentService.SearchAsync(searchname);
-            if (department == null ||!department.Any())
+
+            catch (Exception ex)
             {
-                TempData["Message"] = "No departments found.";
-                return PartialView("_IndexDepartmentPartial",new List<GetAllandSearchDepartmentDTO>());
+                logger.LogError(ex, "Error happened while search department");
+                return StatusCode(500, "Server is not work");
+
             }
-            return PartialView("_IndexDepartmentPartial",department);
+
         }
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                var managers = await managerService.GetAllManagersAsync();
+                ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
+                return View();
             }
-            var managers = await managerService.GetAllManagersAsync();
-            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
-            return View();
+               
+            
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error happened while Create department");
+                TempData["Message"] = "Something went wrong, please try again later.";
+                return RedirectToAction("Index", "Department");
+            }
+           
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(AddAndUpdateDepartmentDTO department)
         {
+            try {
 
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-           
-            if (ModelState.IsValid)
-            {
-                int result =await departmentService.AddAsync(department);
-                if (result > 0)
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
                 {
-                    TempData["Message"] = "Department created successfully.";
-                    return Json(new { success = true ,redirecturl=Url.Action("Index","Department")});
-                }
-                else
-                {
-                    TempData["Message"] = "Failed to create Department.";
-                    return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
+                    return RedirectToAction("Index", "Login");
                 }
 
+                if (ModelState.IsValid)
+                {
+                    int result = await departmentService.AddAsync(department);
+                    if (result > 0)
+                    {
+                        TempData["Message"] = "Department created successfully.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Failed to create Department.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    }
+
+
+                }
+                var managers = await managerService.GetAllManagersAsync();
+                ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
+                return PartialView("_CreateDepartmentPartial", department);
 
             }
-            var managers = await managerService.GetAllManagersAsync();
-            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
-            return PartialView("_CreateDepartmentPartial", department);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error happened while Create department");
+                TempData["Message"] = "Something went wrong, please try again later.";
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+            }
+          
         }
 
         [HttpGet]
         public async Task< IActionResult> Edit(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                if (id is null || id < 0)
+                {
+                    return RedirectToAction("Index", "Department");
+                }
+
+
+                var department = await departmentService.GetDepartmentByIdAsync(id);
+                if (department == null)
+                {
+                    TempData["Message"] = "Department not found.";
+                    return RedirectToAction("Index");
+                }
+                var managers = await managerService.GetAllManagersAsync();
+                ViewBag._Manager = new SelectList(managers, "Id", "FullName");
+                return View(department);
             }
-            if (id is null|| id<0)
+
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Error happened while Edit department");
+                TempData["Message"] = "Something went wrong, please try again later.";
                 return RedirectToAction("Index", "Department");
             }
-           
 
-            var department =await departmentService.GetDepartmentByIdAsync(id);
-            if (department == null)
-            {
-                TempData["Message"] = "Department not found.";
-                return RedirectToAction("Index");
-            }
-            var managers = await managerService.GetAllManagersAsync();
-            ViewBag._Manager = new SelectList(managers, "Id", "FullName");
-            return View(department);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(AddAndUpdateDepartmentDTO department)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
+            try {
+
+
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+
+                if (ModelState.IsValid)
+                {
+
+                    int result = await departmentService.UpdateAsync(department);
+                    if (result > 0)
+                    {
+                        TempData["Message"] = "Department updated successfully.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    }
+                    else
+                    {
+                        TempData["Message"] = "Failed to update Department.";
+                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    }
+                }
+
+                var managers = await managerService.GetAllManagersAsync();
+                ViewBag._Manager = new SelectList(managers, "Id", "FirstName", department.ManagerId); ;
+                return PartialView("_EditDepartmentPartial", department);
             }
 
-            if (ModelState.IsValid)
+            catch (Exception ex)
             {
-
-                int result =await departmentService.UpdateAsync(department);
-                if (result > 0)
-                {
-                    TempData["Message"] = "Department updated successfully.";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
-                }
-                else
-                {
-                    TempData["Message"] = "Failed to update Department.";
-                    return Json(new { success = false, redirecturl = Url.Action("Index", "Department") });
-                }
+                logger.LogError(ex, "Error happened while Edit department");
+                TempData["Message"] = "Something went wrong, please try again later.";
+              
+                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
             }
-
-            var managers = await managerService.GetAllManagersAsync();
-            ViewBag._Manager = new SelectList(managers, "Id", "FullName",department.ManagerId); ;
-            return PartialView("_EditDepartmentPartial", department);
+           
         }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
+            try
             {
-                return RedirectToAction("Index", "Login");
+                int? mangerId = HttpContext.Session.GetInt32("UserId");
+                var Role = HttpContext.Session.GetString("Role");
+                if (mangerId == null || Role == "Employee")
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                if (id is null)
+                {
+                    TempData["Message"] = "Department Id is not exist";
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                }
+
+                var result = await departmentService.DeleteAsync(id);
+                if (result > 0)
+                {
+                    TempData["Message"] = "Department delete successfully.";
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                }
+                else
+                {
+                    TempData["Message"] = "You Cant Delete Because Department exist employees";
+                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                }
             }
-            if (id is null)
+
+            catch (Exception ex) 
             {
-                TempData["Message"] = "Department Id is not exist";
+                logger.LogError(ex, "Error happened while delete department");
+                TempData["Message"] = "Something went wrong, please try again later.";
                 return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+               
             }
-           
-            var result =await departmentService.DeleteAsync(id);
-            if (result > 0)
-            {
-                TempData["Message"] = "Department delete successfully.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
-            }
-            else
-            {
-                TempData["Message"] = "You Cant Delete Because Department exist employees";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
-            }
+
         }
     }
 }
