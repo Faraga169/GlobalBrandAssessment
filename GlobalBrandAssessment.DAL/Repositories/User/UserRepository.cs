@@ -26,5 +26,17 @@ namespace GlobalBrandAssessment.DAL.Repositories
             globalbrandDbContext.Users.Add(user);
             return await globalbrandDbContext.SaveChangesAsync();
         }
+
+        //public async Task<int> RemoveAsync(int? id)
+        //{
+        //    var user = globalbrandDbContext.Employees.Find(id);
+        //    if (user == null)
+        //    {
+        //        return 0;
+        //    }
+        //    globalbrandDbContext.Employees.Remove(user);
+        //    return await globalbrandDbContext.SaveChangesAsync();
+
+        //}
     }
 }

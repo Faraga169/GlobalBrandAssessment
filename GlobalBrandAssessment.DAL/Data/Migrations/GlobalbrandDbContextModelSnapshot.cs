@@ -39,7 +39,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UploadedById")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.HasKey("AttachmentId");
@@ -47,9 +47,9 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     b.HasIndex("TaskId")
                         .IsUnique();
 
-                    b.HasIndex("UploadedById");
+                    b.HasIndex("EmployeeId");
 
-                    b.ToTable("Attachments");
+                    b.ToTable("Attachments", (string)null);
                 });
 
             modelBuilder.Entity("GlobalBrandAssessment.DAL.Data.Models.Comment", b =>
@@ -69,7 +69,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
                     b.HasKey("CommentId");
@@ -77,9 +77,9 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     b.HasIndex("TaskId")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("EmployeeId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("GlobalBrandAssessment.DAL.Data.Models.Department", b =>
@@ -102,7 +102,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
 
                     b.HasData(
                         new
@@ -163,7 +163,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
 
                     b.HasData(
                         new
@@ -278,7 +278,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
 
                     b.HasData(
                         new
@@ -337,7 +337,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                         .IsUnique()
                         .HasFilter("[EmployeeId] IS NOT NULL");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new
@@ -422,15 +422,15 @@ namespace GlobalBrandAssessment.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GlobalBrandAssessment.DAL.Data.Models.User", "UploadedBy")
+                    b.HasOne("GlobalBrandAssessment.DAL.Data.Models.Employee", "AssignedEmployee")
                         .WithMany()
-                        .HasForeignKey("UploadedById")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Task");
 
-                    b.Navigation("UploadedBy");
+                    b.Navigation("AssignedEmployee");
                 });
 
             modelBuilder.Entity("GlobalBrandAssessment.DAL.Data.Models.Comment", b =>
@@ -441,15 +441,15 @@ namespace GlobalBrandAssessment.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GlobalBrandAssessment.DAL.Data.Models.User", "User")
+                    b.HasOne("GlobalBrandAssessment.DAL.Data.Models.Employee", "AssignedEmployee")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Task");
 
-                    b.Navigation("User");
+                    b.Navigation("AssignedEmployee");
                 });
 
             modelBuilder.Entity("GlobalBrandAssessment.DAL.Data.Models.Department", b =>

@@ -25,7 +25,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             this.managerRepository = managerRepository;
             this.mapper = mapper;
         }
-        public Task<int> AddAsync(AddAndUpdateManagerDTO employee)
+        public Task<int> Add(AddAndUpdateManagerDTO employee)
         {
             var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
 
@@ -39,7 +39,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             //    DeptId = employee.DeptId,
             //});
                 
-            return managerRepository.AddAsync(result);
+            return managerRepository.Add(result);
         }
 
         public Task<int> DeleteAsync(int? id)
@@ -93,6 +93,9 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             return await managerRepository.GetAllManagersAsync();
         }
 
-       
+        public Task<int> AddAsync(AddAndUpdateManagerDTO entity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

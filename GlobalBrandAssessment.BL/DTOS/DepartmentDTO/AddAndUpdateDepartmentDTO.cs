@@ -21,7 +21,8 @@ namespace GlobalBrandAssessment.BL.DTOS.DepartmentDTO
         [DisplayName("Department Name")]
         public string Name { get; set; } = null!;
 
-      
+       
+
         [DisplayName("Manager")]
         public int? ManagerId { get; set; }
     }

@@ -14,5 +14,7 @@ namespace GlobalBrandAssessment.BL.Services
         public Task<Employee> GetEmployeeByIdAsync(int? employeeId);
 
         public Task<List<GetAllAndSearchManagerDTO>> GetEmployeesByManagerAsync(int? ManagerId);
+
+        public Task<string> GetEmployeeImageUrlAsync(int id);
     }
 }

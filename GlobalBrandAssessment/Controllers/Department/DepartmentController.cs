@@ -120,12 +120,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                     if (result > 0)
                     {
                         TempData["Message"] = "Department created successfully.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                     }
                     else
                     {
                         TempData["Message"] = "Failed to create Department.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                     }
 
 
@@ -139,7 +139,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 logger.LogError(ex, "Error happened while Create department");
                 TempData["Message"] = "Something went wrong, please try again later.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
             }
           
         }
@@ -200,12 +200,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                     if (result > 0)
                     {
                         TempData["Message"] = "Department updated successfully.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                     }
                     else
                     {
                         TempData["Message"] = "Failed to update Department.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                     }
                 }
 
@@ -219,7 +219,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 logger.LogError(ex, "Error happened while Edit department");
                 TempData["Message"] = "Something went wrong, please try again later.";
               
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
             }
            
         }
@@ -238,19 +238,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 if (id is null)
                 {
                     TempData["Message"] = "Department Id is not exist";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                 }
 
                 var result = await departmentService.DeleteAsync(id);
                 if (result > 0)
                 {
                     TempData["Message"] = "Department delete successfully.";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                 }
                 else
                 {
                     TempData["Message"] = "You Cant Delete Because Department exist employees";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                 }
             }
 
@@ -258,7 +258,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 logger.LogError(ex, "Error happened while delete department");
                 TempData["Message"] = "Something went wrong, please try again later.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Department") });
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                
             }
 

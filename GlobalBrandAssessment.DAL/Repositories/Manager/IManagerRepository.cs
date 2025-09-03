@@ -11,7 +11,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
 {
     public interface IManagerRepository:IGenericRepository<Employee>
     {
-
+        public Task<int> Add(Employee employee);
 
         public Task<int> DeleteAsync(int? id);
 

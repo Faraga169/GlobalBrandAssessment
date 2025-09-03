@@ -33,10 +33,9 @@
                     $("#formContainer").html(response);
                     }
                 } ,
-                 error: function () {
-                alert("Something went wrong. Please try again.");
-            }
-
+                 error: function (xhr) {
+                alert("Something went wrong. Please try again.",xhr.responseText);
+                 }
         });
     });
          });

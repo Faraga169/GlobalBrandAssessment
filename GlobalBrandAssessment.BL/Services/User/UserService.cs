@@ -29,5 +29,14 @@ namespace GlobalBrandAssessment.BL.Services
             }
             return await userRepository.AddAsync(user);
         }
+
+        //public async Task<int> RemoveAsync(int? id)
+        //{
+        //    if (id == null)
+        //        return 0;
+        //    return await userRepository.RemoveAsync(id);
+        //}
+
+
     }
 }

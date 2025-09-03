@@ -67,7 +67,6 @@ else
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-
          $(document).ready(function () {
         $(".deletebtn").on("click", function () {
 
@@ -90,7 +89,6 @@ else
 		}
 		});
         });
-
 	$(document).ready(function () {
 		$("#searchbtn").on('click',function(){
 		var value=$(".searchvalue").val();
@@ -104,9 +102,9 @@ else
                     
                    
                 },
-                error: function () {
-                    alert("Something went wrong.");
-                }
+                 error: function (xhr) {
+                alert("Something went wrong. Please try again.",xhr.responseText);
+                 }
             });
         });
        

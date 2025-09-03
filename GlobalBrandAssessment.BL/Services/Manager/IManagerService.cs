@@ -13,7 +13,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
     public interface IManagerService :IGenericService<AddAndUpdateManagerDTO>
     {
 
-
+        public Task<int> Add(AddAndUpdateManagerDTO employee);
         public Task<int> DeleteAsync(int? id);
 
         public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid);
@@ -23,6 +23,8 @@ namespace GlobalBrandAssessment.BL.Services.Manager
         public Task<List<Employee>> GetAllManagersAsync();
 
         public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId);
+
+
        
     }
 }

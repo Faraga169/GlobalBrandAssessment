@@ -10,6 +10,7 @@ using GlobalBrandAssessment.GlobalBrandDbContext;
 using System.Data;
 using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -155,7 +156,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
                     }
 
-                    int newEmployeeId = await managerService.AddAsync(addORUpdateManagerDTO);
+                    int newEmployeeId = await managerService.Add(addORUpdateManagerDTO);
                     if (newEmployeeId > 0)
                     {
                         var user = mapper.Map<AddAndUpdateManagerDTO, User>(addORUpdateManagerDTO);
@@ -243,13 +244,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 {
                     addORUpdateManagerDTO.ManagerId = manager.Id;
                 }
-
+                var oldImageUrl = await employeeService.GetEmployeeImageUrlAsync(addORUpdateManagerDTO.Id);
 
                 if (ModelState.IsValid)
                 {
 
                     if (addORUpdateManagerDTO.Image != null)
                     {
+                       
                         // Save new image
                         string rootPath = Directory.GetCurrentDirectory();
                         string wwwRootPath = Path.Combine(rootPath, "wwwroot");
@@ -262,7 +264,24 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         {
                             addORUpdateManagerDTO.Image.CopyTo(fileStream);
                         }
-                        addORUpdateManagerDTO.ImageURL = addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
+                        addORUpdateManagerDTO.ImageURL = "/images/" + fileName;
+
+                        // Delete old image if exists
+                        if (!string.IsNullOrEmpty(oldImageUrl))
+                        {
+                            string oldImagePath = Path.Combine(wwwRootPath, oldImageUrl.TrimStart('/'));
+                            if (System.IO.File.Exists(oldImagePath))
+                            {
+                                System.IO.File.Delete(oldImagePath);
+                            }
+                        }
+                    }
+                    else
+                    {
+
+                       
+                        addORUpdateManagerDTO.ImageURL = oldImageUrl;
+
                     }
 
                     int result = await managerService.UpdateAsync(addORUpdateManagerDTO);
@@ -318,6 +337,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 var result = await managerService.DeleteAsync(id);
                 if (result > 0)
                 {
+                 
+                    
                     TempData["Message"] = "Employee deleted successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }

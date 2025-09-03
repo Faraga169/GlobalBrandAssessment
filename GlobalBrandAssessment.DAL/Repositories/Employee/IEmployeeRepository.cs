@@ -13,6 +13,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public Task<Employee> GetEmployeeById(int? employeeId);
 
         public Task<List<Employee>> GetEmployeesByManager(int? ManagerId);
+        public  Task<string> GetEmployeeImageUrlAsync(int id);
     }
 
 }

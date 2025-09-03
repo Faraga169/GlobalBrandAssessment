@@ -19,6 +19,6 @@ namespace GlobalBrandAssessment.BL.DTOS.CommentDTO
         [Display(Name = "Comment")]
         public string? Content { get; set; }
 
-        public int UserId { get; set; }
+        public int EmployeeId { get; set; }
     }
 }

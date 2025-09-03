@@ -28,5 +28,13 @@ namespace GlobalBrandAssessment.DAL.Repositories
         {
             return await globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).Where(e => e.ManagerId == ManagerId).ToListAsync();
         }
+
+        public async Task<string> GetEmployeeImageUrlAsync(int id)
+        {
+            return await globalbrandDbContext.Employees
+                .Where(e => e.Id == id)
+                .Select(e => e.ImageURL)
+                .FirstOrDefaultAsync();
+        }
     }
 }

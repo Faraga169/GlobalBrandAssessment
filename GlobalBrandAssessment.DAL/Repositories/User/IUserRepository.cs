@@ -11,6 +11,11 @@ namespace GlobalBrandAssessment.DAL.Repositories
     {
         public Task<int> AddAsync(User user);
         public Task<int?> GetEmployeeIdByUserIdAsync(int? userId);
-       
+
+        //public Task<int> RemoveAsync(int? id);
+
+      
+
+
     }
 }

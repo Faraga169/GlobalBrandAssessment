@@ -9,6 +9,7 @@ using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
+using GlobalBrandAssessment.GlobalBrandDbContext;
 
 namespace GlobalBrandAssessment.BL.Services
 {
@@ -55,6 +56,11 @@ namespace GlobalBrandAssessment.BL.Services
         public async Task<int> UpdateAsync(AddAndUpdateManagerDTO entity)
         {
             return await employeeRepository.UpdateAsync(mapper.Map<AddAndUpdateManagerDTO, Employee>(entity));
+        }
+
+        public async Task<string> GetEmployeeImageUrlAsync(int id)
+        {
+            return await employeeRepository.GetEmployeeImageUrlAsync(id);
         }
     }
 }

@@ -87,13 +87,13 @@ else{
                 data: { id: taskId },
                 success: function (response) {
                     if (response.success) {
-                        window.location.href =response.redirecturl;;
+                        window.location.href =response.redirectUrl;;
                     }
                 },
-                error: function () {
-                    alert("Something went wrong. Please try again.");
-                }
-            });
+                 error: function (xhr) {
+                alert("Something went wrong. Please try again.",xhr.responseText);
+                 }
+            }); 
         }
         });
         });
@@ -108,11 +108,12 @@ else{
                 success: function (result) {
                         $("#taskTable").html(result);
                 },
-                error: function () {
-                    alert("Something went wrong.");
+                error: function (xhr) {
+                alert("Something went wrong. Please try again.",xhr.responseText);
                 }
             });
         });
 
     });
+    
 </script>

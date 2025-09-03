@@ -85,13 +85,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public async Task<IActionResult> Task()
         {
             try {
-                int? employeeId = HttpContext.Session.GetInt32("UserId");
+                int? userId = HttpContext.Session.GetInt32("UserId");
                 var Role = HttpContext.Session.GetString("Role");
-                if (employeeId == null || Role == "Manager")
+                if (userId == null || Role == "Manager")
                 {
                     return RedirectToAction("Index", "Login");
                 }
-                var employeetask = await taskService.GetTaskbyEmployeeIdAsync(employeeId);
+                var user = await userService.GetEmployeeIdByUserIdAsync(userId);
+                var employeetask = await taskService.GetTaskbyEmployeeIdAsync(user);
                 if (employeetask == null)
                 {
                     TempData["Message"] = "You dont have Tasks";
@@ -151,7 +152,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
+                var user = await userService.GetEmployeeIdByUserIdAsync(userId);
 
                 if (taskEditViewModel == null)
                     return Json(new { success = false });
@@ -171,12 +172,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         if (existingComment != null)
                         {
 
-                            addCommentDTO.UserId = userId.Value;
+                            addCommentDTO.EmployeeId = user.Value;
                             addCommentDTO.CommentId = existingComment.CommentId;
                             await commentService.UpdateAsync(addCommentDTO);
                         }
                         else
                         {
+                            addCommentDTO.EmployeeId = user.Value;
                             await commentService.AddAsync(addCommentDTO);
                         }
 
@@ -196,12 +198,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
                         if (existattachment != null)
                         {
-                            attachmentDto.UploadedById = userId.Value;
+                            attachmentDto.EmployeeId= user.Value;
                             attachmentDto.AttachmentId = existattachment.AttachmentId;
                             await attachmentService.UpdateAsync(attachmentDto);
                         }
                         else
                         {
+                            attachmentDto.EmployeeId = user.Value;
                             await attachmentService.AddAsync(attachmentDto);
                         }
 
@@ -210,12 +213,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     }
                 }
                 var AddandUpdateTaskDTO = mapper.Map<TaskEditViewModel, AddandUpdateTaskDTO>(taskEditViewModel);
-                AddandUpdateTaskDTO.EmployeeId = userId;
+                AddandUpdateTaskDTO.EmployeeId = user;
                 int result = await taskService.UpdateAsync(AddandUpdateTaskDTO);
                 if (result > 0)
                 {
                     TempData["Message"] = "status updated successfully.";
-                    return Json(new { success = true, redirecturl = Url.Action("Task", "Employee") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Task", "Employee") });
                 }
                 else
                 {
@@ -227,7 +230,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             catch (Exception ex) { 
             logger.LogError(ex, "An error occurred in Employee Edit POST action.");
             TempData["Message"] = "Something wrong going";
-            return Json(new { success = true, redirecturl = Url.Action("Task", "Employee") });
+            return Json(new { success = true, redirectUrl = Url.Action("Task", "Employee") });
             }
             
         }

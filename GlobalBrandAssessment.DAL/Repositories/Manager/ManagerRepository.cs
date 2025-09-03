@@ -20,13 +20,16 @@ namespace GlobalBrandAssessment.DAL.Repositories
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-        public async Task<int> AddAsync(Employee employee)
+
+        public async Task<int> Add(Employee employee)
         {
-            globalbrandDbContext.Employees.Add(employee);
+            
+
+            await globalbrandDbContext.Employees.AddAsync(employee);
             await globalbrandDbContext.SaveChangesAsync();
+
             return employee.Id;
         }
-
         public async Task<int> DeleteAsync(int? id)
         {
             var employee = globalbrandDbContext.Employees.Find(id);

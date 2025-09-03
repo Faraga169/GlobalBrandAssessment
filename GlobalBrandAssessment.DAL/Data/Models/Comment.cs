@@ -19,11 +19,11 @@ namespace GlobalBrandAssessment.DAL.Data.Models
 
        /*Navigation property*/
         public Tasks Task { get; set; } = null!;
-        public User User { get; set; } = null!;
+        public Employee Employee { get; set; } = null!;
 
         /*Foreign keys*/
-        [ForeignKey("User")]
-        public int UserId { get; set; }
+        [ForeignKey("Employee")]
+        public int EmployeeId { get; set; }
         [ForeignKey("Task")]
         public int TaskId { get; set; }
 

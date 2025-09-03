@@ -112,12 +112,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                     if (result > 0)
                     {
                         TempData["Message"] = "Task created successfully.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
                     else
                     {
                         TempData["Message"] = "Failed to create Task.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
 
 
@@ -130,7 +130,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             {
                 logger.LogError(ex, "An error occurred in Task Create POST action.");
                 TempData["Message"] = "Failed to create Task.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
             }
 
            
@@ -186,12 +186,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                     if (result > 0)
                     {
                         TempData["Message"] = "Task updated successfully.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
                     else
                     {
                         TempData["Message"] = "Failed to update Task.";
-                        return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
                 }
                 var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
@@ -202,7 +202,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             {
                 logger.LogError(ex, "An error occurred in Task Edit POST action.");
                 TempData["Message"] = "Failed to update Task.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
             }
            
         }
@@ -227,19 +227,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 if (result > 0)
                 {
                     TempData["Message"] = "Task delete successfully.";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                 }
                 else
                 {
                     TempData["Message"] = "Task delete fail.";
-                    return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                 }
             }
             catch (Exception ex)
             { 
             logger.LogError(ex, "An error occurred in Task Delete action.");
-                TempData["Message"] = "Task delete fail.";
-                return Json(new { success = true, redirecturl = Url.Action("Index", "Task") });
+                    TempData["Message"] = "Task delete fail.";
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
             }
                 
         }
