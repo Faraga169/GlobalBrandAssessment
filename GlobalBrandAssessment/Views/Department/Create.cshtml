@@ -9,32 +9,39 @@
     @await Html.PartialAsync("_CreateDepartmentPartial", Model)
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-      $("#CreateDepartmentForm").on("submit", function (e) {
-        e.preventDefault();
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+       
+    <script>
+        $(document).ready(function () {
+          $("#CreateDepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+            if (!$(this).valid()) 
+                   return; 
+        
+            var formData = new FormData(this);
 
-        var formData = new FormData(this);
+            $.ajax({
+              url: '@Url.Action("Create", "Department")',
+              type: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function (response) {
+                if (response.success) {
+                window.location.href =  response.redirectUrl;
+                } else {
 
-        $.ajax({
-          url: '@Url.Action("Create", "Department")',
-          type: "POST",
-          data: formData,
-          processData: false,  
-          contentType: false,   
-          success: function (response) {
-            if (response.success) {
-            window.location.href =  response.redirectUrl;
-            } else {
-             
-              $("#formContainer").html(response);
-            }
-          },
-          error: function (xhr) {
-                alert("Something went wrong. Please try again.",xhr.responseText);
-          }
+                  $("#formContainer").html(response);
+                }
+              },
+              error: function (xhr) {
+                    alert("Something went wrong. Please try again.",xhr.responseText);
+              }
+            });
+          });
         });
-      });
-    });
-</script>
+    </script>
+
+
+}

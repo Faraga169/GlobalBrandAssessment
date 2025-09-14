@@ -18,24 +18,48 @@ namespace GlobalBrandAssessment.DAL.Repositories.Generic
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
-        public async Task<int> AddAsync(T entity)
+       
+        public async Task AddAsync(T entity)
         {
             globalbrandDbContext.Set<T>().Add(entity);
-            return await globalbrandDbContext.SaveChangesAsync();
+           await Task.CompletedTask;
         }
-
 
 
         
-        public async Task<int> UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity)
         {
             globalbrandDbContext.Set<T>().Update(entity);
-            return await globalbrandDbContext.SaveChangesAsync();
+            await Task.CompletedTask;
         }
 
-        public async Task<List<T>> Search(Expression<Func<T, bool>> expression,int?value)
+
+        public async Task DeleteAsync(T entity)
         {
-            return (await globalbrandDbContext.Set<T>().Where(expression).ToListAsync());
+            globalbrandDbContext.Set<T>().Remove(entity);
+            await Task.CompletedTask;
         }
+
+        
+
+        //public async Task<List<T>> SearchAsync(Expression<Func<T, bool>> expression, int? valueparams ,Expression<Func<T, object>>[] includes)
+        //{
+        //    IQueryable<T> query = globalbrandDbContext.Set<T>();
+
+
+        //    foreach (var include in includes)
+        //    {
+        //        query = query.Include(include);
+        //    }
+
+        //    if (expression != null)
+        //    {
+        //        query = query.Where(expression);
+        //    }
+
+        //    return await query.ToListAsync();
+        //}
+
+
     }
 }

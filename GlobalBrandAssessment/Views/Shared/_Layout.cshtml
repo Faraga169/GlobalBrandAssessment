@@ -8,16 +8,14 @@
     <!-- Font Awesome Free CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GlobalBrandAssessment.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-gradient shadow-sm mb-4" style="background: linear-gradient(to right, #4e73df, #1cc88a);">
-            <div class="container-fluid">
+            <div class="container w-75 mx-auto ">
                 <!-- Logo -->
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Manager" asp-action="Index">
-                    <img src="~/Images/GlobalBrands.jpg" alt="GlobalBrands" style="height:40px; width:auto; margin-right:8px;" />
-                    <span class="text-dark fw-bold">Global Brands</span>
+                    <img src="~/Images/GBG.png" alt="GlobalBrands" style="height:40px; width:auto; margin-right:8px;" />
                 </a>
 
                 <!-- Toggle button for mobile -->
@@ -118,7 +116,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-   
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

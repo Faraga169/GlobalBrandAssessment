@@ -19,35 +19,18 @@ namespace GlobalBrandAssessment.DAL.Repositories
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-      
-
-        public async Task<int> DeleteAsync(int? id)
-        {
-            var department = globalbrandDbContext.Departments.Include(d => d.Employees).FirstOrDefault(d => d.Id == id);
-
-            if (department == null)
-            {
-                return 0; 
-            }
-            if (department.EmployeeCount > 0) {
-                return -1;
-            }
-               
-            globalbrandDbContext.Departments.Remove(department);
-            return await globalbrandDbContext.SaveChangesAsync();
-        }
 
 
         public async Task<List<Department>> SearchAsync(string searchname)
         {
-            var query = globalbrandDbContext.Departments.Include(e=>e.Manager).Include(e=>e.Employees).AsQueryable();
+            var query = globalbrandDbContext.Departments.Include(e => e.Manager).Include(e => e.Employees).AsQueryable();
             if (!string.IsNullOrEmpty(searchname))
             {
                 query = query.Where(e => e.Name.ToLower().Contains(searchname.ToLower()));
             }
             return await query.ToListAsync();
         }
-      
+
 
 
         public async Task<List<Department>> GetAllAsync()
@@ -56,10 +39,10 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         }
 
-        public async Task<Department> GetDepartmentById(int? id)
+        public async Task<Department?> GetDepartmentById(int? id)
         {
 
-             return await globalbrandDbContext.Departments.Include(d => d.Manager).FirstOrDefaultAsync(d => d.Id == id);
+             return await globalbrandDbContext.Departments.Include(d => d.Manager).Include(d=>d.Employees).FirstOrDefaultAsync(d => d.Id == id);
         }
     }
 }

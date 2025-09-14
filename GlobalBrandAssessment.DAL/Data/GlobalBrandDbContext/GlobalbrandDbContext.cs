@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using GlobalBrandAssessment.DAL.Data.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Tasks = GlobalBrandAssessment.DAL.Data.Models.Tasks;
 
@@ -7,10 +9,7 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
 {
     public class GlobalbrandDbContext:DbContext
     {
-        public GlobalbrandDbContext():base()
-        {
-            
-        }
+        
 
         public GlobalbrandDbContext(DbContextOptions<GlobalbrandDbContext> options) : base(options)
         {
@@ -30,9 +29,13 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
 
             base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Employee>()
+       .HasOne(e => e.User)
+       .WithOne(u => u.Employee)
+       .HasForeignKey<User>(u => u.EmployeeId)
+       .OnDelete(DeleteBehavior.Cascade);
 
 
-       
 
             modelBuilder.Entity<Department>().HasData(
                 new Department { Id = 1, Name = "IT" },
@@ -84,5 +87,7 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
         public virtual DbSet<Tasks> Tasks { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
         public virtual DbSet<Attachment> Attachments { get; set; } = null!;
+
+       
     }
 }

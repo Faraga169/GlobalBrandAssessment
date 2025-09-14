@@ -11,6 +11,7 @@ using System.Data;
 using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -22,8 +23,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly IUserService userService;
         private readonly IMapper mapper;
         private readonly ILogger<ManagerController> logger;
+        private readonly IWebHostEnvironment environment;
 
-        public ManagerController(IManagerService managerService, IEmployeeService employeeService, IDepartmentService departmentService, IUserService userService, IMapper mapper, ILogger<ManagerController> logger)
+        public ManagerController(IManagerService managerService, IEmployeeService employeeService, IDepartmentService departmentService, IUserService userService, IMapper mapper, ILogger<ManagerController> logger,IWebHostEnvironment environment)
         {
             this.managerService = managerService;
             this.employeeService = employeeService;
@@ -31,29 +33,30 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             this.userService = userService;
             this.mapper = mapper;
             this.logger = logger;
+            this.environment = environment;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
 
         {
+
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
             try
             {
-
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-
                 var manager = await employeeService.GetEmployeesByManagerAsync(mangerId);
                 return View(manager);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred in Manager Index action.");
-                return StatusCode(500, "Internal server error");
+                logger.LogError(ex.Message, "An error occurred in Manager Index action.");
+                return PartialView("Errorpartial", ex);
             }
 
         }
@@ -63,51 +66,79 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
+
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {
+                return RedirectToAction("Index", "Login");
+            }
             try
             {
 
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var manager = await managerService.SearchAsync(searchname, mangerId);
                 if (manager == null || !manager.Any())
                 {
                     return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
                 }
 
-
                 return PartialView("_IndexManagerPartial", manager);
+
+
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred in Manager Search action.");
-                return StatusCode(500, "Internal server error");
-            }
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    TempData["Message"] = ex.Message;
+                    return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
+                }
+                else
+                {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("Errorpartial",ex);
+                }
 
+
+            }
+      
         }
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {
+                return RedirectToAction("Index", "Login");
+            }
             try
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var departments = await departmentService.GetAllAsync();
                 ViewBag._Department = new SelectList(departments, "Id", "Name");
                 return View();
             }
+           
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred in Manager Create Get action.");
-                return StatusCode(500, "Internal server error");
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    TempData["Message"] = ex.Message;
+                    return View();
+                }
+                else
+                {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("Errorpartial",ex);
+                }
+
+
             }
 
         }
@@ -117,27 +148,29 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Create(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
-            try
+
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-
-                var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
-                if (manager == null)
-                {
-                    ModelState.AddModelError("", "No manager found for the selected department.");
-                }
-                else
-                {
-                    addORUpdateManagerDTO.ManagerId = manager.Id;
-                }
+                return RedirectToAction("Index", "Login");
+            }
 
 
-                if (ModelState.IsValid)
+            var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
+            if (manager == null)
+            {
+                ModelState.AddModelError("", "No manager found for the selected department.");
+            }
+            else
+            {
+                addORUpdateManagerDTO.ManagerId = manager.Id;
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                try
                 {
 
                     if (addORUpdateManagerDTO.Image != null)
@@ -157,6 +190,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     }
 
                     int newEmployeeId = await managerService.Add(addORUpdateManagerDTO);
+                    
                     if (newEmployeeId > 0)
                     {
                         var user = mapper.Map<AddAndUpdateManagerDTO, User>(addORUpdateManagerDTO);
@@ -173,37 +207,54 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                     }
                 }
+
+                catch (Exception ex)
+                {
+                    if (environment.IsDevelopment())
+                    {
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+
+
+                    }
+
+                    else
+                    {
+
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex.Message);
+                        return PartialView("Errorpartial", ex);
+                    }
+
+                }
+            }
                 var departments = await departmentService.GetAllAsync();
                 ViewBag._Department = new SelectList(departments, "Id", "Name");
                 return PartialView("_CreateManagerPartial", addORUpdateManagerDTO);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Manager Create Post action.");
-                TempData["Message"] = "Failed to create employee something going wrong";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
+
             }
 
-        }
-
+        
+        
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {
+                return RedirectToAction("Index", "Login");
+            }
             try
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                if (id is null || id < 0)
-                {
-                    return RedirectToAction("Index", "Manager");
-                }
+                
+                if(!id.HasValue)
+                return BadRequest();
 
                 var employee = await employeeService.GetEmployeeByIdAsync(id);
+                if (employee == null)
+                    return NotFound();
                 var result = mapper.Map<DAL.Data.Models.Employee, AddAndUpdateManagerDTO>(employee);
                 if (result == null)
                 {
@@ -218,22 +269,22 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred in Manager Edit Get action.");
-                return StatusCode(500, "Internal server error");
+                return PartialView("Errorpartial",ex);
             }
 
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(AddAndUpdateManagerDTO addORUpdateManagerDTO)
+        public async Task<IActionResult> Edit([FromRoute]int id,AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
-            try
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+                return RedirectToAction("Index", "Login");
+            }
+           
+               
                 ModelState.Remove("Password");
                 var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
                 if (manager == null)
@@ -245,13 +296,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     addORUpdateManagerDTO.ManagerId = manager.Id;
                 }
                 var oldImageUrl = await employeeService.GetEmployeeImageUrlAsync(addORUpdateManagerDTO.Id);
+            addORUpdateManagerDTO.Id = id;
 
-                if (ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                try
                 {
+                  
 
                     if (addORUpdateManagerDTO.Image != null)
                     {
-                       
+
                         // Save new image
                         string rootPath = Directory.GetCurrentDirectory();
                         string wwwRootPath = Path.Combine(rootPath, "wwwroot");
@@ -279,7 +334,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     else
                     {
 
-                       
+
                         addORUpdateManagerDTO.ImageURL = oldImageUrl;
 
                     }
@@ -298,46 +353,51 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
                     }
 
+                }
+                catch (Exception ex)
+                {
+                    if (environment.IsDevelopment())
+                    {
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+
+
+                    }
+                    else
+                    {
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex, "Error happened while updating Employee {EmployeeId}",addORUpdateManagerDTO.Id);
+                        return PartialView("Errorpartial", ex);
+                    }
 
                 }
+            }
 
                 var departments = await departmentService.GetAllAsync();
                 ViewBag._Department = new SelectList(departments, "Id", "Name", addORUpdateManagerDTO.DeptId);
                 return PartialView("_EditManagerPartial", addORUpdateManagerDTO);
+
             }
-
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Manager Edit Post action.");
-
-                TempData["Message"] = "Failed to update employee.something wrong";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
-            }
-
-        }
 
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {
+                return RedirectToAction("Index", "Login");
+            }
             try
             {
-
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                if (id is null)
-                {
-                    TempData["Message"] = "Invalid employee id.";
-                    return Json(new { success = false });
-                }
+               if(!id.HasValue)
+                    return BadRequest();
 
                 var result = await managerService.DeleteAsync(id);
                 if (result > 0)
                 {
-                 
+
+                   await userService.RemoveAsync(id);
                     
                     TempData["Message"] = "Employee deleted successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });

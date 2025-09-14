@@ -10,10 +10,8 @@ using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services
 {
-    public interface ICommentService:IGenericService<AddAndUpdateCommentDTO>
+    public interface ICommentService:IGenericService<Comment,AddAndUpdateCommentDTO>
     {
-
-
 
         public Task<Comment?> GetByTaskIdAsync(int taskId);
 

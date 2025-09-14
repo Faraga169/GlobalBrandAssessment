@@ -9,12 +9,12 @@ using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services
 {
-    public interface IEmployeeService: IGenericService<AddAndUpdateManagerDTO>
+    public interface IEmployeeService: IGenericService<Employee,AddAndUpdateManagerDTO>
     {
-        public Task<Employee> GetEmployeeByIdAsync(int? employeeId);
+        public Task<Employee?> GetEmployeeByIdAsync(int? employeeId);
 
         public Task<List<GetAllAndSearchManagerDTO>> GetEmployeesByManagerAsync(int? ManagerId);
 
-        public Task<string> GetEmployeeImageUrlAsync(int id);
+        public Task<string?> GetEmployeeImageUrlAsync(int id);
     }
 }

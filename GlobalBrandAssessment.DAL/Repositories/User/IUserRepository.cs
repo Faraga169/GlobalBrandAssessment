@@ -4,18 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public interface IUserRepository
+    public interface IUserRepository :IGenericRepository<User>
     {
-        public Task<int> AddAsync(User user);
         public Task<int?> GetEmployeeIdByUserIdAsync(int? userId);
-
-        //public Task<int> RemoveAsync(int? id);
-
-      
-
+        public Task RemoveAsync(int? id);
 
     }
 }

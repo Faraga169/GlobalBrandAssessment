@@ -11,11 +11,16 @@ namespace GlobalBrandAssessment.DAL.Repositories.Generic
     public interface IGenericRepository<T>
     {
 
-        public Task<int> AddAsync(T entity);
+        public Task AddAsync(T entity);
 
-        public Task<int> UpdateAsync(T entity);
+        public Task UpdateAsync(T entity);
 
-        Task<List<T>> Search(Expression<Func<T, bool>> expression,int?value);
+        //public Task<List<T>> SearchAsync(Expression<Func<T, bool>> expression, int? valueparams, Expression<Func<T, object>>[] includes);
+
+        public Task DeleteAsync(T entity);
+
+       
+
 
     }
 }

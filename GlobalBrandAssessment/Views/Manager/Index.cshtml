@@ -32,10 +32,9 @@
 
 
     <div class="input-group mb-2">
-        <input type="search"
-        class="form-control rounded-start-pill searchvalue"
-        placeholder="Search by First Name, Last Name, or Department Name">
+        <input type="search" class="form-control rounded-start-pill searchvalue" placeholder="Search by First Name, Last Name, or Department Name">
         <button type="submit" class="btn btn-outline-secondary rounded-end-pill" id="searchbtn">
+            @Html.AntiForgeryToken()
             <i class="fa-solid fa-magnifying-glass"></i>
         </button>
     </div>
@@ -65,48 +64,53 @@ else
     </div>
 }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-         $(document).ready(function () {
-        $(".deletebtn").on("click", function () {
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+    <script>
+             $(document).ready(function () {
+            $(".deletebtn").on("click", function () {
 
-			var employeeId = $(this).data("id");
+                var employeeId = $(this).data("id");
+                var token = $('input[name="__RequestVerificationToken"]').val();
 
-		if(confirm("Are you sure you want to delete this employee?")) {
-			$.ajax({
-				url: '@Url.Action("Delete", "Manager")',
-				type: "POST",
-				data: { id: employeeId },
-				success: function (response) {
-					if (response.success) {
-                        window.location.href = response.redirectUrl;
-					} 
-				},
-				error: function () {
-					alert("Something went wrong. Please try again.");
-				}
-			});
-		}
-		});
-        });
-	$(document).ready(function () {
-		$("#searchbtn").on('click',function(){
-		var value=$(".searchvalue").val();
-         $.ajax({
-                url: '@Url.Action("Search", "Manager")',
-                type: "POST",
-                data: { searchname: value },
-                success: function (result) {
-                 
-                     $("#employeeTable").html(result);
-                    
-                   
-                },
-                 error: function (xhr) {
-                alert("Something went wrong. Please try again.",xhr.responseText);
-                 }
+            if(confirm("Are you sure you want to delete this employee?")) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Manager")',
+                    type: "POST",
+                    data: { id: employeeId, __RequestVerificationToken: token },
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl;
+                        }
+                    },
+                    error: function () {
+                        alert("Something went wrong. Please try again.");
+                    }
+                });
+            }
             });
-        });
+            
        
-	});
-</script>
+            $("#searchbtn").on('click',function(){
+            var value=$(".searchvalue").val();
+             var token = $('input[name="__RequestVerificationToken"]').val();
+             $.ajax({
+                    url: '@Url.Action("Search", "Manager")',
+                    type: "POST",
+                    data: { searchname: value,__RequestVerificationToken:token },
+                    success: function (result) {
+
+                         $("#employeeTable").html(result);
+
+
+                    },
+                     error: function (xhr) {
+                    alert("Something went wrong. Please try again.",xhr.responseText);
+                     }
+                });
+            });
+
+        });
+		
+    </script>
+}

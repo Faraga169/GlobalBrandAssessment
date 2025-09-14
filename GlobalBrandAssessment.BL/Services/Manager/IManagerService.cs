@@ -10,19 +10,19 @@ using GlobalBrandAssessment.DAL.Repositories;
 
 namespace GlobalBrandAssessment.BL.Services.Manager
 {
-    public interface IManagerService :IGenericService<AddAndUpdateManagerDTO>
+    public interface IManagerService :IGenericService<Employee,AddAndUpdateManagerDTO>
     {
 
-        public Task<int> Add(AddAndUpdateManagerDTO employee);
+       public Task<int>Add(AddAndUpdateManagerDTO addAndUpdateManagerDTO);
         public Task<int> DeleteAsync(int? id);
 
-        public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid);
+        public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid);
 
 
 
         public Task<List<Employee>> GetAllManagersAsync();
 
-        public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId);
+        public Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId);
 
 
        

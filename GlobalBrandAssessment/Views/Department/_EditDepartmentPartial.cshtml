@@ -2,6 +2,7 @@
 
 
 <form id="EditDepartmentForm" asp-action="Edit" >
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 	<div class="input-field">
 		<label asp-for="Name" class="form-label"></label>
 		<input asp-for="Name" class="form-control" placeholder="Enter  Name" />
@@ -27,7 +28,3 @@
 	</div>
 </form>
 
-@section Scripts {
-	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-}

@@ -17,6 +17,7 @@
             </td>
 
             <td>
+                @Html.AntiForgeryToken()
                 <button class="btn btn-outline-danger deletebtn" data-id="@department?.Id">
                     <i class="fa-solid fa-delete-left mx-2"></i>
                     Delete

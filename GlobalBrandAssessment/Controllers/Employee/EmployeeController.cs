@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using AutoMapper;
 using GlobalBrandAssessment.BL.DTOS.AttachmentDTO;
 using GlobalBrandAssessment.BL.DTOS.CommentDTO;
@@ -38,13 +39,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
         public async Task<IActionResult> Index()
         {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
             try {
-                int? userId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (userId == null || Role == "Manager")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
                 var user = await userService.GetEmployeeIdByUserIdAsync(userId);
                 var employee = await employeeService.GetEmployeeByIdAsync(user);
                 return View(employee);
@@ -61,16 +64,16 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> DepartmentDetails()
         {
-            try {
-                int? employeeId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (employeeId == null || Role == "Manager")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            try {  
                 var employee = await departmentService.GetAllAsync();
                 return View(employee);
-
             }
 
             catch(Exception ex)
@@ -84,13 +87,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> Task()
         {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
             try {
-                int? userId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (userId == null || Role == "Manager")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
                 var user = await userService.GetEmployeeIdByUserIdAsync(userId);
                 var employeetask = await taskService.GetTaskbyEmployeeIdAsync(user);
                 if (employeetask == null)
@@ -112,25 +117,28 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
             try {
-                int? userId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (userId == null || Role == "Manager")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                if (id is null || id < 0)
-                {
-                    return RedirectToAction("Index", "Employee");
-                }
+                if (!id.HasValue)
+                    return BadRequest();
+              
 
                 var Taskemployee = await taskService.GetTaskByIdAsync(id.Value);
+
+                if (Taskemployee == null)
+                    return NotFound();
+
                 var result = mapper.Map<AddandUpdateTaskDTO, TaskEditViewModel>(Taskemployee);
-                if (result.Status == "In Progress")
-                {
+                
                     return View(result);
-                }
-                return View(result);
+                
+            
             }
 
             catch (Exception ex)
@@ -144,21 +152,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Edit(TaskEditViewModel taskEditViewModel)
         {
-            try {
 
             int? userId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (userId == null || Role == "Manager")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+            var Role = HttpContext.Session.GetString("Role");
+            if (userId == null || Role == "Manager")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            try {
+
                 var user = await userService.GetEmployeeIdByUserIdAsync(userId);
-
-                if (taskEditViewModel == null)
-                    return Json(new { success = false });
-
-
-
+               
 
                 if (taskEditViewModel.Status == "In Progress")
                 {
@@ -187,19 +191,38 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     // Save attachment
                     if (taskEditViewModel.Attachment != null)
                     {
-                        taskEditViewModel.FilePath = Path.Combine("wwwroot/uploads", taskEditViewModel.Attachment.FileName);
-                        using (var stream = new FileStream(taskEditViewModel.FilePath, FileMode.Create))
-                        {
-                            taskEditViewModel.Attachment.CopyTo(stream);
-                        }
+                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                        if (!Directory.Exists(uploadPath))
+                            Directory.CreateDirectory(uploadPath);
+
+                        var fileName = Guid.NewGuid() + "_" + Path.GetFileName(taskEditViewModel.Attachment.FileName);
+                        var fullPath = Path.Combine(uploadPath, fileName);
                         var existattachment = await attachmentService.GetByTaskIdAsync(taskEditViewModel.Id);
+                        if (existattachment != null && !string.IsNullOrEmpty(existattachment.FilePath))
+                        {
+                            var oldFilePath = Path.Combine(uploadPath, existattachment.FilePath);
+
+                            // احذف القديم لو مختلف عن الجديد
+                            if (System.IO.File.Exists(oldFilePath) && existattachment.FilePath != fileName)
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+
+                        using (var stream = new FileStream(fullPath, FileMode.Create))
+                        {
+                            await taskEditViewModel.Attachment.CopyToAsync(stream);
+                        }
+
+                        taskEditViewModel.FilePath = fileName;
+                    
                         var attachmentDto = mapper.Map<TaskEditViewModel, AddAndUpdateAttachmentDTO>(taskEditViewModel);
 
-
-                        if (existattachment != null)
+                    if (existattachment != null)
                         {
                             attachmentDto.EmployeeId= user.Value;
                             attachmentDto.AttachmentId = existattachment.AttachmentId;
+                         
                             await attachmentService.UpdateAsync(attachmentDto);
                         }
                         else
@@ -233,6 +256,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             return Json(new { success = true, redirectUrl = Url.Action("Task", "Employee") });
             }
             
+        }
+        [HttpGet]
+        public IActionResult DownloadFile(string fileName)
+        {
+
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","uploads", fileName.TrimStart('/'));
+
+            // force download for any file type
+            var contentType = "application/octet-stream";
+
+            return PhysicalFile(fullPath, contentType, fileName);
         }
     }
 }

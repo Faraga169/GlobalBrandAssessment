@@ -5,97 +5,85 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.Extensions.ExpressionMapping;
+using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
+using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
+using GlobalBrandAssessment.DAL.UnitofWork;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace GlobalBrandAssessment.BL.Services.Manager
 {
-    public class ManagerService : IManagerService
+    public class ManagerService : GenericService<Employee, AddAndUpdateManagerDTO>, IManagerService
     {
-        
-        private readonly IManagerRepository managerRepository;
+        private readonly IUnitofWork unitofWork;
         private readonly IMapper mapper;
 
-        public ManagerService(IManagerRepository managerRepository,IMapper mapper)
+        public ManagerService(IUnitofWork unitofWork,IMapper mapper):base(unitofWork, mapper)
         {
-            
-            this.managerRepository = managerRepository;
+            this.unitofWork = unitofWork;
             this.mapper = mapper;
         }
-        public Task<int> Add(AddAndUpdateManagerDTO employee)
-        {
-            var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
 
-            //var result = managerRepository.Add(new Employee()
-            //{
-            //    FirstName = employee.FirstName,
-            //    LastName = employee.LastName,
-            //    Salary = employee.Salary,
-            //    Password = employee.Password,
-            //    ImageURL = employee.ImageURL,
-            //    DeptId = employee.DeptId,
-            //});
-                
-            return managerRepository.Add(result);
+        public async Task<int> Add(AddAndUpdateManagerDTO addAndUpdateManagerDTO)
+        {
+            var entity = mapper.Map<AddAndUpdateManagerDTO, Employee>(addAndUpdateManagerDTO);
+            await unitofWork.ManagerRepository.AddAsync(entity);
+            await unitofWork.CompleteAsync();
+            return entity.Id;
         }
 
-        public Task<int> DeleteAsync(int? id)
+        public async Task<int> DeleteAsync(int? id)
         {
-            return managerRepository.DeleteAsync(id);
+            var manager = await unitofWork.employeeRepository.GetEmployeeById(id);
+            if (manager == null)
+                return 0;
+            await unitofWork.ManagerRepository.DeleteAsync(manager);
+            var result=await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
         }
 
-       
 
-        public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname, int? managerid)
+
+        public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid)
         {
             //.And .Or Extension Methods for Expression Func Predicate
             //Expression<Func<Employee, bool>> searchExpression = x => true;
             //if (string.IsNullOrEmpty(searchname)) {
-                
+
             //    searchExpression = x => x.FirstName.Contains(searchname) || x.LastName.Contains(searchname);
             //}
 
-            var managerlist = await managerRepository.SearchAsync(searchname, managerid);
-            var SearchManagerDTO= mapper.Map<List<Employee>,List<GetAllAndSearchManagerDTO>>(managerlist);
+            var managerlist = await unitofWork.ManagerRepository.SearchAsync(searchname,managerid);
+            var SearchManagerDTO = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(managerlist);
 
 
-            //var result = managerlist.Select(m => new SearchManagerDTO
-            //{
-            //    FirstName = m.FirstName,
-            //    LastName = m.LastName,
-            //    Salary = m.Salary,
-            //    ImageURL = m.ImageURL,
-            //    Department = m.Department.Name
-            //}).ToList();
 
             return SearchManagerDTO;
         }
 
-        public Task<int> UpdateAsync(AddAndUpdateManagerDTO employee)
-        {
-            var result = mapper.Map<AddAndUpdateManagerDTO, Employee>(employee);
-            return managerRepository.UpdateAsync(result);
-        }
+    
+        
 
-       
 
-        public Task<Employee> GetManagerByDepartmentIdAsync(int? deptId)
+
+
+        public Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId)
         {
-            return managerRepository.GetManagerByDepartmentIdAsync(deptId) ;
+            
+            return unitofWork.ManagerRepository.GetManagerByDepartmentIdAsync(deptId) ;
         }
 
         public async Task<List<Employee>> GetAllManagersAsync()
         {
             
-            return await managerRepository.GetAllManagersAsync();
+            return await unitofWork.ManagerRepository.GetAllManagersAsync();
         }
 
-        public Task<int> AddAsync(AddAndUpdateManagerDTO entity)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

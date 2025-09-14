@@ -13,11 +13,9 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public Task<List<Department>> GetAllAsync();
 
 
-        public Task<int> DeleteAsync(int? id);
-
         public Task<List<Department>> SearchAsync(string searchname);
 
-        public Task<Department> GetDepartmentById(int? id);
+        public Task<Department?> GetDepartmentById(int? id);
 
 
         

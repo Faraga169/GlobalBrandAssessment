@@ -10,7 +10,7 @@ using GlobalBrandAssessment.DAL.Repositories;
 
 namespace GlobalBrandAssessment.BL.Services
 {
-    public interface IDepartmentService: IGenericService<AddAndUpdateDepartmentDTO>
+    public interface IDepartmentService: IGenericService<Department,AddAndUpdateDepartmentDTO>
     {
         public Task<List<GetAllandSearchDepartmentDTO>> GetAllAsync();
 
@@ -19,7 +19,7 @@ namespace GlobalBrandAssessment.BL.Services
 
         public Task<List<GetAllandSearchDepartmentDTO>> SearchAsync(string searchname);
 
-        public Task<AddAndUpdateDepartmentDTO> GetDepartmentByIdAsync(int? id);
+        public Task<AddAndUpdateDepartmentDTO?> GetDepartmentByIdAsync(int? id);
        
     }
 }

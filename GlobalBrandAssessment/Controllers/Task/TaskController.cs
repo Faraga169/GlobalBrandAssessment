@@ -12,33 +12,33 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
     public class TaskController : Controller
     {
         private readonly ITaskService taskService;
-        private readonly IManagerService managerService;
         private readonly IEmployeeService employeeService;
         private readonly ILogger<TaskController> logger;
+        private readonly IWebHostEnvironment environment;
 
-        public TaskController(ITaskService taskService,IEmployeeService employeeService,ILogger<TaskController> logger)
+        public TaskController(ITaskService taskService,IEmployeeService employeeService,ILogger<TaskController> logger,IWebHostEnvironment environment)
         {
             this.taskService = taskService;
             this.employeeService = employeeService;
             this.logger = logger;
+            this.environment = environment;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var managerId = HttpContext.Session.GetInt32("UserId");
+            if (managerId == null)
+                return RedirectToAction("Index", "Login");
+            
             try {
-                var managerId = HttpContext.Session.GetInt32("UserId");
-                if (managerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var tasks = await taskService.GetAllTasksAsync(managerId);
                 return View(tasks);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred in Task Index action.");
-                return StatusCode(500, "Internal server error");
+                return PartialView("Errorpartial",ex);
             }
             
         }
@@ -46,13 +46,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            if (mangerId == null)
+                return RedirectToAction("Index", "Login");
+            
             try
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                if (mangerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
                 var task = await taskService.SearchAsync(searchname, mangerId);
                 if (task == null || !task.Any())
                 {
@@ -62,49 +62,71 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 return PartialView("_IndexTaskPartial", task);
             }
 
-            catch (Exception ex) { 
-            logger.LogError(ex, "An error occurred in Task Search action.");
-                return StatusCode(500, "Internal server error");
+            catch (Exception ex)
+            {
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    TempData["Message"] = ex.Message;
+                    return PartialView("_IndexTaskPartial", new List<GetAllandSearchTaskDTO>());
+                }
+                else
+                {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("Errorpartial",ex);
+                }
+
+
             }
-            
+
         }
 
 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            if (mangerId == null)
+                return RedirectToAction("Index", "Login");
             try
             {
 
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                if (mangerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var employees = await employeeService.GetEmployeesByManagerAsync(mangerId);
                 ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
                 return View();
             }
-            catch (Exception ex) { 
-            logger.LogError(ex, "An error occurred in Task Create GET action.");
-                return StatusCode(500, "Internal server error");
+            catch (Exception ex)
+            {
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                     return View(); 
+                }
+                else
+                {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("ErrorPartial",ex);
+                }
+
+
             }
         }
 
         [HttpPost]
         public async  Task<IActionResult> Create(AddandUpdateTaskDTO createtaskdto)
         {
-            try {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
 
-                if (mangerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+            if (mangerId == null)
+                return RedirectToAction("Index", "Login");
 
 
-
-                if (ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                try
                 {
 
                     int result = await taskService.AddAsync(createtaskdto);
@@ -120,42 +142,51 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
 
+                }
+                catch (Exception ex)
+                {
+                    if (environment.IsDevelopment())
+                    {
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+
+
+                    }
+
+                    else
+                    {
+
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex.Message);
+                        return PartialView("Errorpartial", ex);
+                    }
 
                 }
+            }
                 var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
                 return PartialView("_CreateTaskPartial", createtaskdto);
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Task Create POST action.");
-                TempData["Message"] = "Failed to create Task.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
-            }
+           
 
            
-        }
+        
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            if (mangerId == null)
+                return RedirectToAction("Index", "Login");
             try {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                if (mangerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                if (id is null || id < 0)
-                {
-                    return RedirectToAction("Index", "Task");
-                }
+
+                if (!id.HasValue)
+                    return BadRequest();
 
                 var task = await taskService.GetTaskByIdAsync(id.Value);
+
                 if (task == null)
-                {
-                    TempData["Message"] = "Task not found.";
-                    return RedirectToAction("Index");
-                }
+                    return NotFound();
                 var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName", task.EmployeeId);
                 return View(task);
@@ -169,17 +200,20 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(AddandUpdateTaskDTO Edittaskdto)
+        public async Task<IActionResult> Edit([FromRoute]int id,AddandUpdateTaskDTO Edittaskdto)
         {
-            try {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            if (mangerId == null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
 
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                if (mangerId == null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
 
-                if (ModelState.IsValid)
+            Edittaskdto.Id = id;
+            if (ModelState.IsValid)
+            {
+
+                try
                 {
 
                     int result = await taskService.UpdateAsync(Edittaskdto);
@@ -194,34 +228,46 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                     }
                 }
+                catch (Exception ex)
+                {
+                    if (environment.IsDevelopment())
+                    {
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+
+
+                    }
+                    else
+                    {
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex, "Error happened while updating Task {EmployeeId}", Edittaskdto.Id);
+                        return PartialView("Errorpartial", ex);
+                    }
+
+                }
+            }
+
                 var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
                 return PartialView("_EditTaskPartial", Edittaskdto);
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Task Edit POST action.");
-                TempData["Message"] = "Failed to update Task.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
-            }
+          
            
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
+            var manager = HttpContext.Session.GetInt32("UserId");
+            if (manager is null)
+            {
+                return RedirectToAction("Index", "Login");
+            }
             try {
 
-                var manager = HttpContext.Session.GetInt32("UserId");
-                if (manager is null)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
-                if (id is null)
-                {
-                    TempData["Message"] = "Task not found.";
-                    return PartialView("_IndexTaskPartial");
-                }
+              
+             if(!id.HasValue)
+                    return BadRequest();
 
                 var result = await taskService.DeleteAsync(id);
                 if (result > 0)

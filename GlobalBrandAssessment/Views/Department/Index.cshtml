@@ -35,6 +35,7 @@
            class="form-control rounded-start-pill searchvalue"
            placeholder="SEARCH BY Department Name">
     <button type="submit" class="btn btn-outline-secondary rounded-end-pill" id="searchbtn">
+		@Html.AntiForgeryToken()
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
 </div>
@@ -67,44 +68,43 @@ else
     <h3 class="text-center">No Departments Found </h3>
 </div>
 }
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
 
-         $(document).ready(function () {
-        $(".deletebtn").on("click", function () {
+@section Scripts{
+        <script>
+            $(document).ready(function () {
+            $(".deletebtn").on("click", function () {
+                var departmentId = $(this).data("id");
+                var token = $('input[name="__RequestVerificationToken"]').val(); 
 
-            var departmentId = $(this).data("id");
-
-        if(confirm("Are you sure you want to delete this department?")) {
-            $.ajax({
-                url: '@Url.Action("Delete", "Department")',
-                type: "POST",
-                data: { id: departmentId  },
-                success: function (response) {
-                    if (response.success) {
-                          window.location.href =response.redirectUrl;
-                    }
-                },
-                  error: function (xhr) {
-                  alert("Something went wrong. Please try again.",xhr.responseText);
-                  }
+            if(confirm("Are you sure you want to delete this department?")) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Department")',
+                    type: "POST",
+                    data: { id: departmentId,
+                           __RequestVerificationToken: token 
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                              window.location.href =response.redirectUrl;
+                        }
+                    },
+                      error: function (xhr) {
+                      alert("Something went wrong. Please try again.",xhr.responseText);
+                      }
+                });
+            }
             });
-        }
-        });
-        });
+           
 
-  $(document).ready(function () {
-        $("#searchbtn").on('click',function(){
-        var value=$(".searchvalue").val();
-         $.ajax({
-                url: '@Url.Action("Search", "Department")',
+            $("#searchbtn").on('click',function(){
+            var value=$(".searchvalue").val();
+            var token = $('input[name="__RequestVerificationToken"]').val();
+             $.ajax({
+                    url: '@Url.Action("Search", "Department")',
                 type: "POST",
-                data: { searchname: value },
+                    data: { searchname: value,__RequestVerificationToken:token },
                 success: function (result) {
-                   
                       $("#employeeTable").html(result);
-                   
-                        
                 },
                   error: function (xhr) {
                   alert("Something went wrong. Please try again.",xhr.responseText);
@@ -113,5 +113,7 @@ else
         });
 
     });
-</script>
+    </script>
+
+}
 

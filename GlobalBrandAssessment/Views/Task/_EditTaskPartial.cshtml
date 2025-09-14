@@ -2,6 +2,7 @@
 
 
 <form asp-action="Edit"  id="EditTaskForm">
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 	<div class="input-field">
 		<label asp-for="Title" class="form-label"></label>
 		<input asp-for="Title" class="form-control" placeholder="Enter Title" />
@@ -31,8 +32,3 @@
 		<a class="btn btn-danger mx-2" asp-action="Index">Back</a>
 	</div>
 </form>
-
-@section Scripts {
-	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-}

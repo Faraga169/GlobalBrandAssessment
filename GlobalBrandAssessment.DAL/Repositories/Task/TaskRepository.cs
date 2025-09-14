@@ -20,10 +20,10 @@ namespace GlobalBrandAssessment.DAL.Repositories
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
-       
-        public async Task<List<TaskModel>> SearchAsync(string searchname,int? managerid)
+
+        public async Task<List<TaskModel>> SearchAsync(string searchname, int? managerid)
         {
-            var query = globalbrandDbContext.Tasks.Include(e => e.AssignedEmployee).Include(e=>e.Attachments).Include(e=>e.Comments).Where(t=>t.AssignedEmployee.ManagerId == managerid).AsQueryable();
+            var query = globalbrandDbContext.Tasks.Include(e => e.AssignedEmployee).Include(e => e.Attachments).Include(e => e.Comments).Where(t => t.AssignedEmployee.ManagerId == managerid).AsQueryable();
             if (!string.IsNullOrEmpty(searchname))
             {
                 query = query.Where(e => e.Title.ToLower().Contains(searchname.ToLower()));
@@ -31,17 +31,8 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
             return await query.ToListAsync();
         }
-        public async Task<int> DeleteAsync(int? id)
-        {
-            var task = globalbrandDbContext.Tasks.Find(id);
-            if (task == null)
-            {
-                return 0 ;
-            }
-            globalbrandDbContext.Tasks.Remove(task);
-            var result = globalbrandDbContext.SaveChangesAsync();
-            return await result;
-        }
+      
+           
 
         public async Task<List<TaskModel>> GetAllTasksAsync(int? managerid)
         {
@@ -50,10 +41,10 @@ namespace GlobalBrandAssessment.DAL.Repositories
         }
 
        
-        public async Task<TaskModel> GetTaskByIdAsync(int id)
+        public async Task<TaskModel?> GetTaskByIdAsync(int? id)
         {
-            var task = globalbrandDbContext.Tasks.Include(T=>T.Attachments).Include(T=>T.Comments).FirstOrDefaultAsync(T=>T.Id==id);
-            return await task;
+            var task =await globalbrandDbContext.Tasks.Include(T=>T.Attachments).Include(T=>T.Comments).FirstOrDefaultAsync(T=>T.Id==id);
+            return task;
         }
 
       

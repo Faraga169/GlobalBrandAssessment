@@ -21,7 +21,6 @@ namespace GlobalBrandAssessment.DAL.Repositories.Attachment
         }
 
        
-
         public async Task<DAL.Data.Models.Attachment?> GetByTaskId(int taskId)
         {
             return await globalbrandDbContext.Attachments.AsNoTracking().FirstOrDefaultAsync(c => c.TaskId == taskId);

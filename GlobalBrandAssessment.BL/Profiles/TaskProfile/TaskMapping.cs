@@ -15,10 +15,12 @@ namespace GlobalBrandAssessment.BL.Profiles.TaskProfile
         {
             CreateMap<AddandUpdateTaskDTO, DAL.Data.Models.Tasks>().ReverseMap().ForMember(tdest=>tdest.Content,option=>option.MapFrom(tsrc=>tsrc.Comments.Content))
                 .ForMember(tdest => tdest.FilePath, option => option.MapFrom(tsrc => tsrc.Attachments.FilePath));
-            CreateMap<DAL.Data.Models.Tasks, GetAllandSearchTaskDTO>().ForMember(tdest => tdest.FirstName, option => option.MapFrom(tsource => tsource.AssignedEmployee.FirstName))
-                .ForMember(tdest => tdest.LastName, option => option.MapFrom(tsource => tsource.AssignedEmployee.LastName))
+
+            CreateMap<DAL.Data.Models.Tasks, GetAllandSearchTaskDTO>().ForMember(tdest => tdest.FirstName, option => option.MapFrom(tsource => tsource.AssignedEmployee != null ? tsource.AssignedEmployee.FirstName : null))
+                .ForMember(tdest => tdest.LastName, option => option.MapFrom(tsource => tsource.AssignedEmployee != null ? tsource.AssignedEmployee.LastName : null))
                 .ForMember(tdest => tdest.Content, option => option.MapFrom(tsrc => tsrc.Comments.Content))
                 .ForMember(tdest => tdest.FilePath, option => option.MapFrom(tsrc => tsrc.Attachments.FilePath)); 
+
             CreateMap<AddandUpdateTaskDTO, TaskEditViewModel>().ReverseMap();
         }
     }

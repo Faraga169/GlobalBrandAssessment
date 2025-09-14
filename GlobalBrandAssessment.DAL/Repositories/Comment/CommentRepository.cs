@@ -20,7 +20,6 @@ namespace GlobalBrandAssessment.DAL.Repositories
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-       
 
         public async Task<Comment?> GetByTaskId(int taskId)
         {

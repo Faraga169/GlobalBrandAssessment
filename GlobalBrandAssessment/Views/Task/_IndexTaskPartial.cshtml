@@ -21,9 +21,10 @@
             <td scope="col">
                 @if (!string.IsNullOrEmpty(task.FilePath))
                 {
-                    <a href="@task.FilePath" target="_blank">
-                        @System.IO.Path.GetFileName(task.FilePath)
-                    </a>
+                        <a href="@Url.Action("DownloadFile", "Employee", new { fileName=task.FilePath})">
+                            @System.IO.Path.GetFileName(task.FilePath)
+                        </a>
+                   
                 }
                 else
                 {
@@ -47,16 +48,13 @@
 
             <td>
                 <button class="btn btn-outline-danger deletebtn" data-id="@task?.Id">
+					@Html.AntiForgeryToken()
                     <i class="fa-solid fa-delete-left mx-2"></i>
                     Delete
                 </button>
             </td>
         </tr>
     }
-      
-
-    
-
 
 else
 {

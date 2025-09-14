@@ -5,7 +5,7 @@
 }
 
 <div class="d-flex justify-content-center">
-	<h2 class="text-secondary fs-3">Edit Department</h2>
+	<h2 class="text-secondary fs-3">Edit @Model.Name</h2>
 </div>
 
 <div id="formContainer">
@@ -13,31 +13,40 @@
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        $("#EditDepartmentForm").on("submit", function (e) {
-        e.preventDefault();
-        var formData = new FormData(this);
+@section Scripts{
 
-        $.ajax({
-            url: '@Url.Action("Edit", "Department")',
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                    if (response.success) {
-                        window.location.href = response.redirectUrl;
-                    } else {
-                    $("#formContainer").html(response);
-                    }
-                } ,
-                 error: function (xhr) {
-                alert("Something went wrong. Please try again.",xhr.responseText);
-                 }
+	<partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            $("#EditDepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+             if (!$(this).valid())
+                   return;
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '@Url.Action("Edit", "Department")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                        $("#formContainer").html(response);
+                        }
+                    } ,
+                     error: function (xhr) {
+                    alert("Something went wrong. Please try again.",xhr.responseText);
+                     }
+            });
         });
-    });
-         });
+             });
+             
 
-</script>
+    </script>
+
+
+}

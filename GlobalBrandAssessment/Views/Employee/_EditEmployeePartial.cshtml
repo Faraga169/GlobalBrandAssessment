@@ -25,11 +25,13 @@
         {
             <p>
                 Current Attachment:
-                <a href="@Model.FilePath" target="_blank">
+                <a href="@Url.Action("DownloadFile", "Employee", new { filePath = Model.FilePath })">
                     @System.IO.Path.GetFileName(Model.FilePath)
                 </a>
             </p>
         }
+     
+        
         <div class="form-group">
             <label>Upload new Attachment</label>
             <input type="file" asp-for="Attachment" multiple class="form-control" />
@@ -48,18 +50,3 @@
 </form>
 
 
-    <script>
-
-        function toggleExtra() {
-            let status = document.getElementById("statusSelect").value;
-            let extra = document.getElementById("extraFields");
-            if (status === "In Progress") {
-                extra.style.display = "block";
-            } else {
-                extra.style.display = "none";
-            }
-        }
-
-        document.getElementById("statusSelect").addEventListener("change", toggleExtra);
-        window.onload = toggleExtra;
-    </script>

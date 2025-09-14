@@ -11,7 +11,7 @@
 <div id="formContainer">
     @await Html.PartialAsync("_EditEmployeePartial", Model)
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section Scripts{
 <script>
 
          $(document).ready(function () {
@@ -42,3 +42,4 @@
 </script>
          
   
+}

@@ -18,7 +18,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
-        public async Task<Employee> GetEmployeeById(int? employeeId)
+        public async Task<Employee?> GetEmployeeById(int? employeeId)
         {
             return await globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).FirstOrDefaultAsync(e => e.Id == employeeId);
         }
@@ -29,12 +29,9 @@ namespace GlobalBrandAssessment.DAL.Repositories
             return await globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).Where(e => e.ManagerId == ManagerId).ToListAsync();
         }
 
-        public async Task<string> GetEmployeeImageUrlAsync(int id)
+        public async Task<string?> GetEmployeeImageUrlAsync(int id)
         {
-            return await globalbrandDbContext.Employees
-                .Where(e => e.Id == id)
-                .Select(e => e.ImageURL)
-                .FirstOrDefaultAsync();
+            return await globalbrandDbContext.Employees.Where(e => e.Id == id).Select(e => e.ImageURL).FirstOrDefaultAsync();
         }
     }
 }

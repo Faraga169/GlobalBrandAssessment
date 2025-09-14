@@ -14,7 +14,7 @@ namespace GlobalBrandAssessment.BL.Profiles.ManagerProfile
         public ManagerMapping()
         {
             CreateMap<AddAndUpdateManagerDTO, Employee>().ReverseMap();
-            CreateMap<Employee,GetAllAndSearchManagerDTO>().ForMember(tdest=>tdest.Department,option=>option.MapFrom(tsource=>tsource.Department.Name));
+            CreateMap<Employee,GetAllAndSearchManagerDTO>().ForMember(tdest=>tdest.Department,option=>option.MapFrom(tsource=>tsource.Department != null ? tsource.Department.Name : null));
             CreateMap<AddAndUpdateManagerDTO,User>().ForMember(tdest=>tdest.UserName,option=>option.MapFrom(tsrc=>tsrc.FirstName));
         }
     }

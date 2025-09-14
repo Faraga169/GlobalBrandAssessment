@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
+using System.Threading.Tasks;
 using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Generic;
@@ -16,33 +17,34 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         private readonly IDepartmentService departmentService;
         private readonly IManagerService managerService;
         private readonly ILogger<DepartmentController> logger;
+        private readonly IWebHostEnvironment environment;
 
-        public DepartmentController(IDepartmentService departmentService,IManagerService managerService,ILogger<DepartmentController> logger)
+        public DepartmentController(IDepartmentService departmentService,IManagerService managerService,ILogger<DepartmentController> logger,IWebHostEnvironment environment)
         {
             this.departmentService = departmentService;
             this.managerService = managerService;
             this.logger = logger;
+            this.environment = environment;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            try {
                 int? mangerId = HttpContext.Session.GetInt32("UserId");
                 var Role = HttpContext.Session.GetString("Role");
                 if (mangerId == null || Role == "Employee")
                 {
                     return RedirectToAction("Index", "Login");
                 }
-
+            try
+            {
                 var department = await departmentService.GetAllAsync();
                 return View(department);
             }
 
-            catch (Exception ex)
+            catch (Exception ex) 
             {
-                logger.LogError(ex, "Error happened while Display department");
-                TempData["Message"] = "Something went wrong, please try again later.";
-                return RedirectToAction("Index", "Department");
+                logger.LogError(ex, "Error happened while Get All department");
+                return PartialView("Errorpartial", ex);
             }
 
         }
@@ -52,17 +54,16 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+
+                return RedirectToAction("Index", "Login");
+
             try {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var department = await departmentService.SearchAsync(searchname);
                 if (department == null || !department.Any())
                 {
-                    TempData["Message"] = "No departments found.";
                     return PartialView("_IndexDepartmentPartial", new List<GetAllandSearchDepartmentDTO>());
                 }
                 return PartialView("_IndexDepartmentPartial", department);
@@ -70,8 +71,18 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
 
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error happened while search department");
-                return StatusCode(500, "Server is not work");
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    TempData["Message"] = ex.Message;
+                    return PartialView("_IndexDepartmentPartial", new List<GetAllandSearchDepartmentDTO>());
+                }
+                else {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("Errorpartial", ex);
+                }
+               
 
             }
 
@@ -80,33 +91,42 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpGet]
         public async Task<IActionResult> Create()
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+
+                return RedirectToAction("Index", "Login");
             try {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
                 var managers = await managerService.GetAllManagersAsync();
                 ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
                 return View();
             }
-               
-            
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error happened while Create department");
-                TempData["Message"] = "Something went wrong, please try again later.";
-                return RedirectToAction("Index", "Department");
+                if (environment.IsDevelopment())
+                {
+                    // 1.Development => Log Error In Console and Return Same view with Error Message
+                    TempData["Message"] = ex.Message;
+                    return View();
+                }
+                else
+                {
+                    //2. Deployment => Log Error In File | Table in Database And Return Error View
+                    logger.LogError(ex.Message);
+                    return PartialView("Errorpartial", ex);
+                }
+
+
             }
-           
+
+
+
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(AddAndUpdateDepartmentDTO department)
         {
-            try {
-
+           
                 int? mangerId = HttpContext.Session.GetInt32("UserId");
                 var Role = HttpContext.Session.GetString("Role");
                 if (mangerId == null || Role == "Employee")
@@ -114,36 +134,54 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                     return RedirectToAction("Index", "Login");
                 }
 
-                if (ModelState.IsValid)
+            var managers = await managerService.GetAllManagersAsync();
+
+            if (ModelState.IsValid)
                 {
-                    int result = await departmentService.AddAsync(department);
-                    if (result > 0)
+                    try {
+
+                        int result = await departmentService.AddAsync(department);
+                        if (result > 0)
+                        {
+                            TempData["Message"] = "Department created successfully.";
+                            return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
+                        }
+
+                        else
+                        {
+                            TempData["Message"] = "Failed to create Department.";
+                            return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
+                        }
+
+                    } 
+
+                    catch (Exception ex) {
+                    if (environment.IsDevelopment())
                     {
-                        TempData["Message"] = "Department created successfully.";
-                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
-                    }
-                    else
-                    {
-                        TempData["Message"] = "Failed to create Department.";
-                        return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                       
+                       
                     }
 
+                    else {
+
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex.Message);
+                      return PartialView("Errorpartial", ex);
+                    }
+                  
+                }
 
                 }
-                var managers = await managerService.GetAllManagersAsync();
+              
                 ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
                 return PartialView("_CreateDepartmentPartial", department);
 
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error happened while Create department");
-                TempData["Message"] = "Something went wrong, please try again later.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
-            }
           
-        }
-
+          
+        
         [HttpGet]
         public async Task< IActionResult> Edit(int? id)
         {
@@ -154,18 +192,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 {
                     return RedirectToAction("Index", "Login");
                 }
-                if (id is null || id < 0)
-                {
-                    return RedirectToAction("Index", "Department");
-                }
+                if(!id.HasValue)
+                    return BadRequest(); //400
 
 
                 var department = await departmentService.GetDepartmentByIdAsync(id);
                 if (department == null)
-                {
-                    TempData["Message"] = "Department not found.";
-                    return RedirectToAction("Index");
-                }
+                    return NotFound(); //404
+
+
                 var managers = await managerService.GetAllManagersAsync();
                 ViewBag._Manager = new SelectList(managers, "Id", "FullName");
                 return View(department);
@@ -181,11 +216,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(AddAndUpdateDepartmentDTO department)
+        public async Task<IActionResult> Edit([FromRoute]int id,AddAndUpdateDepartmentDTO department)
         {
-            try {
-
-
+           
                 int? mangerId = HttpContext.Session.GetInt32("UserId");
                 var Role = HttpContext.Session.GetString("Role");
                 if (mangerId == null || Role == "Employee")
@@ -193,9 +226,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                     return RedirectToAction("Index", "Login");
                 }
 
-                if (ModelState.IsValid)
+            var managers = await managerService.GetAllManagersAsync();
+            if (ModelState.IsValid)
                 {
-
+                    try {
+                    department.Id = id;
                     int result = await departmentService.UpdateAsync(department);
                     if (result > 0)
                     {
@@ -207,39 +242,51 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                         TempData["Message"] = "Failed to update Department.";
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                     }
-                }
 
-                var managers = await managerService.GetAllManagersAsync();
+                } 
+                catch (Exception ex) {
+                    if (environment.IsDevelopment())
+                    {
+                        // 1.Development => Log Error In Console and Return Same view with Error Message
+                        ModelState.AddModelError(string.Empty, ex.Message);
+                        
+                        
+                    }
+                    else
+                    {
+                        //2. Deployment => Log Error In File | Table in Database And Return Error View
+                        logger.LogError(ex, "Error happened while updating department {DepartmentId}", department.Id);
+                        return PartialView("Errorpartial", ex);
+                    }
+
+                }
+                    
+                }
                 ViewBag._Manager = new SelectList(managers, "Id", "FirstName", department.ManagerId); ;
                 return PartialView("_EditDepartmentPartial", department);
             }
 
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error happened while Edit department");
-                TempData["Message"] = "Something went wrong, please try again later.";
-              
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
-            }
            
-        }
+           
+        
 
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
+            int? mangerId = HttpContext.Session.GetInt32("UserId");
+            var Role = HttpContext.Session.GetString("Role");
+            if (mangerId == null || Role == "Employee")
+            {               
+                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Login") });                
+            }
             try
             {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
+
+                if (!id.HasValue) {
+                    TempData["Message"] = "Invalid department ID.";
+                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Department") });
                 }
-                if (id is null)
-                {
-                    TempData["Message"] = "Department Id is not exist";
-                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
-                }
+                   
 
                 var result = await departmentService.DeleteAsync(id);
                 if (result > 0)
@@ -250,7 +297,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 else
                 {
                     TempData["Message"] = "You Cant Delete Because Department exist employees";
-                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
+                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Department") });
                 }
             }
 
@@ -258,7 +305,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             {
                 logger.LogError(ex, "Error happened while delete department");
                 TempData["Message"] = "Something went wrong, please try again later.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
+                return Json(new { success = false, redirectUrl = Url.Action("Index", "Department") });
                
             }
 

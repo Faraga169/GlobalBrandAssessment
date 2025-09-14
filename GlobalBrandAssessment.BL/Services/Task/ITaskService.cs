@@ -9,7 +9,7 @@ using GlobalBrandAssessment.DAL.Data.Models;
 
 namespace GlobalBrandAssessment.BL.Services.Task
 {
-    public interface ITaskService:IGenericService<AddandUpdateTaskDTO>
+    public interface ITaskService:IGenericService<Tasks,AddandUpdateTaskDTO>
     {
         public Task<List<GetAllandSearchTaskDTO>> GetAllTasksAsync(int? managerid);
 

@@ -5,37 +5,45 @@ using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
+using GlobalBrandAssessment.DAL.UnitofWork;
 
 namespace GlobalBrandAssessment.BL.Services
 {
     public class UserService:IUserService
     {
-        private readonly IUserRepository userRepository;
+      
+        private readonly IUnitofWork unitofWork;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUnitofWork unitofWork)
         {
-            this.userRepository = userRepository;
+            this.unitofWork = unitofWork;
         }
 
         public Task<int?> GetEmployeeIdByUserIdAsync(int? userId)
         {
-            return userRepository.GetEmployeeIdByUserIdAsync(userId);
+            return unitofWork.userRepository.GetEmployeeIdByUserIdAsync(userId);
         }
 
-        public async Task<int> AddAsync(User user)
+        public async Task<int?> AddAsync(User user)
         {
             if (user == null) { 
             return 0;
             }
-            return await userRepository.AddAsync(user);
+           await unitofWork.userRepository.AddAsync(user);
+          return await unitofWork.CompleteAsync();
+           
+          
+
         }
 
-        //public async Task<int> RemoveAsync(int? id)
-        //{
-        //    if (id == null)
-        //        return 0;
-        //    return await userRepository.RemoveAsync(id);
-        //}
+        public async Task<int> RemoveAsync(int? id)
+        {
+            
+            await unitofWork.userRepository.RemoveAsync(id);
+            var result= await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
+
+        }
 
 
     }

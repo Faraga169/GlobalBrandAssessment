@@ -10,10 +10,10 @@ namespace GlobalBrandAssessment.DAL.Repositories
 {
     public interface IEmployeeRepository: IGenericRepository<Employee>
     {
-        public Task<Employee> GetEmployeeById(int? employeeId);
+        public Task<Employee?> GetEmployeeById(int? employeeId);
 
         public Task<List<Employee>> GetEmployeesByManager(int? ManagerId);
-        public  Task<string> GetEmployeeImageUrlAsync(int id);
+        public  Task<string?> GetEmployeeImageUrlAsync(int id);
     }
 
 }

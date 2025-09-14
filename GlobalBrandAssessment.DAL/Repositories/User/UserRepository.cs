@@ -4,16 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
 
-        public UserRepository(GlobalbrandDbContext globalbrandDbContext)
+        public UserRepository(GlobalbrandDbContext globalbrandDbContext) : base(globalbrandDbContext)
         {
             this.globalbrandDbContext = globalbrandDbContext;
         }
@@ -21,22 +22,17 @@ namespace GlobalBrandAssessment.DAL.Repositories
         {
             return await globalbrandDbContext.Users.Where(u => u.UserId == userId).Select(u => u.EmployeeId).FirstOrDefaultAsync();
         }
-        public async Task<int> AddAsync(User user)
+
+        public async Task RemoveAsync(int? id)
         {
-            globalbrandDbContext.Users.Add(user);
-            return await globalbrandDbContext.SaveChangesAsync();
+            var user=globalbrandDbContext.Users.FirstOrDefault(u => u.EmployeeId == id);
+            if (user != null)
+            {
+                globalbrandDbContext.Users.Remove(user);
+                 await Task.CompletedTask;
+            }
+           
+
         }
-
-        //public async Task<int> RemoveAsync(int? id)
-        //{
-        //    var user = globalbrandDbContext.Employees.Find(id);
-        //    if (user == null)
-        //    {
-        //        return 0;
-        //    }
-        //    globalbrandDbContext.Employees.Remove(user);
-        //    return await globalbrandDbContext.SaveChangesAsync();
-
-        //}
     }
 }

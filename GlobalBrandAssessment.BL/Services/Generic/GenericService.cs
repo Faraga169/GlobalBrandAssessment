@@ -1,36 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.Extensions.ExpressionMapping;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
+using GlobalBrandAssessment.DAL.UnitofWork;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 
 namespace GlobalBrandAssessment.BL.Services.Generic
 {
-    public class GenericService<T>:IGenericService<T> where T : class
+    public class GenericService<T,Tdto>:IGenericService<T,Tdto> where T : class 
     {
-        private readonly IGenericRepository<T> genericRepository;
+        private readonly IUnitofWork unitofWork;
+        private readonly IMapper mapper;
 
-        public GenericService(IGenericRepository<T> genericRepository)
+        public GenericService(IUnitofWork unitofWork,IMapper mapper)
         {
-            this.genericRepository = genericRepository;
+            this.unitofWork = unitofWork;
+            this.mapper = mapper;
         }
 
     
 
-        public async Task<int> AddAsync(T entity)
+        public async Task<int> AddAsync(Tdto dto)
         {
-            return await genericRepository.AddAsync(entity);
+            var entity=mapper.Map<Tdto, T>(dto);
+            await unitofWork.Repository<T>().AddAsync(entity);
+            var result = await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
         }
 
+   
 
-
-
-        public async Task<int> UpdateAsync(T entity)
+        public async Task<int> UpdateAsync(Tdto dto)
         {
-            return await genericRepository.UpdateAsync(entity);
+            var entity= mapper.Map<Tdto, T>(dto);
+            await unitofWork.Repository<T>().UpdateAsync(entity);
+            var result = await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
         }
     }
 }

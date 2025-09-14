@@ -9,35 +9,39 @@
     @await Html.PartialAsync("_CreateManagerPartial", Model)
 </div>
 
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+    <script>
+            $(document).ready(function () {
+            $("#createEmployeeForm").on("submit", function (e) {
+            e.preventDefault();
+			if (!$(this).valid())
+				   return;
+            var formData = new FormData(this);
+            $.ajax({
+                url: '@Url.Action("Create", "Manager")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                        if (response.success) {
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-        $(document).ready(function () {
-        $("#createEmployeeForm").on("submit", function (e) {
-        e.preventDefault();
-        var formData = new FormData(this);
-        $.ajax({
-            url: '@Url.Action("Create", "Manager")',
-            type: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                    if (response.success) {
-                        
-                          window.location.href = response.redirectUrl;
-                    } else {
-                    $("#formContainer").html(response);
-                    }
-                } ,
-                 error: function (xhr) {
-                alert("Something went wrong. Please try again.",xhr.responseText);
-                 }
+                              window.location.href = response.redirectUrl;
+                        } else {
+                        $("#formContainer").html(response);
+                        }
+                    } ,
+                     error: function (xhr) {
+                    alert("Something went wrong. Please try again.",xhr.responseText);
+                     }
 
+            });
         });
-    });
-        });
-</script>
+            });
+    </script>
+}
+
 
 
 

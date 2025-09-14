@@ -11,8 +11,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GlobalBrandAssessment.BL.Services
 {
-    public interface IAttachmentService:IGenericService<AddAndUpdateAttachmentDTO>
+    public interface IAttachmentService:IGenericService<Attachment,AddAndUpdateAttachmentDTO>
     {
-        public Task<DAL.Data.Models.Attachment?> GetByTaskIdAsync(int taskId);
+        public Task<Attachment?> GetByTaskIdAsync(int taskId);
     }
 }

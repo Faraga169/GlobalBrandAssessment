@@ -2,6 +2,7 @@
 
 
 <form asp-action="Edit" enctype="multipart/form-data" id="EditEmployeeForm">
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 	<div class="input-field">
 		<label asp-for="FirstName" class="form-label"></label>
 		<input asp-for="FirstName" class="form-control" placeholder="Enter First Name" />
@@ -42,8 +43,3 @@
 		<a class="btn btn-danger mx-2" asp-action="Index">Back</a>
 	</div>
 </form>
-
-@section Scripts {
-	<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-	<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-}

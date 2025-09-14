@@ -11,12 +11,11 @@ namespace GlobalBrandAssessment.DAL.Data.Models
     {
         public Task<List<Tasks>> GetAllTasksAsync(int? managerid);
 
-        public Task<Tasks> GetTaskByIdAsync(int id);
+        public Task<Tasks?> GetTaskByIdAsync(int? id);
 
 
-
-        public Task<int> DeleteAsync(int? id);
-        public Task<List<Tasks>> SearchAsync(string searchname,int? managerid);
+      
+        public Task<List<Tasks>> SearchAsync(string searchname, int? managerid);
 
         public Task<List<Tasks>> GetTaskbyEmployeeIdAsync(int? id);
 

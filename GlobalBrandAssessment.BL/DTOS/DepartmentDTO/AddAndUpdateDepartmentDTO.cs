@@ -24,6 +24,7 @@ namespace GlobalBrandAssessment.BL.DTOS.DepartmentDTO
        
 
         [DisplayName("Manager")]
+        [Required(ErrorMessage = "Manager is required.")]
         public int? ManagerId { get; set; }
     }
 }
