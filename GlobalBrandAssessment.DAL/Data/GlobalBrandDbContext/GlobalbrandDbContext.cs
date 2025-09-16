@@ -7,7 +7,7 @@ using Tasks = GlobalBrandAssessment.DAL.Data.Models.Tasks;
 
 namespace GlobalBrandAssessment.GlobalBrandDbContext
 {
-    public class GlobalbrandDbContext:DbContext
+    public class GlobalbrandDbContext:IdentityDbContext<User>
     {
         
 
@@ -25,11 +25,24 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
      .HasForeignKey(e => e.DeptId)
      .OnDelete(DeleteBehavior.Restrict);
 
-         
+
+
 
             base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Employee>()
+            modelBuilder.Entity<Attachment>()
+     .HasOne(a => a.Task)
+     .WithOne(t => t.Attachments)
+     .HasForeignKey<Attachment>(a => a.TaskId)
+     .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Task)
+                .WithOne(t => t.Comments)
+                .HasForeignKey<Comment>(c => c.TaskId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Employee>()
        .HasOne(e => e.User)
        .WithOne(u => u.Employee)
        .HasForeignKey<User>(u => u.EmployeeId)
@@ -56,17 +69,17 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
                 new Employee { Id = 9, FirstName = "Mai", LastName = "Alaa", Salary = 15000, DeptId = 4, ImageURL = "/Images/young-woman-posing-outdoor-field.jpg" }
             );
 
-            modelBuilder.Entity<User>().HasData(
-                new User { UserId = 1, UserName = "AhmedFarag", Password = "Ahmed2003#", Role = "Manager", EmployeeId = 1 },
-                new User { UserId = 2, UserName = "MariamAhmed", Password = "Mariam123#", Role = "Employee", EmployeeId = 2 },
-                new User { UserId = 3, UserName = "AbdelrahmanMohammed", Password = "Abdelrahman123#", Role = "Employee", EmployeeId = 3 },
-                new User { UserId = 4, UserName = "SaraAli", Password = "Sara123#", Role = "Employee", EmployeeId = 4 },
-                new User { UserId = 5, UserName = "AliaaAli", Password = "Aliaa123#", Role = "Employee", EmployeeId = 5 },
-                new User { UserId = 6, UserName = "HamzaAli", Password = "Hamza123#", Role = "Employee", EmployeeId = 6 },
-                new User { UserId = 7, UserName = "TarekSalama", Password = "Tarek2003#", Role = "Manager", EmployeeId = 7 },
-                new User { UserId = 8, UserName = "AliMohammed", Password = "Ali2003#", Role = "Manager", EmployeeId = 8 },
-                new User { UserId = 9, UserName = "MaiAlaa", Password = "Mai2003#", Role = "Manager", EmployeeId = 9 }
-            );
+            //modelBuilder.Entity<User>().HasData(
+            //    new User { UserId = 1, UserName = "AhmedFarag", Password = "Ahmed2003#", Role = "Manager", EmployeeId = 1 },
+            //    new User { UserId = 2, UserName = "MariamAhmed", Password = "Mariam123#", Role = "Employee", EmployeeId = 2 },
+            //    new User { UserId = 3, UserName = "AbdelrahmanMohammed", Password = "Abdelrahman123#", Role = "Employee", EmployeeId = 3 },
+            //    new User { UserId = 4, UserName = "SaraAli", Password = "Sara123#", Role = "Employee", EmployeeId = 4 },
+            //    new User { UserId = 5, UserName = "AliaaAli", Password = "Aliaa123#", Role = "Employee", EmployeeId = 5 },
+            //    new User { UserId = 6, UserName = "HamzaAli", Password = "Hamza123#", Role = "Employee", EmployeeId = 6 },
+            //    new User { UserId = 7, UserName = "TarekSalama", Password = "Tarek2003#", Role = "Manager", EmployeeId = 7 },
+            //    new User { UserId = 8, UserName = "AliMohammed", Password = "Ali2003#", Role = "Manager", EmployeeId = 8 },
+            //    new User { UserId = 9, UserName = "MaiAlaa", Password = "Mai2003#", Role = "Manager", EmployeeId = 9 }
+            //);
 
             modelBuilder.Entity<Tasks>().HasData(
                 new Tasks { Id = 1, Title = "Prepare monthly IT report", Description = "Compile and analyze IT data.", Status = "Pending", EmployeeId = 2 },
@@ -81,7 +94,7 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
 
 
 
-        public virtual DbSet<User> Users { get; set; } = null!;
+        //public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Department> Departments { get; set; } = null!;
         public virtual DbSet<Employee> Employees { get; set; } = null!;
         public virtual DbSet<Tasks> Tasks { get; set; } = null!;

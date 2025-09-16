@@ -14,5 +14,7 @@ namespace GlobalBrandAssessment.BL.Services
     public interface IAttachmentService:IGenericService<Attachment,AddAndUpdateAttachmentDTO>
     {
         public Task<Attachment?> GetByTaskIdAsync(int taskId);
+
+        public Task<int> DeleteAsync(int id);
     }
 }

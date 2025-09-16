@@ -10,46 +10,50 @@ using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.PL.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
+    [Authorize(Roles = "Employee")]
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService employeeService;
+        private readonly UserManager<User> userManager;
         private readonly IDepartmentService departmentService;
         private readonly ITaskService taskService;
         private readonly ICommentService commentService;
         private readonly IAttachmentService attachmentService;
-        private readonly IUserService userService;
+      
         private readonly IMapper mapper;
         private readonly ILogger<EmployeeController> logger;
 
-        public EmployeeController(IEmployeeService employeeService, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IUserService userService,IMapper mapper,ILogger<EmployeeController> logger)
+        public EmployeeController(IEmployeeService employeeService,UserManager<User> userManager, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IMapper mapper,ILogger<EmployeeController> logger)
         {
             this.employeeService = employeeService;
+            this.userManager = userManager;
             this.departmentService = departmentService;
             this.taskService = taskService;
             this.commentService = commentService;
             this.attachmentService = attachmentService;
-            this.userService = userService;
+            
             this.mapper = mapper;
             this.logger = logger;
         }
         public async Task<IActionResult> Index()
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (userId == null || Role == "Manager")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+           
 
             try {
-               
-                var user = await userService.GetEmployeeIdByUserIdAsync(userId);
-                var employee = await employeeService.GetEmployeeByIdAsync(user);
+                var currentUser = await userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                int? employeeId = currentUser.EmployeeId;
+                var employee = await employeeService.GetEmployeeByIdAsync(employeeId);
                 return View(employee);
             }
 
@@ -64,12 +68,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> DepartmentDetails()
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (userId == null || Role == "Manager")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             try {  
                 var employee = await departmentService.GetAllAsync();
@@ -87,17 +86,17 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> Task()
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (userId == null || Role == "Manager")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
 
             try {
-               
-                var user = await userService.GetEmployeeIdByUserIdAsync(userId);
-                var employeetask = await taskService.GetTaskbyEmployeeIdAsync(user);
+
+                var currentUser = await userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                int? employeeId = currentUser.EmployeeId;
+                var employeetask = await taskService.GetTaskbyEmployeeIdAsync(employeeId);
                 if (employeetask == null)
                 {
                     TempData["Message"] = "You dont have Tasks";
@@ -117,12 +116,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (userId == null || Role == "Manager")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+           
 
             try {
                 if (!id.HasValue)
@@ -153,16 +147,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public async Task<IActionResult> Edit(TaskEditViewModel taskEditViewModel)
         {
 
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (userId == null || Role == "Manager")
-            {
-                return RedirectToAction("Index", "Login");
-            }
             try {
+             
+                var currentUser = await userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return RedirectToAction("Index", "Login");
+                }
+                int? employeeId = currentUser.EmployeeId;
 
-                var user = await userService.GetEmployeeIdByUserIdAsync(userId);
-               
 
                 if (taskEditViewModel.Status == "In Progress")
                 {
@@ -176,13 +169,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         if (existingComment != null)
                         {
 
-                            addCommentDTO.EmployeeId = user.Value;
+                            addCommentDTO.EmployeeId = employeeId;
                             addCommentDTO.CommentId = existingComment.CommentId;
                             await commentService.UpdateAsync(addCommentDTO);
                         }
                         else
                         {
-                            addCommentDTO.EmployeeId = user.Value;
+                            addCommentDTO.EmployeeId = employeeId;
                             await commentService.AddAsync(addCommentDTO);
                         }
 
@@ -220,14 +213,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
                     if (existattachment != null)
                         {
-                            attachmentDto.EmployeeId= user.Value;
+                            attachmentDto.EmployeeId= employeeId;
                             attachmentDto.AttachmentId = existattachment.AttachmentId;
                          
                             await attachmentService.UpdateAsync(attachmentDto);
                         }
                         else
                         {
-                            attachmentDto.EmployeeId = user.Value;
+                            attachmentDto.EmployeeId = employeeId;
                             await attachmentService.AddAsync(attachmentDto);
                         }
 
@@ -236,7 +229,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     }
                 }
                 var AddandUpdateTaskDTO = mapper.Map<TaskEditViewModel, AddandUpdateTaskDTO>(taskEditViewModel);
-                AddandUpdateTaskDTO.EmployeeId = user;
+                AddandUpdateTaskDTO.EmployeeId = employeeId;
                 int result = await taskService.UpdateAsync(AddandUpdateTaskDTO);
                 if (result > 0)
                 {

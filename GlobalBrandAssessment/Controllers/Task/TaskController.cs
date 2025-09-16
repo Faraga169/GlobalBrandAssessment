@@ -4,21 +4,30 @@ using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.PL.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GlobalBrandAssessment.PL.Controllers.Task
 {
+    [Authorize(Roles = "Manager")]
     public class TaskController : Controller
     {
         private readonly ITaskService taskService;
+        private readonly UserManager<User> userManager;
+        private readonly IAttachmentService attachmentService;
+        private readonly ICommentService commentService;
         private readonly IEmployeeService employeeService;
         private readonly ILogger<TaskController> logger;
         private readonly IWebHostEnvironment environment;
 
-        public TaskController(ITaskService taskService,IEmployeeService employeeService,ILogger<TaskController> logger,IWebHostEnvironment environment)
+        public TaskController(ITaskService taskService,UserManager<User> userManager,IAttachmentService attachmentService,ICommentService commentService,IEmployeeService employeeService,ILogger<TaskController> logger,IWebHostEnvironment environment)
         {
             this.taskService = taskService;
+            this.userManager = userManager;
+            this.attachmentService = attachmentService;
+            this.commentService = commentService;
             this.employeeService = employeeService;
             this.logger = logger;
             this.environment = environment;
@@ -27,12 +36,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var managerId = HttpContext.Session.GetInt32("UserId");
-            if (managerId == null)
-                return RedirectToAction("Index", "Login");
-            
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var employeeId = currentUser?.EmployeeId;
+
             try {
-                var tasks = await taskService.GetAllTasksAsync(managerId);
+                var tasks = await taskService.GetAllTasksAsync(employeeId);
                 return View(tasks);
             }
             catch (Exception ex)
@@ -46,14 +55,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-                return RedirectToAction("Index", "Login");
-            
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
+
             try
             {
                
-                var task = await taskService.SearchAsync(searchname, mangerId);
+                var task = await taskService.SearchAsync(searchname, managerId);
                 if (task == null || !task.Any())
                 {
                     TempData["Message"] = "No tasks found.";
@@ -86,13 +95,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-                return RedirectToAction("Index", "Login");
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
             try
             {
 
-                var employees = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                var employees = await employeeService.GetEmployeesByManagerAsync(managerId);
                 ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
                 return View();
             }
@@ -118,10 +127,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async  Task<IActionResult> Create(AddandUpdateTaskDTO createtaskdto)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-
-            if (mangerId == null)
-                return RedirectToAction("Index", "Login");
+            
 
 
             if (ModelState.IsValid)
@@ -163,7 +169,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 }
             }
-                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
+            var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
                 return PartialView("_CreateTaskPartial", createtaskdto);
             }
@@ -175,9 +184,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-                return RedirectToAction("Index", "Login");
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
             try {
 
                 if (!id.HasValue)
@@ -187,7 +196,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 if (task == null)
                     return NotFound();
-                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName", task.EmployeeId);
                 return View(task);
 
@@ -202,12 +211,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async Task<IActionResult> Edit([FromRoute]int id,AddandUpdateTaskDTO Edittaskdto)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            if (mangerId == null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
 
             Edittaskdto.Id = id;
             if (ModelState.IsValid)
@@ -246,8 +249,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 }
             }
+            var currentUser = await userManager.GetUserAsync(User);
 
-                var employee = await employeeService.GetEmployeesByManagerAsync(mangerId);
+            var managerId = currentUser?.EmployeeId;
+            var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
                 ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
                 return PartialView("_EditTaskPartial", Edittaskdto);
             }
@@ -258,20 +263,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
-            var manager = HttpContext.Session.GetInt32("UserId");
-            if (manager is null)
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
             try {
 
               
              if(!id.HasValue)
                     return BadRequest();
 
+                await attachmentService.DeleteAsync(id.Value);
+                await commentService.DeleteAsync(id.Value);
                 var result = await taskService.DeleteAsync(id);
                 if (result > 0)
                 {
+                   
                     TempData["Message"] = "Task delete successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
                 }

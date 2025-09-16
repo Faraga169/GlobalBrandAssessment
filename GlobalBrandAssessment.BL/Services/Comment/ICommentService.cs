@@ -15,5 +15,7 @@ namespace GlobalBrandAssessment.BL.Services
 
         public Task<Comment?> GetByTaskIdAsync(int taskId);
 
+        public  Task<int> DeleteAsync(int id);
+
     }
 }

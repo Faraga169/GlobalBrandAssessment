@@ -7,7 +7,7 @@
         <tr>
             <td>@employee.FirstName</td>
             <td>@employee.LastName</td>
-            <td>@employee.Salary</td>
+            <td>@string.Format("{0:C}", employee.Salary)</td>
             <td>
                 <img src="@(employee.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))"
                 alt="@employee.FirstName"

@@ -17,7 +17,7 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
 
         public IEmployeeRepository employeeRepository { get; }
 
-        public IUserRepository userRepository { get; }
+       
 
         public ITaskRepository taskRepository { get; }
 

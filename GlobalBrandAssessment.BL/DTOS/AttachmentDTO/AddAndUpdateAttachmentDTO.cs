@@ -19,6 +19,6 @@ namespace GlobalBrandAssessment.BL.DTOS.AttachmentDTO
         [Display(Name = "Attachment")]
         public string? FilePath { get; set; }
 
-        public int EmployeeId { get; set; }
+        public int? EmployeeId { get; set; }
     }
 }

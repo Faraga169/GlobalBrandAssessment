@@ -21,7 +21,8 @@
 				<h5 class="card-title">@Model.FullName</h5>
 				<p class="card-text">Department: @Model.Department?.Name</p>
 				<p class="card-text">ManagerName: @Model.Manager?.FullName</p>
-				<p class="card-text">Salary: @Model.Salary</p>
+					<p class="card-text">Salary: @string.Format("{0:C}", @Model.Salary)</p>
+				
 				<p class="card-text"><small class="text-muted">Employee ID: @Model.Id</small></p>
 			</div>
 		</div>

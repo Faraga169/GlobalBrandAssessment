@@ -14,7 +14,6 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
     public class UnitOfWork : IUnitofWork
     {
         private readonly GlobalbrandDbContext globalbrandDbContext;
-        private Lazy<IUserRepository> _userRepository;
         private Lazy<IEmployeeRepository> _employeeRepository;
         private Lazy<ITaskRepository> _taskRepository;
         private Lazy<ICommentRepository> _commentRepository;
@@ -28,7 +27,6 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
             _commentRepository = new Lazy<ICommentRepository>(()=>new CommentRepository(globalbrandDbContext));
             _employeeRepository = new Lazy<IEmployeeRepository>(()=>new EmployeeRepository(globalbrandDbContext));
             _taskRepository = new Lazy<ITaskRepository>(()=>new TaskRepository(globalbrandDbContext));
-            _userRepository = new Lazy<IUserRepository>(()=>new UserRepository(globalbrandDbContext));
             _attachmentRepository = new Lazy<IAttachmentRepository>(() => new AttachmentRepository(globalbrandDbContext)); ;
             _managerRepository = new Lazy<IManagerRepository>(()=>new ManagerRepository(globalbrandDbContext));
             _departmentRepository = new Lazy<IDepartmentRepository>(()=>new DepartmentRepository(globalbrandDbContext));
@@ -41,7 +39,6 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
 
         public IEmployeeRepository employeeRepository => _employeeRepository.Value;
 
-        public IUserRepository userRepository => _userRepository.Value;
 
         public ITaskRepository taskRepository => _taskRepository.Value;
 

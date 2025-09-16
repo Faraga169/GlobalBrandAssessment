@@ -36,6 +36,15 @@ namespace GlobalBrandAssessment.BL.Services
             return result;
         }
 
+        public async Task<int> DeleteAsync(int id)
+        {
+            var comment = await unitofWork.commentRepository.GetByTaskId(id);
+            if (comment is null)
+                return 0;
 
+            await unitofWork.commentRepository.DeleteAsync(comment);
+            var result = await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
+        }
     }
 }

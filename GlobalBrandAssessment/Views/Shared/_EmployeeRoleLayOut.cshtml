@@ -46,9 +46,9 @@
                         <li class="nav-item">
                             <button id="darkModeToggle" class="btn btn-dark px-2 mx-1 rounded-pill">Dark Mode</button>
                         </li>
-                        <li class="nav-item ">
-                            <a class="btn btn-danger text-light fw-semibold" asp-area="" asp-controller="Login" asp-action="Index">Log Out</a>
-                        </li>
+                        <form asp-action="Logout" asp-controller="Login">
+                            <button class="btn btn-danger text-light fw-semibold" type="submit">Logout</button>
+                        </form>
                     </ul>
                 </div>
             </div>

@@ -26,7 +26,7 @@
                 <span>Login</span>
             </div>
             <form asp-action="Index" >
-                <div>@ViewBag.error</div>
+               <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="input_box">
                 <input asp-for="UserName" class="input-field" >
                     <label asp-for="UserName" class="label"></label>
@@ -39,15 +39,15 @@
                 <i class="bx bx-lock-alt icon"></i>
                     <span asp-validation-for="Password"></span>
             </div>
-            @* <div class="remember-forgot"> *@
-            @*     <div class="remember-me"> *@
-            @*         <input type="checkbox" id="remember"> *@
-            @*         <label for="remember">Remember me</label> *@
-            @*     </div> *@
+             <div class="remember-forgot"> 
+                 <div class="remember-me"> 
+                   <input type="checkbox" asp-for="RememberMe"> 
+                     <label asp-for="RememberMe" ></label> 
+                 </div> 
             @*     <div class="forgot"> *@
             @*         <a href="#">Forgot password?</a> *@
             @*     </div> *@
-            @* </div> *@
+             </div> 
             <div class="input_box">
                 <input type="submit" class="input-submit" value="Login">
             </div>

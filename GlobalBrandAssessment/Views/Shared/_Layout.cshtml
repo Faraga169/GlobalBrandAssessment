@@ -42,9 +42,10 @@
                         <li class="nav-item">
                             <a id="darkModeToggle" class="btn btn-dark px-2 mx-1 ">Dark Mode</a>
                         </li>
-                    <li class="nav-item ">
-                        <a class="btn btn-danger text-light fw-semibold" asp-area="" asp-controller="Login" asp-action="Index">Log Out</a>
-                    </li>
+                        <form asp-action="Logout" asp-controller="Login" >
+                            <button class="btn btn-danger text-light fw-semibold" type="submit">Logout</button>
+                        </form>
+                        
                     </ul>
                 </div>
             </div>
@@ -116,6 +117,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+   
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

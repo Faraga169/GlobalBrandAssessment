@@ -44,4 +44,11 @@ $(document).ready(function () {
         }
 
     document.getElementById("statusSelect").addEventListener("change", toggleExtra);
-    window.onload = toggleExtra;
+window.onload = toggleExtra;
+
+
+ window.addEventListener("pageshow", function (event) {
+            if (event.persisted) {
+        window.location.reload();
+            }
+        });

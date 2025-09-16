@@ -12,25 +12,28 @@ using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
+    [Authorize(Roles = "Manager")]
     public class ManagerController : Controller
     {
         private readonly IManagerService managerService;
+        private readonly UserManager<User> userManager;
         private readonly IEmployeeService employeeService;
         private readonly IDepartmentService departmentService;
-        private readonly IUserService userService;
         private readonly IMapper mapper;
         private readonly ILogger<ManagerController> logger;
         private readonly IWebHostEnvironment environment;
 
-        public ManagerController(IManagerService managerService, IEmployeeService employeeService, IDepartmentService departmentService, IUserService userService, IMapper mapper, ILogger<ManagerController> logger,IWebHostEnvironment environment)
+        public ManagerController(IManagerService managerService, UserManager<User> userManager, IEmployeeService employeeService, IDepartmentService departmentService, IMapper mapper, ILogger<ManagerController> logger,IWebHostEnvironment environment)
         {
             this.managerService = managerService;
+            this.userManager = userManager;
             this.employeeService = employeeService;
             this.departmentService = departmentService;
-            this.userService = userService;
             this.mapper = mapper;
             this.logger = logger;
             this.environment = environment;
@@ -41,16 +44,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
         {
 
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
+            var currentUser = await userManager.GetUserAsync(User);
+            var managerId = currentUser?.EmployeeId;  
             try
             {
-                var manager = await employeeService.GetEmployeesByManagerAsync(mangerId);
+                var manager = await employeeService.GetEmployeesByManagerAsync(managerId);
                 return View(manager);
             }
             catch (Exception ex)
@@ -66,17 +64,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
+            var currentUser = await userManager.GetUserAsync(User);
+            var managerId = currentUser?.EmployeeId;
 
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
             try
             {
 
-                var manager = await managerService.SearchAsync(searchname, mangerId);
+                var manager = await managerService.SearchAsync(searchname, managerId);
                 if (manager == null || !manager.Any())
                 {
                     return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
@@ -110,12 +104,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         public async Task<IActionResult> Create()
         {
 
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+           
             try
             {
                 var departments = await departmentService.GetAllAsync();
@@ -148,13 +137,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Create(AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
-
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+          
 
 
             var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
@@ -194,10 +177,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     if (newEmployeeId > 0)
                     {
                         var user = mapper.Map<AddAndUpdateManagerDTO, User>(addORUpdateManagerDTO);
-                        user.Role = "Employee";
+                       
                         user.EmployeeId = newEmployeeId;
+                        user.Email = $"{user.UserName}@test.com";  
+                        user.EmailConfirmed = true;
+                        user.Id = Guid.NewGuid().ToString();
 
-                        await userService.AddAsync(user);
+                        var result = await userManager.CreateAsync(user, addORUpdateManagerDTO.Password);
+
+                        if (result.Succeeded)
+                        {
+                          
+                            await userManager.AddToRoleAsync(user, "Employee");
+                        }
                         TempData["Message"] = "Employee created successfully.";
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                     }
@@ -240,12 +232,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            
             try
             {
                 
@@ -277,13 +264,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Edit([FromRoute]int id,AddAndUpdateManagerDTO addORUpdateManagerDTO)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
-           
+            
                
                 ModelState.Remove("Password");
                 var manager = await managerService.GetManagerByDepartmentIdAsync(addORUpdateManagerDTO.DeptId);
@@ -343,7 +324,20 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
                     if (result > 0)
                     {
-                        TempData["Message"] = "Employee updated successfully.";
+                     
+                        var user = await userManager.Users
+                            .FirstOrDefaultAsync(u => u.EmployeeId == addORUpdateManagerDTO.Id);
+
+                        if (user != null)
+                        {
+
+                            user.UserName = addORUpdateManagerDTO.FirstName;
+                            user.Email = $"{addORUpdateManagerDTO.FirstName}@test.com";
+                            user.EmailConfirmed = true;
+                            var updateResult = await userManager.UpdateAsync(user);
+                        }
+
+                         TempData["Message"] = "Employee updated successfully.";
                         return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                     }
                     else
@@ -382,12 +376,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {
-                return RedirectToAction("Index", "Login");
-            }
             try
             {
                if(!id.HasValue)
@@ -397,9 +385,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 if (result > 0)
                 {
 
-                   await userService.RemoveAsync(id);
-                    
-                    TempData["Message"] = "Employee deleted successfully.";
+                    var user = await userManager.Users.FirstOrDefaultAsync(u => u.EmployeeId ==id);
+
+                    if (user != null) {
+                        await userManager.DeleteAsync(user);
+                      
+                    }
+
+                        TempData["Message"] = "Employee deleted successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Manager") });
                 }
                 else

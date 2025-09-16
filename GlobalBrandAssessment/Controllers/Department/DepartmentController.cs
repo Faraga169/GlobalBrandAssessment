@@ -6,12 +6,14 @@ using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.PL.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace GlobalBrandAssessment.PL.Controllers.Department
 {
+    [Authorize(Roles = "Manager")]
     public class DepartmentController : Controller
     {
         private readonly IDepartmentService departmentService;
@@ -29,12 +31,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
             try
             {
                 var department = await departmentService.GetAllAsync();
@@ -54,11 +50,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-
-                return RedirectToAction("Index", "Login");
+            
 
             try {
                 var department = await departmentService.SearchAsync(searchname);
@@ -91,11 +83,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-
-                return RedirectToAction("Index", "Login");
+           
+               
             try {
                 var managers = await managerService.GetAllManagersAsync();
                 ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
@@ -127,12 +116,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public async Task<IActionResult> Create(AddAndUpdateDepartmentDTO department)
         {
            
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
 
             var managers = await managerService.GetAllManagersAsync();
 
@@ -186,12 +170,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public async Task< IActionResult> Edit(int? id)
         {
             try {
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
                 if(!id.HasValue)
                     return BadRequest(); //400
 
@@ -219,12 +198,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         public async Task<IActionResult> Edit([FromRoute]int id,AddAndUpdateDepartmentDTO department)
         {
            
-                int? mangerId = HttpContext.Session.GetInt32("UserId");
-                var Role = HttpContext.Session.GetString("Role");
-                if (mangerId == null || Role == "Employee")
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+               
 
             var managers = await managerService.GetAllManagersAsync();
             if (ModelState.IsValid)
@@ -273,12 +247,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
-            int? mangerId = HttpContext.Session.GetInt32("UserId");
-            var Role = HttpContext.Session.GetString("Role");
-            if (mangerId == null || Role == "Employee")
-            {               
-                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Login") });                
-            }
+            
             try
             {
 
@@ -297,7 +266,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 else
                 {
                     TempData["Message"] = "You Cant Delete Because Department exist employees";
-                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Department") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                 }
             }
 
