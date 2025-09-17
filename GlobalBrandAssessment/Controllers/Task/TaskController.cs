@@ -101,8 +101,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             try
             {
 
-                var employees = await employeeService.GetEmployeesByManagerAsync(managerId);
-                ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                var employees = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
+                ViewBag._Employees = new SelectList(employees.Items, "Id", "FirstName");
                 return View();
             }
             catch (Exception ex)
@@ -172,8 +172,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             var currentUser = await userManager.GetUserAsync(User);
 
             var managerId = currentUser?.EmployeeId;
-            var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
-                ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
+            var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
+                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName");
                 return PartialView("_CreateTaskPartial", createtaskdto);
             }
            
@@ -196,8 +196,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 if (task == null)
                     return NotFound();
-                var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
-                ViewBag._Employees = new SelectList(employee, "Id", "FirstName", task.EmployeeId);
+                var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
+                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName", task.EmployeeId);
                 return View(task);
 
             }
@@ -252,8 +252,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             var currentUser = await userManager.GetUserAsync(User);
 
             var managerId = currentUser?.EmployeeId;
-            var employee = await employeeService.GetEmployeesByManagerAsync(managerId);
-                ViewBag._Employees = new SelectList(employee, "Id", "FirstName");
+            var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
+                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName");
                 return PartialView("_EditTaskPartial", Edittaskdto);
             }
           

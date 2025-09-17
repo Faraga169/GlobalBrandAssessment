@@ -58,11 +58,10 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             //    searchExpression = x => x.FirstName.Contains(searchname) || x.LastName.Contains(searchname);
             //}
 
-            var managerlist = await unitofWork.ManagerRepository.SearchAsync(searchname,managerid);
-            var SearchManagerDTO = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(managerlist);
+            var employee = await unitofWork.ManagerRepository.SearchAsync(searchname,managerid);
+            var SearchManagerDTO = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employee);
 
-
-
+           
             return SearchManagerDTO;
         }
 

@@ -257,7 +257,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     { 1, 1, "Ahmed", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Farag", null, 5000m },
                     { 2, 1, "Mariam", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Ahmed", null, 6000m },
                     { 3, 1, "Abdelrahman", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Mohammed", null, 5500m },
-                    { 4, 2, "Sara", "/Images/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair.jpg", "Ali", null, 7000m },
+                    { 4, 2, "Sara", "/Images/young-beautiful-woman.jpg", "Ali", null, 7000m },
                     { 5, 3, "Aliaa", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Khaled", null, 6500m },
                     { 6, 4, "Hamza", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Ali", null, 8500m },
                     { 7, 2, "Tarek", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Salama", null, 9500m },

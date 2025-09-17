@@ -40,7 +40,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageno=1,int pagesize=5,string sortcolumn="FirstName")
 
         {
 
@@ -48,7 +48,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             var managerId = currentUser?.EmployeeId;  
             try
             {
-                var manager = await employeeService.GetEmployeesByManagerAsync(managerId);
+                var manager = await employeeService.GetEmployeesByManagerPagedAsync(managerId,pageno,pagesize,sortcolumn);
                 return View(manager);
             }
             catch (Exception ex)

@@ -24,9 +24,20 @@ namespace GlobalBrandAssessment.DAL.Repositories
         }
 
 
-        public async Task<List<Employee>> GetEmployeesByManager(int? ManagerId)
+        public async Task<(List<Employee>,int TotalCount)> GetEmployeesByManagerPaged(int? ManagerId,int pageno=0,int pagesize=0,string sortcolumn="FirstName")
         {
-            return await globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).Where(e => e.ManagerId == ManagerId).ToListAsync();
+            var query=  globalbrandDbContext.Employees.Include(e => e.Department).Include(e => e.Manager).Where(e => e.ManagerId == ManagerId);
+            var Totalcount = query.Count();
+           
+                query = sortcolumn switch
+                {
+                    "LastName" => query.OrderBy(e => e.LastName),
+                    "Department" => query.OrderBy(e => e.Department.Name),
+                    _ => query.OrderBy(e => e.FirstName)
+                };
+            
+            var employee = await query.Skip((pageno - 1) * pagesize).Take(pagesize).ToListAsync();
+            return (employee, Totalcount);
         }
 
         public async Task<string?> GetEmployeeImageUrlAsync(int id)

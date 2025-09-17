@@ -25,11 +25,6 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
      .HasForeignKey(e => e.DeptId)
      .OnDelete(DeleteBehavior.Restrict);
 
-
-
-
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Attachment>()
      .HasOne(a => a.Task)
      .WithOne(t => t.Attachments)
@@ -48,25 +43,28 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
        .HasForeignKey<User>(u => u.EmployeeId)
        .OnDelete(DeleteBehavior.Cascade);
 
+           
+            
+
 
 
             modelBuilder.Entity<Department>().HasData(
-                new Department { Id = 1, Name = "IT" },
-                new Department { Id = 2, Name = "HR" },
-                new Department { Id = 3, Name = "Finance" },
-                new Department { Id = 4, Name = "Marketing" }
-            );
+       new Department { Id = 1, Name = "IT"},
+       new Department { Id = 2, Name = "HR"},
+       new Department { Id = 3, Name = "Finance"},
+       new Department { Id = 4, Name = "Marketing" }
+   );
 
             modelBuilder.Entity<Employee>().HasData(
-                new Employee { Id = 1, FirstName = "Ahmed", LastName = "Farag", Salary = 5000, DeptId = 1, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
+                new Employee { Id = 1, FirstName = "Ahmed", LastName = "Farag", Salary = 5000, DeptId = 1, ManagerId = null, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
                 new Employee { Id = 2, FirstName = "Mariam", LastName = "Ahmed", Salary = 6000, DeptId = 1, ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
                 new Employee { Id = 3, FirstName = "Abdelrahman", LastName = "Mohammed", Salary = 5500, DeptId = 1, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 4, FirstName = "Sara", LastName = "Ali", Salary = 7000, DeptId = 2, ImageURL = "/Images/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair.jpg" },
-                new Employee { Id = 5, FirstName = "Aliaa", LastName = "Khaled", Salary = 6500, DeptId = 3, ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
-                new Employee { Id = 6, FirstName = "Hamza", LastName = "Ali", Salary = 8500, DeptId = 4, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
-                new Employee { Id = 7, FirstName = "Tarek", LastName = "Salama", Salary = 9500, DeptId = 2, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 8, FirstName = "Ali", LastName = "Mohammed", Salary = 12000, DeptId = 3, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 9, FirstName = "Mai", LastName = "Alaa", Salary = 15000, DeptId = 4, ImageURL = "/Images/young-woman-posing-outdoor-field.jpg" }
+                new Employee { Id = 4, FirstName = "Sara", LastName = "Ali", Salary = 7000, DeptId = 2, ImageURL = "/Images/young-beautiful-woman.jpg" },
+                new Employee { Id = 5, FirstName = "Aliaa", LastName = "Khaled", Salary = 6500, DeptId = 3,  ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
+                new Employee { Id = 6, FirstName = "Hamza", LastName = "Ali", Salary = 8500, DeptId = 4,  ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
+                new Employee { Id = 7, FirstName = "Tarek", LastName = "Salama", Salary = 9500, DeptId = 2,  ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
+                new Employee { Id = 8, FirstName = "Ali", LastName = "Mohammed", Salary = 12000, DeptId = 3,  ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
+                new Employee { Id = 9, FirstName = "Mai", LastName = "Alaa", Salary = 15000, DeptId = 4,  ImageURL = "/Images/young-woman-posing-outdoor-field.jpg" }
             );
 
             //modelBuilder.Entity<User>().HasData(
@@ -86,6 +84,8 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
                 new Tasks { Id = 2, Title = "IT Policy Update", Description = "Review and update handbook for 2025.", Status = "InProgress", EmployeeId = 3 },
                 new Tasks { Id = 3, Title = "System Maintenance", Description = "Perform maintenance on servers.", Status = "Completed", EmployeeId = 4 }
             );
+
+            base.OnModelCreating(modelBuilder);
         }
 
 

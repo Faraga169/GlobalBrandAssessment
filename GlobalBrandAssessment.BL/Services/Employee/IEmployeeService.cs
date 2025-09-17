@@ -13,7 +13,7 @@ namespace GlobalBrandAssessment.BL.Services
     {
         public Task<Employee?> GetEmployeeByIdAsync(int? employeeId);
 
-        public Task<List<GetAllAndSearchManagerDTO>> GetEmployeesByManagerAsync(int? ManagerId);
+        public Task<PagedResult<GetAllAndSearchManagerDTO>> GetEmployeesByManagerPagedAsync(int? ManagerId, int pageno=0, int pagesize = 0, string sortcolumn="FirstName");
 
         public Task<string?> GetEmployeeImageUrlAsync(int id);
     }

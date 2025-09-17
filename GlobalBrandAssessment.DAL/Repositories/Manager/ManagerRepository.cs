@@ -36,6 +36,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
             }
 
             return await query.ToListAsync();
+            
         }
 
         public async Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId)

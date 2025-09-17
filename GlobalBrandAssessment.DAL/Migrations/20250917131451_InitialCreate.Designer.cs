@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalBrandAssessment.DAL.Migrations
 {
     [DbContext(typeof(GlobalbrandDbContext))]
-    [Migration("20250914221937_InitialCreate")]
+    [Migration("20250917131451_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -201,7 +201,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             Id = 4,
                             DeptId = 2,
                             FirstName = "Sara",
-                            ImageURL = "/Images/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair.jpg",
+                            ImageURL = "/Images/young-beautiful-woman.jpg",
                             LastName = "Ali",
                             Salary = 7000m
                         },

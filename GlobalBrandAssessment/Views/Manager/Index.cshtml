@@ -1,4 +1,5 @@
-﻿@model IEnumerable<GetAllAndSearchManagerDTO>
+﻿@model PagedResult<GetAllAndSearchManagerDTO>
+
 @{
     ViewData["Title"] = "Employee List";
 }
@@ -39,23 +40,54 @@
         </button>
     </div>
 
-@if (Model.Count() > 0)
+@if (Model.Items.Count() > 0)
 {
-    <table class="table table-hover table-striped text-center table-dark rounded-2">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(x => x.FirstName)</th>
-                <th>@Html.DisplayNameFor(x => x.LastName)</th>
-                <th>@Html.DisplayNameFor(x => x.Salary)</th>
-                <th>@Html.DisplayNameFor(x => x.ImageURL)</th>
-                <th>@Html.DisplayNameFor(x => x.Department)</th>
-                <th colspan="2">Actions</th>
-            </tr>
-        </thead>
-        <tbody id="employeeTable">
-            @await Html.PartialAsync("_IndexManagerPartial", Model)
-        </tbody>
-    </table>
+   
+
+        <table class="table table-hover table-striped text-center table-dark rounded-2">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(x => x.Items.First().FirstName)</th>
+                    <th>@Html.DisplayNameFor(x => x.Items.First().LastName)</th>
+                    <th>@Html.DisplayNameFor(x => x.Items.First().Salary)</th>
+                    <th>@Html.DisplayNameFor(x => x.Items.First().ImageURL)</th>
+                    <th>@Html.DisplayNameFor(x => x.Items.First().Department)</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employeeTable">
+                @await Html.PartialAsync("_IndexManagerPartial", Model.Items)
+            </tbody>
+        </table>
+ 
+    
+
+
+    <!-- Pagination Controls -->
+    <nav class="d-flex justify-content-center mt-3">
+        <ul class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <li class="page-item">
+                    <button class="page-link pagination-btn" data-page="@(Model.PageNumber - 1)">Previous</button>
+                </li>
+            }
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <button class="page-link pagination-btn" data-page="@i">@i</button>
+                </li>
+            }
+
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <li class="page-item">
+                    <button class="page-link pagination-btn" data-page="@(Model.PageNumber + 1)">Next</button>
+                </li>
+            }
+        </ul>
+    </nav>
 }
 else
 {
@@ -93,16 +125,17 @@ else
        
             $("#searchbtn").on('click',function(){
             var value=$(".searchvalue").val();
+             
              var token = $('input[name="__RequestVerificationToken"]').val();
              $.ajax({
                     url: '@Url.Action("Search", "Manager")',
                     type: "POST",
-                    data: { searchname: value,__RequestVerificationToken:token },
+                    data: { searchname: value,__RequestVerificationToken:token},
                     success: function (result) {
 
-                         $("#employeeTable").html(result);
+                       $("#employeeTable").html(result);
 
-
+                   
                     },
                      error: function (xhr) {
                     alert("Something went wrong. Please try again.",xhr.responseText);
@@ -111,6 +144,22 @@ else
             });
 
         });
-		
+                $(document).on("click",".pagination-btn",function () {
+            var page = $(this).data("page");
+            $.ajax({
+                url: '@Url.Action("Index", "Manager")',
+                type: "GET",
+                data: { pageno: page},
+                success: function (result) {
+                    $("#employeeTable").html($(result).find("#employeeTable").html());
+
+                    $(".pagination").html($(result).find(".pagination").html());
+                },
+                error: function () {
+                    alert("Something went wrong. Please try again.");
+                }
+            });
+        });
+
     </script>
 }
