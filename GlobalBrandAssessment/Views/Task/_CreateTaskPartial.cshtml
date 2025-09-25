@@ -1,7 +1,6 @@
 ﻿@model AddandUpdateTaskDTO
 
 
-
 <form asp-action="Create" id="CreateTaskForm">
 	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 	<div>
@@ -19,6 +18,7 @@
 	<div>
 		<label asp-for="EmployeeId" class="form-label"></label>
 		<select asp-items="ViewBag._Employees" asp-for="EmployeeId" class="form-select">
+
 			<option value="">Select Employee</option>
 		</select>
 		<span asp-validation-for="EmployeeId" class="text-danger"></span>

@@ -39,7 +39,39 @@ namespace GlobalBrandAssessment.BL.Services
             return employee;
         }
 
-        public async Task<PagedResult<GetAllAndSearchManagerDTO>> GetEmployeesByManagerPagedAsync(int? ManagerId,int pageno = 0, int pagesize = 0,string sortcolumn="FirstName")
+        public async Task<PagedResult<GetAllAndSearchManagerDTO>> GetAllPagedAsync( int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
+        {
+           
+            var (employees, totalCount) = await unitOfWork.employeeRepository.GetAllPagedAsync( pageno, pagesize, sortcolumn);
+
+
+            var result = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employees);
+            //var pagedResult=mapper.Map<List<GetAllAndSearchManagerDTO>, PagedResult<GetAllAndSearchManagerDTO>>(result);
+
+            var pagedResult = new PagedResult<GetAllAndSearchManagerDTO>()
+            {
+                Items = result,
+                PageNumber = pageno,
+                PageSize = pagesize,
+                TotalCount = totalCount,
+            };
+
+            return pagedResult;
+
+        }
+
+        public async Task<List<GetAllAndSearchManagerDTO>> GetAll() { 
+        var employee=await unitOfWork.employeeRepository.GetAll();
+        var result = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employee);
+            return result;
+        }
+
+        public async Task<List<GetAllAndSearchManagerDTO>> GetEmployeesByManagerId(int? managerid) {
+            var employee = await unitOfWork.employeeRepository.GetEmployeesByManagerId(managerid);
+            var result = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employee);
+            return result;
+        }
+        public async Task<PagedResult<GetAllAndSearchManagerDTO>> GetEmployeesByManagerPagedAsync(int? ManagerId,int pageno = 1, int pagesize = 5,string sortcolumn="FirstName")
         {
             var (employees, totalCount) = await unitOfWork.employeeRepository.GetEmployeesByManagerPaged(ManagerId,pageno,pagesize,sortcolumn);
 
@@ -64,6 +96,13 @@ namespace GlobalBrandAssessment.BL.Services
         public async Task<string?> GetEmployeeImageUrlAsync(int id)
         {
             return await unitOfWork.employeeRepository.GetEmployeeImageUrlAsync(id)??null;
+        }
+
+        public async Task<List<GetAllAndSearchManagerDTO>> GetEmployeesByDeptId(int id)
+        {
+            var employees = await unitOfWork.employeeRepository.GetEmployeesByDeptId(id);
+            var result = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employees);
+            return result;
         }
     }
 }

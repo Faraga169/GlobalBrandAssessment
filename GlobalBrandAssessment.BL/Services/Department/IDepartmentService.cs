@@ -14,7 +14,7 @@ namespace GlobalBrandAssessment.BL.Services
     {
         public Task<List<GetAllandSearchDepartmentDTO>> GetAllAsync();
 
-
+        public  Task<List<GetAllandSearchDepartmentDTO>> GetDepartmentByManagerId(int? managerId);
         public Task<int> DeleteAsync(int? id);
 
         public Task<List<GetAllandSearchDepartmentDTO>> SearchAsync(string searchname);

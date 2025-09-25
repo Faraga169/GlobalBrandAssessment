@@ -42,12 +42,36 @@ namespace GlobalBrandAssessment.BL.Services.Manager
             var manager = await unitofWork.employeeRepository.GetEmployeeById(id);
             if (manager == null)
                 return 0;
+
+            
+            var employees = await unitofWork.employeeRepository.GetAll();
+            bool hasEmployees = employees.Any(e => e.ManagerId == id);
+
+            if (hasEmployees)
+            {
+                
+                return -1;
+            }
+
+            var departments = await unitofWork.departmentRepository.GetAllAsync();
+            bool hasDepartment = departments.Any(d => d.ManagerId == id);
+
+            if (hasDepartment)
+            {
+                
+                return -2;
+            }
+
             await unitofWork.ManagerRepository.DeleteAsync(manager);
-            var result=await unitofWork.CompleteAsync();
+            var result = await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }
 
-
+        public async Task<int> DemoteManagerToEmployeeAsync(int? managerId) { 
+        await unitofWork.ManagerRepository.DemoteManagerToEmployeeAsync(managerId);
+        var result= await unitofWork.CompleteAsync();
+            return result > 0 ? result : 0;
+        }
 
         public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid)
         {

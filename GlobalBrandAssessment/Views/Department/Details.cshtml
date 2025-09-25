@@ -1,0 +1,49 @@
+﻿@model List<GetAllAndSearchManagerDTO>
+
+@{
+    ViewData["Title"] = "Department Details";
+}
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        @foreach (var emp in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="@(emp.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))"
+                                 class="img-fluid rounded-start"
+                                 alt="@emp.FirstName"
+                                 style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <h5 class="card-title">@emp.FirstName</h5>
+                                <p class="card-text">Salary: @string.Format("{0:C}", emp.Salary)</p>
+                                <p class="card-text">
+                                    <small class="text-muted">Employee ID: @emp.Id</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+        }
+    </div>
+
+    <div class="mx-auto text-center">
+        <a class="btn btn-danger" asp-action="Index">Back</a>
+    </div>
+}
+else
+{
+    <div class="alert alert-info ">
+        No employees found in this department.
+    </div>
+
+   
+}

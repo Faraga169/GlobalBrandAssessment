@@ -5,7 +5,7 @@
 namespace GlobalBrandAssessment.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddManagerIdToDepartmentAndEmployee : Migration
+    public partial class AddManagetToDepartment : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -81,10 +81,10 @@ namespace GlobalBrandAssessment.DAL.Migrations
                 keyColumn: "Id",
                 keyValue: 6,
                 column: "ManagerId",
-                value: 9
-            );
+            value: 9
+           );
+
         }
-        
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -161,7 +161,10 @@ namespace GlobalBrandAssessment.DAL.Migrations
                 keyValue: 6,
                 column: "ManagerId",
                 value: null
-            );
+    );
         }
+
+  
+      
     }
 }

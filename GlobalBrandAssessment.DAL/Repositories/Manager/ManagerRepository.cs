@@ -8,6 +8,7 @@ using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GlobalBrandAssessment.DAL.Repositories
 {
@@ -20,10 +21,15 @@ namespace GlobalBrandAssessment.DAL.Repositories
             this.globalbrandDbContext = globalbrandDbContext;
         }
 
-
+       
         public async Task<List<Employee>> SearchAsync(string searchname, int? managerid)
         {
-            var query = globalbrandDbContext.Employees.Include(e => e.Department).Where(e => e.ManagerId == managerid).AsQueryable();
+            var query = globalbrandDbContext.Employees.Include(e => e.Department).AsQueryable();
+
+            if(managerid.HasValue)
+            {
+                query = query.Where(e => e.ManagerId == managerid);
+            }
 
             if (!string.IsNullOrEmpty(searchname))
             {
@@ -46,13 +52,56 @@ namespace GlobalBrandAssessment.DAL.Repositories
                           join dept in globalbrandDbContext.Departments
                           on emp.Id equals dept.ManagerId
                           where dept.Id == deptId
-                          select emp).FirstOrDefaultAsync();
+                          select emp).AsNoTracking().FirstOrDefaultAsync();
         
     }
+
+        public async Task DemoteManagerToEmployeeAsync(int? managerId)
+        {
+
+            var subordinates = await globalbrandDbContext.Employees
+                .Where(e => e.ManagerId == managerId)
+                .ToListAsync();
+            if (subordinates.Count > 0)
+            {
+                foreach (var sub in subordinates)
+                {
+                    sub.ManagerId = null;
+                }
+            }
+            else
+            {
+
+
+                var department = await globalbrandDbContext.Departments
+                    .FirstOrDefaultAsync(d => d.ManagerId == managerId);
+
+                if (department != null)
+                {
+
+                    var employeesWithoutManager = await globalbrandDbContext.Employees
+                        .Where(e => e.ManagerId == null && e.DeptId == department.Id&&e.Id!=managerId)
+                        .ToListAsync();
+
+
+
+                    foreach (var emp in employeesWithoutManager)
+                    {
+                        emp.ManagerId = managerId;
+                    }
+
+                   
+                }
+            }
+        }
+
+        
 
         public async Task<List<Employee>> GetAllManagersAsync()
         {
             return await globalbrandDbContext.Employees.Where(m => globalbrandDbContext.Employees.Any( e=>e.ManagerId == m.Id)).Select( m=> new Employee{ Id = m.Id,FirstName = $"{m.FirstName} {m.LastName}"}).ToListAsync();
         }
+
+      
     }
 }

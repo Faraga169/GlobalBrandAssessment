@@ -12,8 +12,17 @@ namespace GlobalBrandAssessment.DAL.Repositories
     {
         public Task<Employee?> GetEmployeeById(int? employeeId);
 
-        public Task<(List<Employee>, int TotalCount)> GetEmployeesByManagerPaged(int? ManagerId, int pageno = 0, int pagesize = 0, string sortcolumn = "FirstName");
+        public Task<(List<Employee>, int TotalCount)> GetEmployeesByManagerPaged(int? ManagerId, int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName");
+        public Task<(List<Employee>, int TotalCount)> GetAllPagedAsync( int pageno=1 , int pagesize=5, string sortcolumn="FirstName");
         public  Task<string?> GetEmployeeImageUrlAsync(int id);
+
+        public  Task<List<Employee>> GetAll();
+
+        public Task<List<Employee>> GetEmployeesByManagerId(int? managerid);
+        
+
+
+        public Task<List<Employee>> GetEmployeesByDeptId(int id);
     }
 
 }

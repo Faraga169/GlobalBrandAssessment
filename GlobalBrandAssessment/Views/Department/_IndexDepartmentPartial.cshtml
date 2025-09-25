@@ -10,19 +10,33 @@
         <tr>
             <td scope="col">@department.Name</td>
             <td scope="col">@department.EmployeeCount</td>
-            <td scope="col">@department.SumSalary</td>
+            <td scope="col">@string.Format("{0:C}", department.SumSalary)</td>
             <td scope="col">@department.Manager</td>
-            <td scope="col">
-                <a class="btn btn-outline-secondary " asp-action="Edit" asp-route-id="@department?.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit</a>
-            </td>
+            @if (User.IsInRole("Admin"))
+            {
 
-            <td>
-                @Html.AntiForgeryToken()
-                <button class="btn btn-outline-danger deletebtn" data-id="@department?.Id">
-                    <i class="fa-solid fa-delete-left mx-2"></i>
-                    Delete
-                </button>
-            </td>
+                <td scope="col">
+                    <a class="btn btn-outline-secondary " asp-action="Edit" asp-route-id="@department?.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit</a>
+                </td>
+                <td>
+                    <a class="btn btn-outline-info " asp-action="details" asp-route-id="@department?.Id"><i class="fa-solid text-light mx-2 fa-eye"></i>Details</a>
+                </td>
+                <td>
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-outline-danger deletebtn" data-id="@department?.Id">
+                        <i class="fa-solid fa-delete-left mx-2"></i>
+                        Delete
+                    </button>
+                </td>
+
+            }
+
+           else if(User.IsInRole("Manager")){
+                <td>
+                    <a class="btn btn-outline-info " asp-action="details" asp-route-id="@department?.Id"><i class="fa-solid text-light mx-2 fa-eye"></i>Details</a>
+                </td>
+           }
+
         </tr>
 
     }

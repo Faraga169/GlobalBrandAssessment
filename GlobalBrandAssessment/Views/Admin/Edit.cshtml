@@ -1,17 +1,18 @@
 ﻿@model AddAndUpdateManagerDTO
 
 @{
-	ViewData["Title"] = "Edit Employee";
+    ViewData["Title"] = "Edit Employee";
+   
 }
 
 <div class="d-flex justify-content-center">
-	<h2 class="text-secondary fs-3">Edit @Model.FirstName </h2>
+    <h2 class="text-secondary fs-3">Edit @Model.FirstName </h2>
 </div>
 
 <div id="formContainer">
-	@await Html.PartialAsync("_EditManagerPartial", Model)
+    @await Html.PartialAsync("_EditAdminPartial", Model)
 </div>
-@section Scripts{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
 
@@ -23,7 +24,7 @@
             var formData = new FormData(this);
 
             $.ajax({
-                url: '@Url.Action("Edit", "Manager")',
+                url: '@Url.Action("Edit", "Admin")',
                 type: "POST",
                 data: formData,
                 processData: false,

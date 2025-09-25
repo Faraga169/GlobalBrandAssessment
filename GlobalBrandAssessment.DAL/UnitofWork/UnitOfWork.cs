@@ -46,9 +46,9 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
 
         public IDepartmentRepository departmentRepository => _departmentRepository.Value;
 
-        public Task<int> CompleteAsync()
+        public async Task<int> CompleteAsync()
         {
-            return globalbrandDbContext.SaveChangesAsync();
+            return await globalbrandDbContext.SaveChangesAsync();
         }
 
 

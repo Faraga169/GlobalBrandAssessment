@@ -197,8 +197,9 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     LastName = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Salary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ImageURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Roles = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ManagerId = table.Column<int>(type: "int", nullable: true),
-                    DeptId = table.Column<int>(type: "int", nullable: false)
+                    DeptId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -213,7 +214,8 @@ namespace GlobalBrandAssessment.DAL.Migrations
                         name: "FK_Employees_Employees_ManagerId",
                         column: x => x.ManagerId,
                         principalTable: "Employees",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,18 +253,18 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
             migrationBuilder.InsertData(
                 table: "Employees",
-                columns: new[] { "Id", "DeptId", "FirstName", "ImageURL", "LastName", "ManagerId", "Salary" },
+                columns: new[] { "Id", "DeptId", "FirstName", "ImageURL", "LastName", "ManagerId", "Roles", "Salary" },
                 values: new object[,]
                 {
-                    { 1, 1, "Ahmed", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Farag", null, 5000m },
-                    { 2, 1, "Mariam", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Ahmed", null, 6000m },
-                    { 3, 1, "Abdelrahman", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Mohammed", null, 5500m },
-                    { 4, 2, "Sara", "/Images/young-beautiful-woman.jpg", "Ali", null, 7000m },
-                    { 5, 3, "Aliaa", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Khaled", null, 6500m },
-                    { 6, 4, "Hamza", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Ali", null, 8500m },
-                    { 7, 2, "Tarek", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Salama", null, 9500m },
-                    { 8, 3, "Ali", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Mohammed", null, 12000m },
-                    { 9, 4, "Mai", "/Images/young-woman-posing-outdoor-field.jpg", "Alaa", null, 15000m }
+                    { 1, 1, "Ahmed", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Farag", null, "Manager", 5000m },
+                    { 2, 1, "Mariam", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Ahmed", null, "Employee", 6000m },
+                    { 3, 1, "Abdelrahman", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Mohammed", null, "Employee", 5500m },
+                    { 4, 2, "Sara", "/Images/young-beautiful-woman.jpg", "Ali", null, "Employee", 7000m },
+                    { 5, 3, "Aliaa", "/Images/causal-female-posing-hat-isolated-white-wall.jpg", "Khaled", null, "Employee", 6500m },
+                    { 6, 4, "Hamza", "/Images/bohemian-man-with-his-arms-crossed.jpg", "Ali", null, "Employee", 8500m },
+                    { 7, 2, "Tarek", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Salama", null, "Manager", 9500m },
+                    { 8, 3, "Ali", "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg", "Mohammed", null, "Manager", 12000m },
+                    { 9, 4, "Mai", "/Images/young-woman-posing-outdoor-field.jpg", "Alaa", null, "Manager", 15000m }
                 });
 
             migrationBuilder.InsertData(
@@ -432,7 +434,8 @@ namespace GlobalBrandAssessment.DAL.Migrations
                 table: "Departments",
                 column: "ManagerId",
                 principalTable: "Employees",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />

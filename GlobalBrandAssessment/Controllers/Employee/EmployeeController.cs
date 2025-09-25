@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Mail;
 using System.Security.Claims;
 using AutoMapper;
 using GlobalBrandAssessment.BL.DTOS.AttachmentDTO;
@@ -17,7 +18,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
-    [Authorize(Roles = "Employee")]
+
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService employeeService;
@@ -42,6 +43,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             this.mapper = mapper;
             this.logger = logger;
         }
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Index()
         {
            
@@ -65,24 +67,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
         }
 
-        [HttpGet]
-        public async Task<IActionResult> DepartmentDetails()
-        {
-            
 
-            try {  
-                var employee = await departmentService.GetAllAsync();
-                return View(employee);
-            }
-
-            catch(Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Employee DepartmentDetails action.");
-                return StatusCode(500, "Internal server error");
-            }
-
-        }
-
+        [Authorize(Roles = "Employee")]
         [HttpGet]
         public async Task<IActionResult> Task()
         {
@@ -113,6 +99,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
 
         }
 
+        [Authorize(Roles = "Employee")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -144,6 +131,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpPost]
+        [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(TaskEditViewModel taskEditViewModel)
         {
 
@@ -188,45 +176,49 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                         if (!Directory.Exists(uploadPath))
                             Directory.CreateDirectory(uploadPath);
 
+                      
                         var fileName = Guid.NewGuid() + "_" + Path.GetFileName(taskEditViewModel.Attachment.FileName);
                         var fullPath = Path.Combine(uploadPath, fileName);
+
+                        
                         var existattachment = await attachmentService.GetByTaskIdAsync(taskEditViewModel.Id);
                         if (existattachment != null && !string.IsNullOrEmpty(existattachment.FilePath))
                         {
                             var oldFilePath = Path.Combine(uploadPath, existattachment.FilePath);
 
-                            // احذف القديم لو مختلف عن الجديد
-                            if (System.IO.File.Exists(oldFilePath) && existattachment.FilePath != fileName)
+                         
+                            if (System.IO.File.Exists(oldFilePath))
                             {
                                 System.IO.File.Delete(oldFilePath);
                             }
                         }
 
+                       
                         using (var stream = new FileStream(fullPath, FileMode.Create))
                         {
                             await taskEditViewModel.Attachment.CopyToAsync(stream);
                         }
 
+                       
                         taskEditViewModel.FilePath = fileName;
-                    
-                        var attachmentDto = mapper.Map<TaskEditViewModel, AddAndUpdateAttachmentDTO>(taskEditViewModel);
 
-                    if (existattachment != null)
+                        var attachmentDto = mapper.Map<TaskEditViewModel, AddAndUpdateAttachmentDTO>(taskEditViewModel);
+                        attachmentDto.EmployeeId = employeeId;
+
+                        if (existattachment != null)
                         {
-                            attachmentDto.EmployeeId= employeeId;
-                            attachmentDto.AttachmentId = existattachment.AttachmentId;
                          
+                            attachmentDto.AttachmentId = existattachment.AttachmentId;
+                            attachmentDto.FilePath = fileName;
                             await attachmentService.UpdateAsync(attachmentDto);
                         }
                         else
                         {
-                            attachmentDto.EmployeeId = employeeId;
+                            attachmentDto.FilePath = fileName;
                             await attachmentService.AddAsync(attachmentDto);
                         }
-
-
-
                     }
+
                 }
                 var AddandUpdateTaskDTO = mapper.Map<TaskEditViewModel, AddandUpdateTaskDTO>(taskEditViewModel);
                 AddandUpdateTaskDTO.EmployeeId = employeeId;
@@ -251,15 +243,21 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             
         }
         [HttpGet]
+        [Authorize(Roles = "Employee,Manager,Admin")]
         public IActionResult DownloadFile(string fileName)
         {
-
-            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","uploads", fileName.TrimStart('/'));
+           
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","uploads", fileName);
 
             // force download for any file type
             var contentType = "application/octet-stream";
+            if (!System.IO.File.Exists(fullPath))
+                return NotFound("File not found on server.");
 
-            return PhysicalFile(fullPath, contentType, fileName);
+            var originalFileName = fileName.Contains('_')
+                ? fileName.Substring(fileName.IndexOf('_') + 1)
+                : fileName;
+            return PhysicalFile(fullPath, contentType, originalFileName);
         }
     }
 }

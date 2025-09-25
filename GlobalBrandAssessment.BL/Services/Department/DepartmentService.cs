@@ -36,18 +36,44 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
 
     public async Task<int> DeleteAsync(int? id)
     {
+        if (id == null)
+            return 0;
 
+        
         var department = await unitofWork.departmentRepository.GetDepartmentById(id);
 
-        if (department is null||department.EmployeeCount>0)
+        if (department == null)
             return 0;
 
 
+        if (department.Employees != null && department.Employees.Any(e => e.Id != department.ManagerId))
+        {
+           
+            return 0;
+        }
+       
+        if (department.Manager != null)
+        {
+            department.Manager.DeptId = null; 
+            department.Manager = null;
+            department.ManagerId = null;
+        }
+
+
         await unitofWork.departmentRepository.DeleteAsync(department);
-        var result= await unitofWork.CompleteAsync();
-        return result> 0 ? result : -1;
+
+        var result = await unitofWork.CompleteAsync();
+
+        return result > 0 ? result : -1; 
     }
 
+    public async Task<List<GetAllandSearchDepartmentDTO>> GetDepartmentByManagerId(int? managerId) {
+
+        var department = await unitofWork.departmentRepository.GetDepartmentsByManagerId(managerId);
+        
+        var GetDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(department);
+        return GetDepartmentDTO;
+    }
 
     public async Task<List<GetAllandSearchDepartmentDTO>> SearchAsync(string searchname)
     {

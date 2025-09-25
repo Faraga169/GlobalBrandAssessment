@@ -26,6 +26,18 @@
 		<input asp-for="Image" type="file" class="form-control" placeholder="Enter Image" />
 		<span asp-validation-for="Image" class="text-danger"></span>
 	</div>
+
+	<div class="input-field">
+		<label asp-for="Role" class="form-label"></label>
+		<select asp-items="ViewBag.Roles" asp-for="Role" class="form-select">
+			@if (Model.Role == null)
+			{
+				<option value="">select Role</option>
+			}
+
+		</select>
+		<span asp-validation-for="Role" class="text-danger"></span>
+	</div>
 	<div class="input-field">
 		<label asp-for="DeptId" class="form-label"></label>
 		<select asp-items="ViewBag._Department" asp-for="DeptId" class="form-select">

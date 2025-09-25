@@ -1,4 +1,5 @@
-﻿using GlobalBrandAssessment.BL.DTOS.TaskDTO;
+﻿using System.Threading.Tasks;
+using GlobalBrandAssessment.BL.DTOS.TaskDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GlobalBrandAssessment.PL.Controllers.Task
 {
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Manager,Admin")]
     public class TaskController : Controller
     {
         private readonly ITaskService taskService;
@@ -36,40 +37,63 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            try
+            {
+                var tasks = new List<GetAllandSearchTaskDTO>();
+                if (User.IsInRole("Manager"))
+                {
+                   
+                    var currentUser = await userManager.GetUserAsync(User);
+                    var employeeId = currentUser?.EmployeeId;
+                
+                     tasks = await taskService.GetAllTasksbyManagerIdAsync(employeeId);
+                    return View(tasks);
+                }
 
-            var employeeId = currentUser?.EmployeeId;
 
-            try {
-                var tasks = await taskService.GetAllTasksAsync(employeeId);
-                return View(tasks);
+                else if (User.IsInRole("Admin"))
+                    tasks = await taskService.GetAll();
+                    return View(tasks);
+                
+               
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred in Task Index action.");
-                return PartialView("Errorpartial",ex);
+                return PartialView("ErrorPartial", ex);
             }
-            
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            var currentUser = await userManager.GetUserAsync(User);
+            try {
 
-            var managerId = currentUser?.EmployeeId;
+                var currentUser = await userManager.GetUserAsync(User);
+                var managerId = currentUser?.EmployeeId;
 
-            try
-            {
-               
-                var task = await taskService.SearchAsync(searchname, managerId);
-                if (task == null || !task.Any())
+                var tasks = new List<GetAllandSearchTaskDTO>();
+
+                if (User.IsInRole("Manager"))
                 {
-                    TempData["Message"] = "No tasks found.";
-                    return PartialView("_IndexTaskPartial", new List<GetAllandSearchTaskDTO>());
+                    
+                    tasks = await taskService.SearchAsync(searchname, managerId);
                 }
-                return PartialView("_IndexTaskPartial", task);
+                else if (User.IsInRole("Admin"))
+                {
+                    tasks = await taskService.SearchAsync(searchname,null);
+                }
+                
+
+                if (tasks == null || !tasks.Any())
+                    return PartialView("_IndexTaskPartial",new List<GetAllandSearchTaskDTO>());
+
+                return PartialView("_IndexTaskPartial", tasks);
+            
             }
+           
 
             catch (Exception ex)
             {
@@ -100,9 +124,35 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             var managerId = currentUser?.EmployeeId;
             try
             {
+                if (User.IsInRole("Manager"))
+                {
+                    var employees = await employeeService.GetEmployeesByManagerId(managerId);
+                    if (employees == null || !employees.Any())
+                    {
+                        ViewBag._Employees = new List<SelectListItem>{
+        new SelectListItem { Value = "", Text = "No employees available" }
+    };
+                    }
+                    else
+                    {
+                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                    }
+                }
 
-                var employees = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
-                ViewBag._Employees = new SelectList(employees.Items, "Id", "FirstName");
+                else if (User.IsInRole("Admin")) {
+                    var employees = await employeeService.GetAll();
+                    if (employees == null || !employees.Any())
+                    {
+                        ViewBag._Employees = new List<SelectListItem>{
+        new SelectListItem { Value = "", Text = "No employees available" }
+    };
+                    }
+                    else
+                    {
+                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                    }
+                }
+               
                 return View();
             }
             catch (Exception ex)
@@ -127,11 +177,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         [HttpPost]
         public async  Task<IActionResult> Create(AddandUpdateTaskDTO createtaskdto)
         {
-            
 
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
 
             if (ModelState.IsValid)
             {
+               
                 try
                 {
 
@@ -169,12 +222,37 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 }
             }
-            var currentUser = await userManager.GetUserAsync(User);
+           
+            if (User.IsInRole("Manager"))
+            {
+                var employees = await employeeService.GetEmployeesByManagerId(managerId);
+                if (employees == null || !employees.Any())
+                {
+                    ViewBag._Employees = new List<SelectListItem>{
+        new SelectListItem { Value = "", Text = "No employees available" }
+    };
+                }
+                else
+                {
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                }
+            }
 
-            var managerId = currentUser?.EmployeeId;
-            var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
-                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName");
-                return PartialView("_CreateTaskPartial", createtaskdto);
+            else if (User.IsInRole("Admin"))
+            {
+                var employees = await employeeService.GetAll();
+                if (employees == null || !employees.Any())
+                {
+                    ViewBag._Employees = new List<SelectListItem>{
+        new SelectListItem { Value = "", Text = "No employees available" }
+    };
+                }
+                else
+                {
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                }
+            }
+            return PartialView("_CreateTaskPartial", createtaskdto);
             }
            
 
@@ -196,8 +274,23 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 if (task == null)
                     return NotFound();
-                var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
-                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName", task.EmployeeId);
+                if (User.IsInRole("Manager"))
+                {
+                    var employees = await employeeService.GetEmployeesByManagerId(managerId);
+                   
+                    
+                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName", task.EmployeeId);
+                    
+                   
+                }
+
+                else if (User.IsInRole("Admin"))
+                {
+                    var employees = await employeeService.GetAll();
+                 
+                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName", task.EmployeeId);
+                    
+                }
                 return View(task);
 
             }
@@ -212,7 +305,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
         public async Task<IActionResult> Edit([FromRoute]int id,AddandUpdateTaskDTO Edittaskdto)
         {
 
-            Edittaskdto.Id = id;
+           
+            var currentUser = await userManager.GetUserAsync(User);
+
+            var managerId = currentUser?.EmployeeId;
             if (ModelState.IsValid)
             {
 
@@ -249,12 +345,23 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
                 }
             }
-            var currentUser = await userManager.GetUserAsync(User);
+            
+            if (User.IsInRole("Manager"))
+            {
+                var employees = await employeeService.GetEmployeesByManagerId(managerId);
+               
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                
+            }
 
-            var managerId = currentUser?.EmployeeId;
-            var employee = await employeeService.GetEmployeesByManagerPagedAsync(managerId);
-                ViewBag._Employees = new SelectList(employee.Items, "Id", "FirstName");
-                return PartialView("_EditTaskPartial", Edittaskdto);
+            else if (User.IsInRole("Admin"))
+            {
+                var employees = await employeeService.GetAll();
+               
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                
+            }
+            return PartialView("_EditTaskPartial", Edittaskdto);
             }
           
            

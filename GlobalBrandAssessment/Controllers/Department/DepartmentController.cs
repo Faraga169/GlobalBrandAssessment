@@ -1,39 +1,57 @@
 ﻿using System.Linq.Expressions;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.BL.DTOS.DepartmentDTO;
+using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.PL.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace GlobalBrandAssessment.PL.Controllers.Department
 {
-    [Authorize(Roles = "Manager")]
+    
     public class DepartmentController : Controller
     {
         private readonly IDepartmentService departmentService;
         private readonly IManagerService managerService;
         private readonly ILogger<DepartmentController> logger;
         private readonly IWebHostEnvironment environment;
+        private readonly IEmployeeService employeeService;
+        private readonly UserManager<User> userManager;
 
-        public DepartmentController(IDepartmentService departmentService,IManagerService managerService,ILogger<DepartmentController> logger,IWebHostEnvironment environment)
+        public DepartmentController(IDepartmentService departmentService,IManagerService managerService,ILogger<DepartmentController> logger,IWebHostEnvironment environment,IEmployeeService employeeService,UserManager<User> userManager)
         {
             this.departmentService = departmentService;
             this.managerService = managerService;
             this.logger = logger;
             this.environment = environment;
+            this.employeeService = employeeService;
+            this.userManager = userManager;
         }
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Index()
         {
+            var currentUser = await userManager.GetUserAsync(User);
+            var managerId = currentUser?.EmployeeId;
+            var department= new List<GetAllandSearchDepartmentDTO>();
             try
             {
-                var department = await departmentService.GetAllAsync();
+                if (User.IsInRole("Admin")) {
+                    department = await departmentService.GetAllAsync();
+                    
+                }
+                else if (User.IsInRole("Manager"))
+                {
+                    department = await departmentService.GetDepartmentByManagerId(managerId);
+                   
+                }
                 return View(department);
             }
 
@@ -48,6 +66,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Search(string searchname)
         {
             
@@ -81,38 +100,16 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create()
+        [Authorize(Roles = "Admin")]
+        public  IActionResult Create()
         {
-           
-               
-            try {
-                var managers = await managerService.GetAllManagersAsync();
-                ViewBag._Manager = new SelectList(managers, "Id", "FirstName");
+              
                 return View();
-            }
-            catch (Exception ex)
-            {
-                if (environment.IsDevelopment())
-                {
-                    // 1.Development => Log Error In Console and Return Same view with Error Message
-                    TempData["Message"] = ex.Message;
-                    return View();
-                }
-                else
-                {
-                    //2. Deployment => Log Error In File | Table in Database And Return Error View
-                    logger.LogError(ex.Message);
-                    return PartialView("Errorpartial", ex);
-                }
-
-
-            }
-
-
-
+            
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(AddAndUpdateDepartmentDTO department)
         {
            
@@ -124,7 +121,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
                 {
                     try {
 
-                        int result = await departmentService.AddAsync(department);
+                    int result = await departmentService.AddAsync(department);
                         if (result > 0)
                         {
                             TempData["Message"] = "Department created successfully.";
@@ -167,6 +164,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
           
         
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task< IActionResult> Edit(int? id)
         {
             try {
@@ -195,16 +193,14 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit([FromRoute]int id,AddAndUpdateDepartmentDTO department)
         {
-           
-               
-
             var managers = await managerService.GetAllManagersAsync();
             if (ModelState.IsValid)
                 {
                     try {
-                    department.Id = id;
+
                     int result = await departmentService.UpdateAsync(department);
                     if (result > 0)
                     {
@@ -245,6 +241,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
         
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             
@@ -253,7 +250,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
 
                 if (!id.HasValue) {
                     TempData["Message"] = "Invalid department ID.";
-                    return Json(new { success = false, redirectUrl = Url.Action("Index", "Department") });
+                    return Json(new { success = true, redirectUrl = Url.Action("Index", "Department") });
                 }
                    
 
@@ -279,5 +276,36 @@ namespace GlobalBrandAssessment.PL.Controllers.Department
             }
 
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
+
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                var employees = await employeeService.GetEmployeesByDeptId(id);
+
+               
+
+                return View(employees);
+            }
+            catch (Exception ex)
+            {
+                if (environment.IsDevelopment())
+                {
+                   
+                    return View("Details", new List<GetAllAndSearchManagerDTO>());
+                }
+                else
+                {
+                    logger.LogError(ex, "Error happened while Displaying employees in department");
+                    return PartialView("Errorpartial", ex);
+                }
+            }
+        }
+
+
     }
 }
+

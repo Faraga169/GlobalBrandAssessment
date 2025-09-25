@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
 using Microsoft.AspNetCore.Http;
+using GlobalBrandAssessment.DAL.Data.Models.Common;
 
 namespace GlobalBrandAssessment.BL.DTOS.ManagerDTO
 {
@@ -39,6 +40,10 @@ namespace GlobalBrandAssessment.BL.DTOS.ManagerDTO
         public string? ImageURL { get; set; }
 
         public IFormFile? Image { get; set; } = null!;
+
+        [Required(ErrorMessage = "Please Enter Role")]
+        [DisplayName("Position")]
+        public string Role { get; set; } = null!;
 
 
         [DisplayName("Department")]

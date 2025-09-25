@@ -14,6 +14,8 @@ namespace GlobalBrandAssessment.DAL.Data.Models
 
         public Task<List<Employee>> SearchAsync(string searchname, int? managerid);
 
+        public Task DemoteManagerToEmployeeAsync(int? managerId);
+
 
         public Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId);
 

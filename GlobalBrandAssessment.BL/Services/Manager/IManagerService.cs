@@ -14,6 +14,8 @@ namespace GlobalBrandAssessment.BL.Services.Manager
     {
 
        public Task<int>Add(AddAndUpdateManagerDTO addAndUpdateManagerDTO);
+
+        public Task<int> DemoteManagerToEmployeeAsync(int? managerId);
         public Task<int> DeleteAsync(int? id);
 
         public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid);

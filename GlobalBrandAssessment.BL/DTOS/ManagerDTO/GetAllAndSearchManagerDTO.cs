@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GlobalBrandAssessment.DAL.Data.Models;
 using Microsoft.AspNetCore.Http;
+using GlobalBrandAssessment.DAL.Data.Models.Common;
 
 namespace GlobalBrandAssessment.BL.DTOS.ManagerDTO
 {
@@ -27,6 +28,8 @@ namespace GlobalBrandAssessment.BL.DTOS.ManagerDTO
         [DisplayName("Image")]
         public string? ImageURL { get; set; }
 
+        [DisplayName("Position")]
+        public string Role { get; set; } = null!;
 
 
 
@@ -34,6 +37,9 @@ namespace GlobalBrandAssessment.BL.DTOS.ManagerDTO
         /*Navigation Property*/
         [DisplayName("Department Name")]
         public string Department { get; set; } = null!;
+
+        
+       
 
     }
 }

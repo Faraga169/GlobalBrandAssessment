@@ -2,24 +2,24 @@
 
 
 <div class="d-flex justify-content-center">
-	<h2 class="text-secondary fs-3">Create Employee</h2>
-	</div>
+    <h2 class="text-secondary fs-3">Create Employee</h2>
+</div>
 
 <div id="formContainer">
-    @await Html.PartialAsync("_CreateManagerPartial", Model)
+    @await Html.PartialAsync("_CreateAdminPartial", Model)
 </div>
 
 @section Scripts {
-	<partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial" />
     <script>
             $(document).ready(function () {
             $("#createEmployeeForm").on("submit", function (e) {
             e.preventDefault();
-			if (!$(this).valid())
-				   return;
+            if (!$(this).valid())
+                   return;
             var formData = new FormData(this);
             $.ajax({
-                url: '@Url.Action("Create", "Manager")',
+                url: '@Url.Action("Create", "Admin")',
                 type: "POST",
                 data: formData,
                 processData: false,
@@ -45,6 +45,6 @@
 
 
 
-	
+
 
 

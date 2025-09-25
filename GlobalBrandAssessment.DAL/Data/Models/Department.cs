@@ -46,11 +46,16 @@ namespace GlobalBrandAssessment.DAL.Data.Models
             }
         }
 
+        //[NotMapped]
+        //[Required(ErrorMessage = "Description is required.")]
+        //public string Description { get; set; } = null!;
+
         /*Foreign key*/
         [ForeignKey("Manager")]
         [DisplayName("Manager")]
         //[Required(ErrorMessage = "Manager is required.")]
         public int? ManagerId { get; set; }
+
 
     }
 }

@@ -11,8 +11,9 @@ namespace GlobalBrandAssessment.BL.Services.Task
 {
     public interface ITaskService:IGenericService<Tasks,AddandUpdateTaskDTO>
     {
-        public Task<List<GetAllandSearchTaskDTO>> GetAllTasksAsync(int? managerid);
+        public Task<List<GetAllandSearchTaskDTO>> GetAllTasksbyManagerIdAsync(int? managerid);
 
+        public Task<List<GetAllandSearchTaskDTO>> GetAll();
         public Task<AddandUpdateTaskDTO> GetTaskByIdAsync(int id);
 
 

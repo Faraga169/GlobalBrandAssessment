@@ -25,31 +25,39 @@
     <h2 class="text-secondary fs-3">Display Departments</h2>
 </div>
 
-<div class="d-flex justify-content-center mb-2">
-    <a class="btn btn-outline-secondary bg-opacity-50" asp-action="Create"><i class="fa-solid fa-circle-plus mx-2"></i>Create New Department</a>
-</div>
 
 
-<div class="input-group mb-2">
-    <input type="search"
-           class="form-control rounded-start-pill searchvalue"
-           placeholder="SEARCH BY Department Name">
-    <button type="submit" class="btn btn-outline-secondary rounded-end-pill" id="searchbtn">
-		@Html.AntiForgeryToken()
-        <i class="fa-solid fa-magnifying-glass"></i>
-    </button>
-</div>
+
+
+
 
    @if(Model.Count() > 0)
 {
+    @if (User.IsInRole("Admin"))
+
+    {
+        <div class="d-flex justify-content-center mb-2">
+            <a class="btn btn-outline-secondary bg-opacity-50" asp-action="Create"><i class="fa-solid fa-circle-plus mx-2"></i>Create New Department</a>
+        </div>
+    }
+    <div class="input-group mb-2">
+        <input type="search"
+               class="form-control rounded-start-pill searchvalue"
+               placeholder="SEARCH BY Department Name">
+        <button type="submit" class="btn btn-outline-secondary rounded-end-pill" id="searchbtn">
+            @Html.AntiForgeryToken()
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </div>
 <table class="table table-hover table-striped table-responsive text-center table-dark rounded-2">
     <thead>
         <tr>
             <th scope="col">@Html.DisplayNameFor(X => X.Name)</th>
             <th scope="col">@Html.DisplayNameFor(X => X.EmployeeCount)</th>
             <th scope="col">@Html.DisplayNameFor(X => X.SumSalary)</th>
+            
             <th scope="col">@Html.DisplayNameFor(X => X.Manager)</th>
-            <th scope="col" colspan="2">Actions</th>
+            <th scope="col" colspan="3">Actions</th>
         </tr>
     </thead>
   

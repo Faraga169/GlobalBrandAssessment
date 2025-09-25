@@ -40,13 +40,21 @@ namespace GlobalBrandAssessment.BL.Services.Task
             return result>0?result:0;
         }
 
-        public async Task<List<GetAllandSearchTaskDTO>> GetAllTasksAsync(int? managerid)
+        
+        public async Task<List<GetAllandSearchTaskDTO>> GetAllTasksbyManagerIdAsync(int? managerid)
         {
-            var tasks =await unitofWork.taskRepository.GetAllTasksAsync(managerid);
+            var tasks =await unitofWork.taskRepository.GetAllTasksbyManagerIdAsyn(managerid);
             var result=mapper.Map<List<Tasks>, List<GetAllandSearchTaskDTO>>(tasks);
             return result;
         }
 
+
+        public async Task<List<GetAllandSearchTaskDTO>> GetAll()
+        {
+            var tasks = await unitofWork.taskRepository.GetAll();
+            var result = mapper.Map<List<Tasks>, List<GetAllandSearchTaskDTO>>(tasks);
+            return result;
+        }
         public async Task<List<Tasks>> GetTaskbyEmployeeIdAsync(int? id)
         {
 

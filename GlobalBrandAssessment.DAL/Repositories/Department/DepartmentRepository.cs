@@ -42,7 +42,16 @@ namespace GlobalBrandAssessment.DAL.Repositories
         public async Task<Department?> GetDepartmentById(int? id)
         {
 
-             return await globalbrandDbContext.Departments.Include(d => d.Manager).Include(d=>d.Employees).FirstOrDefaultAsync(d => d.Id == id);
+             return await globalbrandDbContext.Departments.Include(d => d.Manager).Include(d=>d.Employees).AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
+        }
+
+        public async Task<List<Department>> GetDepartmentsByManagerId(int? managerId)
+        {
+            return await globalbrandDbContext.Departments
+                .Include(d => d.Manager)
+                .Include(d => d.Employees)
+                .Where(d => d.ManagerId == managerId)
+                .ToListAsync();
         }
     }
 }

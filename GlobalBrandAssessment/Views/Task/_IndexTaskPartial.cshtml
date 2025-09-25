@@ -21,8 +21,12 @@
             <td scope="col">
                 @if (!string.IsNullOrEmpty(task.FilePath))
                 {
+                    
+                    var originalFileName = task.FilePath.Contains('_')
+                    ? task.FilePath.Substring(task.FilePath.IndexOf('_') + 1)
+                    : task.FilePath;
                         <a href="@Url.Action("DownloadFile", "Employee", new { fileName=task.FilePath})">
-                            @System.IO.Path.GetFileName(task.FilePath)
+                                @originalFileName
                         </a>
                    
                 }

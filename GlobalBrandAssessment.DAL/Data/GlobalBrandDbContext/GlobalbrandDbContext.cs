@@ -1,9 +1,11 @@
 ﻿using System.Data;
 using GlobalBrandAssessment.DAL.Data.Models;
+using GlobalBrandAssessment.DAL.Data.Models.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Tasks = GlobalBrandAssessment.DAL.Data.Models.Tasks;
+
 
 namespace GlobalBrandAssessment.GlobalBrandDbContext
 {
@@ -18,12 +20,18 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+               
 
-            modelBuilder.Entity<Department>()
-     .HasMany(d => d.Employees)
-     .WithOne(e => e.Department)
-     .HasForeignKey(e => e.DeptId)
-     .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Employee>()
+     .HasOne(e => e.Manager)
+     .WithMany(m => m.Subordinates)
+     .HasForeignKey(e => e.ManagerId)
+     .OnDelete(DeleteBehavior.Restrict); 
+
+
+
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.Roles).HasConversion<string>();
 
             modelBuilder.Entity<Attachment>()
      .HasOne(a => a.Task)
@@ -43,8 +51,20 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
        .HasForeignKey<User>(u => u.EmployeeId)
        .OnDelete(DeleteBehavior.Cascade);
 
-           
-            
+
+          
+            modelBuilder.Entity<Department>()
+                .HasMany(d => d.Employees)
+                .WithOne(e => e.Department)
+                .HasForeignKey(e => e.DeptId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+          
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.Manager)
+                .WithMany() 
+                .HasForeignKey(d => d.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
 
@@ -56,16 +76,16 @@ namespace GlobalBrandAssessment.GlobalBrandDbContext
    );
 
             modelBuilder.Entity<Employee>().HasData(
-                new Employee { Id = 1, FirstName = "Ahmed", LastName = "Farag", Salary = 5000, DeptId = 1, ManagerId = null, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
-                new Employee { Id = 2, FirstName = "Mariam", LastName = "Ahmed", Salary = 6000, DeptId = 1, ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
-                new Employee { Id = 3, FirstName = "Abdelrahman", LastName = "Mohammed", Salary = 5500, DeptId = 1, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 4, FirstName = "Sara", LastName = "Ali", Salary = 7000, DeptId = 2, ImageURL = "/Images/young-beautiful-woman.jpg" },
-                new Employee { Id = 5, FirstName = "Aliaa", LastName = "Khaled", Salary = 6500, DeptId = 3,  ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
-                new Employee { Id = 6, FirstName = "Hamza", LastName = "Ali", Salary = 8500, DeptId = 4,  ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
-                new Employee { Id = 7, FirstName = "Tarek", LastName = "Salama", Salary = 9500, DeptId = 2,  ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 8, FirstName = "Ali", LastName = "Mohammed", Salary = 12000, DeptId = 3,  ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
-                new Employee { Id = 9, FirstName = "Mai", LastName = "Alaa", Salary = 15000, DeptId = 4,  ImageURL = "/Images/young-woman-posing-outdoor-field.jpg" }
-            );
+    new Employee { Id = 1, FirstName = "Ahmed", LastName = "Farag", Password = "Ahmed2003#", Salary = 5000, DeptId = 1, Roles = Role.Manager, ManagerId = null, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
+    new Employee { Id = 2, FirstName = "Mariam", LastName = "Ahmed", Password = "Mariam123#", Salary = 6000, DeptId = 1, Roles = Role.Employee, ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
+    new Employee { Id = 3, FirstName = "Abdelrahman", LastName = "Mohammed", Password = "Abdelrahman123#", Salary = 5500, DeptId = 1, Roles = Role.Employee, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
+    new Employee { Id = 4, FirstName = "Sara", LastName = "Ali", Password = "Sara123#", Salary = 7000, DeptId = 2, Roles = Role.Employee, ImageURL = "/Images/young-beautiful-woman.jpg" },
+    new Employee { Id = 5, FirstName = "Aliaa", LastName = "Khaled", Password = "Aliaa123#", Salary = 6500, DeptId = 3, Roles = Role.Employee, ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg" },
+    new Employee { Id = 6, FirstName = "Hamza", LastName = "Ali", Password = "Hamza123#", Salary = 8500, DeptId = 4, Roles = Role.Employee, ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg" },
+    new Employee { Id = 7, FirstName = "Tarek", LastName = "Salama", Password = "Tarek2003#", Salary = 9500, DeptId = 2, Roles = Role.Manager, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
+    new Employee { Id = 8, FirstName = "Ali", LastName = "Mohammed", Password = "Ali2003#", Salary = 12000, DeptId = 3, Roles = Role.Manager, ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg" },
+    new Employee { Id = 9, FirstName = "Mai", LastName = "Alaa", Password = "Mai2003#", Salary = 15000, DeptId = 4, Roles = Role.Manager, ImageURL = "/Images/young-woman-posing-outdoor-field.jpg" }
+);
 
             //modelBuilder.Entity<User>().HasData(
             //    new User { UserId = 1, UserName = "AhmedFarag", Password = "Ahmed2003#", Role = "Manager", EmployeeId = 1 },

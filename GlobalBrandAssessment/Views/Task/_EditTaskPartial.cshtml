@@ -20,7 +20,14 @@
 		<select asp-items="ViewBag._Employees" asp-for="EmployeeId" class="form-select">
 			@if (Model.EmployeeId == null || Model.EmployeeId == 0)
 			{
-				<option value="">select Department</option>
+				@if (ViewBag._Employees.Count == 0)
+				{
+					<option value="">No employees available</option>
+				}
+				else
+				{
+					<option value="">Select Employee</option>
+				}
 			}
 
 		</select>

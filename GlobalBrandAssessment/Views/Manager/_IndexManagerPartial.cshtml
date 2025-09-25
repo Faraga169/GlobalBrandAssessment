@@ -8,6 +8,7 @@
             <td>@employee.FirstName</td>
             <td>@employee.LastName</td>
             <td>@string.Format("{0:C}", employee.Salary)</td>
+            <td>@employee.Role</td>
             <td>
                 <img src="@(employee.ImageURL ?? Url.Content("~/Images/defaultimage.jpg"))"
                 alt="@employee.FirstName"
@@ -15,14 +16,9 @@
             </td>
             <td>@(string.IsNullOrEmpty(employee.Department) ? "No Department" : employee.Department)</td>
             <td>
-                <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@employee.Id"><i class="fa-solid text-light mx-2 fa-pen-to-square"></i>Edit</a>
+                <a class="btn btn-outline-secondary" asp-action="details" asp-route-id="@employee.Id"><i class="fa-solid text-light mx-2 fa-eye"></i>View details</a>
             </td>
-            <td>
-                <button class="btn btn-outline-danger deletebtn" data-id="@employee.Id">
-					@Html.AntiForgeryToken()
-                    <i class="fa-solid fa-delete-left mx-2"></i>
-        Delete </button >
-            </td>
+          
         </tr>
 
     }

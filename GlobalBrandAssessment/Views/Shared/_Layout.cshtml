@@ -27,25 +27,67 @@
                 <!-- Navbar links -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto">
-                        <li class="nav-item me-3">
-                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Manager" asp-action="Index">Employees</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Department" asp-action="Index">Department</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-black fw-semibold" asp-area="" asp-controller="Task" asp-action="Index">Tasks</a>
-                        </li>
-                        
+                        @if (User.IsInRole("Admin"))
+                        {
+                          
+                            <li class="nav-item me-3">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Admin" asp-action="Index">Employees</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Department" asp-action="Index">Departments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Task" asp-action="Index">Tasks</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Manager"))
+                        {
+                           
+                            <li class="nav-item me-3">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Manager" asp-action="Index">Employees</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Department" asp-action="Index">Department</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Task" asp-action="Index">Tasks</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Employee"))
+                        {
+                            <li class="nav-item me-3">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Employee" asp-action="Index">profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-black fw-semibold" asp-controller="Employee" asp-action="Task">Tasks</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a id="darkModeToggle" class="btn btn-dark px-2 mx-1 ">Dark Mode</a>
+                        <li class="nav-item me-3 d-flex align-items-center">
+                            @{
+                                var role = User.IsInRole("Admin") ? "Admin" :
+                                User.IsInRole("Manager") ? "Manager" :
+                                User.IsInRole("Employee") ? "Employee" : "Unknown";
+                                var badgeClass = role switch
+                                {
+                                    "Admin" => "bg-success",   
+                                    "Manager" => "bg-primary", 
+                                    "Employee" => "bg-secondary", 
+                                    _ => "bg-dark"
+                                };
+                            }
+                            <span class="badge @badgeClass fs-6">
+                                @role
+                            </span>
                         </li>
-                        <form asp-action="Logout" asp-controller="Login" >
+
+                        <li class="nav-item">
+                            <a id="darkModeToggle" class="btn btn-dark px-2 mx-1">Dark Mode</a>
+                        </li>
+                        <form asp-action="Logout" asp-controller="Login">
                             <button class="btn btn-danger text-light fw-semibold" type="submit">Logout</button>
                         </form>
-                        
                     </ul>
                 </div>
             </div>

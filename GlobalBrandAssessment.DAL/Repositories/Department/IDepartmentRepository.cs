@@ -12,7 +12,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
     {
         public Task<List<Department>> GetAllAsync();
 
-
+        public Task<List<Department>> GetDepartmentsByManagerId(int? managerId);
         public Task<List<Department>> SearchAsync(string searchname);
 
         public Task<Department?> GetDepartmentById(int? id);

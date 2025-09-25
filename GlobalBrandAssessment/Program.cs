@@ -7,11 +7,11 @@ using GlobalBrandAssessment.BL.Services;
 using GlobalBrandAssessment.BL.Services.Generic;
 using GlobalBrandAssessment.BL.Services.Manager;
 using GlobalBrandAssessment.BL.Services.Task;
-using GlobalBrandAssessment.DAL.Data;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.DAL.Repositories.Attachment;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
+using GlobalBrandAssessment.DAL.Seeding;
 using GlobalBrandAssessment.DAL.UnitofWork;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.AspNetCore.Identity;
@@ -103,7 +103,12 @@ namespace GlobalBrandAssessment
 
                 var userManager = services.GetRequiredService<UserManager<User>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                await ApplicationDbContextSeed.SeedUsersAndRolesAsync(userManager, roleManager);
+                var globalbrandDbContext = services.GetRequiredService<GlobalbrandDbContext>();
+             
+                if (!await userManager.Users.AnyAsync())
+                {
+                    await ApplicationDbContextSeed.SeedUsersAndRolesAsync(userManager, roleManager, globalbrandDbContext);
+                }
             }
 
             app.Run();

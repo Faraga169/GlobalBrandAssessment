@@ -23,21 +23,40 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
         public async Task<List<TaskModel>> SearchAsync(string searchname, int? managerid)
         {
-            var query = globalbrandDbContext.Tasks.Include(e => e.AssignedEmployee).Include(e => e.Attachments).Include(e => e.Comments).Where(t => t.AssignedEmployee.ManagerId == managerid).AsQueryable();
-            if (!string.IsNullOrEmpty(searchname))
+            var query = globalbrandDbContext.Tasks
+                .Include(e => e.AssignedEmployee)
+                .Include(e => e.Attachments)
+                .Include(e => e.Comments)
+                .AsQueryable();
+
+           
+            if (managerid.HasValue)
             {
-                query = query.Where(e => e.Title.ToLower().Contains(searchname.ToLower()));
+                query = query.Where(t => t.AssignedEmployee != null && t.AssignedEmployee.ManagerId == managerid.Value);
+            }
+
+           
+            if (!string.IsNullOrWhiteSpace(searchname))
+            {
+                var lowerSearch = searchname.ToLower();
+                query = query.Where(e => e.Title.ToLower().Contains(lowerSearch));
             }
 
             return await query.ToListAsync();
         }
-      
-           
 
-        public async Task<List<TaskModel>> GetAllTasksAsync(int? managerid)
+
+
+
+        public async Task<List<TaskModel>> GetAllTasksbyManagerIdAsyn(int? managerid)
         {
             var tasks = globalbrandDbContext.Tasks.Include(T=>T.AssignedEmployee).Include(T=>T.Attachments).Include(T=>T.Comments).Where(T=>T.AssignedEmployee.ManagerId==managerid).ToListAsync();
             return await tasks;
+        }
+
+        public async Task<List<TaskModel>> GetAll() { 
+        var tasks = await globalbrandDbContext.Tasks.Include(T => T.AssignedEmployee).Include(T => T.Attachments).Include(T => T.Comments).ToListAsync();
+            return tasks;
         }
 
        

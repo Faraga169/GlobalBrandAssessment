@@ -66,6 +66,8 @@ namespace GlobalBrandAssessment.PL.Controllers.Login
                             return RedirectToAction("Index", "Manager");
                         else if (UserRole == "Employee")
                             return RedirectToAction("Index", "Employee");
+                        else if (UserRole == "Admin")
+                            return RedirectToAction("Index", "Admin");
 
                     }
 

@@ -13,8 +13,10 @@ namespace GlobalBrandAssessment.BL.Profiles.DepartmentProfile
     {
         public DepartmentMapping()
         {
-            CreateMap<AddAndUpdateDepartmentDTO, Department>().ReverseMap();
-            CreateMap<Department, GetAllandSearchDepartmentDTO>().ForMember(tdest => tdest.Manager, option => option.MapFrom(tsource => tsource.Manager!=null?tsource.Manager.FullName:null));
+
+            CreateMap<Department, AddAndUpdateDepartmentDTO>().ReverseMap();
+
+            CreateMap<Department, GetAllandSearchDepartmentDTO>().ForMember(tdest => tdest.Manager, option => option.MapFrom(tsource => tsource.Manager!=null?tsource.Manager.FullName:null)) ;
         }
 
     }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GlobalBrandAssessment.DAL.Migrations
 {
     [DbContext(typeof(GlobalbrandDbContext))]
-    [Migration("20250917131451_InitialCreate")]
+    [Migration("20250925012823_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -138,7 +138,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DeptId")
+                    b.Property<int?>("DeptId")
                         .HasColumnType("int");
 
                     b.Property<string>("FirstName")
@@ -156,6 +156,10 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
                     b.Property<int?>("ManagerId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Roles")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
@@ -176,6 +180,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Ahmed",
                             ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg",
                             LastName = "Farag",
+                            Roles = "Manager",
                             Salary = 5000m
                         },
                         new
@@ -185,6 +190,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Mariam",
                             ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg",
                             LastName = "Ahmed",
+                            Roles = "Employee",
                             Salary = 6000m
                         },
                         new
@@ -194,6 +200,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Abdelrahman",
                             ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg",
                             LastName = "Mohammed",
+                            Roles = "Employee",
                             Salary = 5500m
                         },
                         new
@@ -203,6 +210,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Sara",
                             ImageURL = "/Images/young-beautiful-woman.jpg",
                             LastName = "Ali",
+                            Roles = "Employee",
                             Salary = 7000m
                         },
                         new
@@ -212,6 +220,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Aliaa",
                             ImageURL = "/Images/causal-female-posing-hat-isolated-white-wall.jpg",
                             LastName = "Khaled",
+                            Roles = "Employee",
                             Salary = 6500m
                         },
                         new
@@ -221,6 +230,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Hamza",
                             ImageURL = "/Images/bohemian-man-with-his-arms-crossed.jpg",
                             LastName = "Ali",
+                            Roles = "Employee",
                             Salary = 8500m
                         },
                         new
@@ -230,6 +240,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Tarek",
                             ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg",
                             LastName = "Salama",
+                            Roles = "Manager",
                             Salary = 9500m
                         },
                         new
@@ -239,6 +250,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Ali",
                             ImageURL = "/Images/smiling-young-man-with-crossed-arms-outdoors.jpg",
                             LastName = "Mohammed",
+                            Roles = "Manager",
                             Salary = 12000m
                         },
                         new
@@ -248,6 +260,7 @@ namespace GlobalBrandAssessment.DAL.Migrations
                             FirstName = "Mai",
                             ImageURL = "/Images/young-woman-posing-outdoor-field.jpg",
                             LastName = "Alaa",
+                            Roles = "Manager",
                             Salary = 15000m
                         });
                 });
@@ -557,7 +570,8 @@ namespace GlobalBrandAssessment.DAL.Migrations
                 {
                     b.HasOne("GlobalBrandAssessment.DAL.Data.Models.Employee", "Manager")
                         .WithMany()
-                        .HasForeignKey("ManagerId");
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Manager");
                 });
@@ -567,12 +581,12 @@ namespace GlobalBrandAssessment.DAL.Migrations
                     b.HasOne("GlobalBrandAssessment.DAL.Data.Models.Department", "Department")
                         .WithMany("Employees")
                         .HasForeignKey("DeptId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("GlobalBrandAssessment.DAL.Data.Models.Employee", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId");
+                        .WithMany("Subordinates")
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
 
@@ -658,6 +672,8 @@ namespace GlobalBrandAssessment.DAL.Migrations
 
             modelBuilder.Entity("GlobalBrandAssessment.DAL.Data.Models.Employee", b =>
                 {
+                    b.Navigation("Subordinates");
+
                     b.Navigation("Tasks");
 
                     b.Navigation("User");

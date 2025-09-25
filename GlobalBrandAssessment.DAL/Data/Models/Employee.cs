@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GlobalBrandAssessment.DAL.Data.Models.Common;
 using Microsoft.AspNetCore.Http;
 
 namespace GlobalBrandAssessment.DAL.Data.Models
@@ -44,8 +45,14 @@ namespace GlobalBrandAssessment.DAL.Data.Models
                 
                 }
 
+        [Required(ErrorMessage ="Please Enter Role")]
+        [DisplayName("Position")]
+        public Role Roles { get; set; }
+
         /*Navigation Property*/
         public virtual Employee? Manager { get; set; } = null!;
+
+        public virtual ICollection<Employee> Subordinates { get; set; } = new HashSet<Employee>();
 
         public virtual Department? Department { get; set; } = null!;
 
@@ -60,7 +67,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
 
         [ForeignKey("Department")]
         [DisplayName("Department")]
-        [Required(ErrorMessage = "Department is required.")]
+       
         public int? DeptId { get; set; }
 
 
