@@ -1,4 +1,6 @@
-﻿using GlobalBrandAssessment.BL.Profiles.AttachmentProfile;
+﻿using System.Collections.ObjectModel;
+using System.Data;
+using GlobalBrandAssessment.BL.Profiles.AttachmentProfile;
 using GlobalBrandAssessment.BL.Profiles.CommentProfile;
 using GlobalBrandAssessment.BL.Profiles.DepartmentProfile;
 using GlobalBrandAssessment.BL.Profiles.ManagerProfile;
@@ -14,9 +16,13 @@ using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.DAL.Seeding;
 using GlobalBrandAssessment.DAL.UnitofWork;
 using GlobalBrandAssessment.GlobalBrandDbContext;
+using GlobalBrandAssessment.PL.GlobalErrorHandling;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
 
 namespace GlobalBrandAssessment
 {
@@ -24,9 +30,42 @@ namespace GlobalBrandAssessment
     {
         public static async Task Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+
+   .MinimumLevel.Information() 
+
+.MinimumLevel.Override("Microsoft", LogEventLevel.Error)
+.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
+.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
+.MinimumLevel.Override("System", LogEventLevel.Error)
+
+                .WriteTo.Console()
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.MSSqlServer
+                (
+                    connectionString: "Server=.;Database=GlobalBrandAssessment;Trusted_Connection=True;TrustServerCertificate=True",
+                    sinkOptions: new MSSqlServerSinkOptions { TableName = "AuditLogs", AutoCreateSqlTable = true }
+                ,
+                  columnOptions: new ColumnOptions() {
+
+                  AdditionalColumns= new Collection<SqlColumn>
+        {
+            new SqlColumn("UserName", SqlDbType.NVarChar, dataLength: 100),
+            new SqlColumn("ActionType", SqlDbType.NVarChar, dataLength: 100),
+            new SqlColumn("Controller", SqlDbType.NVarChar, dataLength: 100)
+        }
+                  }
+        ).CreateLogger();
+
+
+
             var builder = WebApplication.CreateBuilder(args);
 
             #region Add services to the container.
+            // Replace default logger with Serilog
+            builder.Host.UseSerilog();
+
             builder.Services.AddControllersWithViews(options =>
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
@@ -79,6 +118,7 @@ namespace GlobalBrandAssessment
             }
 
             app.UseHttpsRedirection();
+            app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseStaticFiles();
             app.Use(async (context, next) =>
             {
@@ -90,7 +130,7 @@ namespace GlobalBrandAssessment
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+          
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Login}/{action=Index}/{id:int?}");

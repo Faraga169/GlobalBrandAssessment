@@ -1,20 +1,18 @@
 ﻿using GlobalBrandAssessment.BL.Services.Manager;
-
 using GlobalBrandAssessment.PL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using GlobalBrandAssessment.DAL.Data.Models;
 using GlobalBrandAssessment.BL.Services;
 using System.Threading.Tasks;
-using GlobalBrandAssessment.GlobalBrandDbContext;
-using System.Data;
 using GlobalBrandAssessment.BL.DTOS.ManagerDTO;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using GlobalBrandAssessment.DAL.Data.Models.Common;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
+using Serilog;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -26,138 +24,95 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly IEmployeeService employeeService;
         private readonly IDepartmentService departmentService;
         private readonly IMapper mapper;
-        private readonly ILogger<ManagerController> logger;
-        private readonly IWebHostEnvironment environment;
 
-        public ManagerController(IManagerService managerService, UserManager<User> userManager, IEmployeeService employeeService, IDepartmentService departmentService, IMapper mapper, ILogger<ManagerController> logger,IWebHostEnvironment environment)
+        public ManagerController(
+            IManagerService managerService,
+            UserManager<User> userManager,
+            IEmployeeService employeeService,
+            IDepartmentService departmentService,
+            IMapper mapper,
+            ILogger<ManagerController> logger)
         {
             this.managerService = managerService;
             this.userManager = userManager;
             this.employeeService = employeeService;
             this.departmentService = departmentService;
             this.mapper = mapper;
-            this.logger = logger;
-            this.environment = environment;
         }
 
         [HttpGet]
-        
-        public async Task<IActionResult> Index(int pageno=1,int pagesize=5,string sortcolumn="FirstName")
-
+        public async Task<IActionResult> Index(int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
         {
+            var currentUser = await userManager.GetUserAsync(User);
+            var managerId = currentUser?.EmployeeId;
 
-             
-            try
-            {
+            var manager = await employeeService.GetEmployeesByManagerPagedAsync(managerId, pageno, pagesize, sortcolumn);
 
-                var currentUser = await userManager.GetUserAsync(User);
-                var managerId = currentUser?.EmployeeId;
+            Log.ForContext("UserName", currentUser.UserName)
+                .ForContext("ActionType", "Index")
+                .ForContext("Controller", "Manager")
+                .Information("Manager {ManagerName} viewed employee list ", currentUser.UserName);
 
-                var manager = await employeeService.GetEmployeesByManagerPagedAsync(managerId,pageno,pagesize,sortcolumn);
-                return View(manager);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex.Message, "An error occurred in Manager Index action.");
-                return PartialView("Errorpartial", ex);
-            }
-
+            return View(manager);
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> Search(string searchname)
         {
-            try
+            if (string.IsNullOrWhiteSpace(searchname))
             {
-                var currentUser = await userManager.GetUserAsync(User);
-                var managerId = currentUser?.EmployeeId;
-                var manager=new List<GetAllAndSearchManagerDTO>();
-                if (User.IsInRole("Manager"))
-                {
-                    manager = await managerService.SearchAsync(searchname, managerId);
-                }
-
-                else if (User.IsInRole("Admin")) {
-                    manager = await managerService.SearchAsync(searchname,null);
-                }
-              
-                if (manager == null || !manager.Any())
-                
-                    return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
-                
-
-                return PartialView("_IndexManagerPartial", manager);
-
-
+                Log.ForContext("UserName", User?.Identity?.Name)
+               .ForContext("ActionType", "Search")
+               .ForContext("Controller", "Manager")
+               .Warning("Empty search term provided by user {UserName}", User.Identity?.Name);
+                return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
             }
-            catch (Exception ex)
-            {
-                if (environment.IsDevelopment())
-                {
-                    // 1.Development => Log Error In Console and Return Same view with Error Message
-                    TempData["Message"] = ex.Message;
-                    return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
-                }
-                else
-                {
-                    //2. Deployment => Log Error In File | Table in Database And Return Error View
-                    logger.LogError(ex.Message);
-                    return PartialView("Errorpartial",ex);
-                }
 
+            var currentUser = await userManager.GetUserAsync(User);
+            var managerId = currentUser?.EmployeeId;
 
-            }
-      
+            List<GetAllAndSearchManagerDTO> managerResults;
+
+            if (User.IsInRole("Manager"))
+                managerResults = await managerService.SearchAsync(searchname, managerId);
+            else
+                managerResults = await managerService.SearchAsync(searchname, null);
+
+         
+            if (managerResults == null || !managerResults.Any())
+                Log.ForContext("UserName", User?.Identity?.Name)
+               .ForContext("ActionType", "Search")
+               .ForContext("Controller", "Manager")
+                .Warning("Search for '{SearchTerm}' by {UserName} returned no results", searchname, User.Identity?.Name);
+            else
+                Log.ForContext("UserName", User?.Identity?.Name)
+               .ForContext("ActionType", "Search")
+               .ForContext("Controller", "Manager")
+                .Information("Search for {SearchTerm} by {UserName}", searchname, User.Identity?.Name);
+
+            return PartialView("_IndexManagerPartial", managerResults ?? new List<GetAllAndSearchManagerDTO>());
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
+            var employee = await employeeService.GetEmployeeByIdAsync(id);
 
            
-            try
+            if (employee == null)
             {
-                var employee=await employeeService.GetEmployeeByIdAsync(id);
-                return View(employee);
-            }
-           
-            catch (Exception ex)
-            {
-                if (environment.IsDevelopment())
-                {
-                    // 1.Development => Log Error In Console and Return Same view with Error Message
-                    TempData["Message"] = ex.Message;
-                    return View();
-                }
-                else
-                {
-                    //2. Deployment => Log Error In File | Table in Database And Return Error View
-                    logger.LogError(ex.Message);
-                    return PartialView("Errorpartial",ex);
-                }
-
-
+                Log.ForContext("UserName", User?.Identity?.Name)
+               .ForContext("ActionType", "Details")
+               .ForContext("Controller", "Manager")
+               .Warning("Manager {UserName} tried to view non-existent employee with ID {EmployeeId}", User.Identity?.Name, id);
+                return NotFound();
             }
 
+            Log.ForContext("UserName", User?.Identity?.Name)
+                .ForContext("ActionType", "Details")
+                .ForContext("Controller", "Manager")
+                .Information("Manager {UserName} viewed details for employee {EmployeeName}", User.Identity?.Name, employee.FirstName);
+            return View(employee);
         }
-
-
-
-       
-
-        
-        
-
-       
-
-      
-
-        
     }
 }
-         
-        
-    
-

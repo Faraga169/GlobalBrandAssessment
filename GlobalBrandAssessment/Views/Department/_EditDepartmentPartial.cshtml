@@ -20,8 +20,9 @@
 		<select asp-items="ViewBag._Manager" asp-for="ManagerId" class="form-select" disabled>
 			@if (Model.ManagerId == null)
 			{
-				<option value="">Select Manager</option>
+				<option value="">No Manager</option>
 			}
+			<option value="">Select Manager</option>
 		</select>
 		<span asp-validation-for="ManagerId" class="text-danger"></span>
 	</div>

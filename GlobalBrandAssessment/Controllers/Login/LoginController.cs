@@ -4,6 +4,7 @@ using GlobalBrandAssessment.PL.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace GlobalBrandAssessment.PL.Controllers.Login
 {
@@ -12,14 +13,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Login
        
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
-        private readonly ILogger<LoginController> logger;
 
-        public LoginController(UserManager<User> userManager,SignInManager<User> signInManager, ILogger<LoginController> logger)
+        public LoginController(UserManager<User> userManager,SignInManager<User> signInManager)
         {
             
             this.userManager = userManager;
             this.signInManager = signInManager;
-            this.logger = logger;
         }
 
         [HttpGet]
@@ -38,49 +37,84 @@ namespace GlobalBrandAssessment.PL.Controllers.Login
         [HttpPost]
         public IActionResult Index(LoginViewModel loginViewModel)
         {
-            try
+
+            if (ModelState.IsValid)
             {
+                Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+               .Information("Login attempt started for user: {UserName}", loginViewModel.UserName);
 
-                if (ModelState.IsValid)
+                var username = userManager.FindByNameAsync(loginViewModel.UserName).Result;
+                if (username == null)
                 {
-                    var username = userManager.FindByNameAsync(loginViewModel.UserName).Result;
-                    if (username == null) {
-                        ModelState.AddModelError("","Username is not exist");
-                        return View(loginViewModel);
-                    }
-
-                    var passwordValid = userManager.CheckPasswordAsync(username, loginViewModel.Password).Result;
-                    if (!passwordValid) {
-                        ModelState.AddModelError("", "Password is not registered in system");
-                        return View(loginViewModel);
-                    }
-                     
-                    var result=signInManager.PasswordSignInAsync(username, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: false).Result;
-                    if(!result.IsNotAllowed)
-                        ModelState.AddModelError("", "You are not allowed to login");
-                    if(result.IsLockedOut)
-                        ModelState.AddModelError("", "You are locked out");
-                    if (result.Succeeded) { 
-                        var UserRole = userManager.GetRolesAsync(username).Result.FirstOrDefault();
-                        if(UserRole=="Manager")
-                            return RedirectToAction("Index", "Manager");
-                        else if (UserRole == "Employee")
-                            return RedirectToAction("Index", "Employee");
-                        else if (UserRole == "Admin")
-                            return RedirectToAction("Index", "Admin");
-
-                    }
-
+                    Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+              .Warning("Login failed: Username {UserName} does not exist.", loginViewModel.UserName);
+                    ModelState.AddModelError("", "Username does not exist");
+                    return View(loginViewModel);
                 }
 
-                return View(loginViewModel);
+                var passwordValid = userManager.CheckPasswordAsync(username, loginViewModel.Password).Result;
+                if (!passwordValid)
+                {
+                    Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+              .Warning("Login failed: Invalid password for user {UserName}.", loginViewModel.UserName);
+                    ModelState.AddModelError("", "Invalid password");
+                    return View(loginViewModel);
+                }
+
+                var result = signInManager.PasswordSignInAsync(username, loginViewModel.Password, loginViewModel.RememberMe, lockoutOnFailure: false).Result;
+
+                if (result.IsNotAllowed)
+                {
+                    Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+              .Warning("Login blocked: User {UserName} is not allowed to log in.", loginViewModel.UserName);
+                    ModelState.AddModelError("", "You are not allowed to login");
+                    return View(loginViewModel);
+                }
+
+                if (result.IsLockedOut)
+                {
+                    Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+              .Warning("Login blocked: User {UserName} account is locked out.", loginViewModel.UserName);
+                    ModelState.AddModelError("", "You are locked out");
+                    return View(loginViewModel);
+                }
+
+                if (result.Succeeded)
+                {
+                    var userRole = userManager.GetRolesAsync(username).Result.FirstOrDefault();
+                    Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+               .Information("User {UserName} logged in successfully with role '{Role}'.", loginViewModel.UserName, userRole);
+
+                    if (userRole == "Manager")
+                        return RedirectToAction("Index", "Manager");
+                    else if (userRole == "Employee")
+                        return RedirectToAction("Index", "Employee");
+                    else if (userRole == "Admin")
+                        return RedirectToAction("Index", "Admin");
+                }
+
+                Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Login")
+               .Warning("Login failed for user '{UserName}' due to unknown reason.", loginViewModel.UserName);
             }
 
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Login Index action.");
-                return StatusCode(500, "Server is not work");
-            }
+            return View(loginViewModel);
+            
+
+          
 
         }
 
@@ -88,10 +122,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Login
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-           
+            var userName = User.Identity?.Name ?? "Unknown";
             await signInManager.SignOutAsync();
-
-
+            Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "LogOut")
+              .ForContext("Controller", "Login")
+            .Information("{UserName} logged out successfully.",userName);
             return RedirectToAction("Index", "Login");
         }
 

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Serilog;
 
 namespace GlobalBrandAssessment.PL.Controllers.Employee
 {
@@ -29,9 +30,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         private readonly IAttachmentService attachmentService;
       
         private readonly IMapper mapper;
-        private readonly ILogger<EmployeeController> logger;
 
-        public EmployeeController(IEmployeeService employeeService,UserManager<User> userManager, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IMapper mapper,ILogger<EmployeeController> logger)
+
+        public EmployeeController(IEmployeeService employeeService,UserManager<User> userManager, IDepartmentService departmentService, ITaskService taskService, ICommentService commentService, IAttachmentService attachmentService,IMapper mapper)
         {
             this.employeeService = employeeService;
             this.userManager = userManager;
@@ -41,14 +42,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             this.attachmentService = attachmentService;
             
             this.mapper = mapper;
-            this.logger = logger;
         }
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Index()
         {
            
-
-            try {
                 var currentUser = await userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
@@ -57,14 +55,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 int? employeeId = currentUser.EmployeeId;
                 var employee = await employeeService.GetEmployeeByIdAsync(employeeId);
                 return View(employee);
-            }
-
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Employee Index action.");
-                return StatusCode(500, "Internal server error");
-            }
-
         }
 
 
@@ -74,7 +64,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         {
             
 
-            try {
+          
 
                 var currentUser = await userManager.GetUserAsync(User);
                 if (currentUser == null)
@@ -89,23 +79,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                     return RedirectToAction("Index");
                 }
                 return View(employeetask);
-            }
-
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Employee Task action.");
-                return StatusCode(500, "Internal server error");
-            }   
-
+            
         }
 
         [Authorize(Roles = "Employee")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-           
-
-            try {
                 if (!id.HasValue)
                     return BadRequest();
               
@@ -119,24 +99,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 
                     return View(result);
                 
-            
-            }
-
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An error occurred in Employee Edit GET action.");
-                return StatusCode(500, "Internal server error");
-            }
-
         }
 
         [HttpPost]
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> Edit(TaskEditViewModel taskEditViewModel)
         {
-
-            try {
-             
                 var currentUser = await userManager.GetUserAsync(User);
                 if (currentUser == null)
                 {
@@ -225,23 +193,26 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
                 int result = await taskService.UpdateAsync(AddandUpdateTaskDTO);
                 if (result > 0)
                 {
-                    TempData["Message"] = "status updated successfully.";
+                Log.ForContext("UserName", User?.Identity?.Name)
+                   .ForContext("ActionType", "Edit")
+                   .ForContext("Controller", "Employee")
+                   .Information("Employee {UserName}  updated task {Title}", User?.Identity?.Name, taskEditViewModel.Title);
+                TempData["Message"] = "status updated successfully.";
+
                     return Json(new { success = true, redirectUrl = Url.Action("Task", "Employee") });
                 }
                 else
                 {
-                    TempData["Message"] = "Failed to update status.";
+                Log.ForContext("UserName", User?.Identity?.Name)
+                  .ForContext("ActionType", "Edit")
+                  .ForContext("Controller", "Employee")
+                  .Warning("Failed to update task {Title} by Employee {UserName})", taskEditViewModel.Title, User?.Identity?.Name);
+                TempData["Message"] = "Failed to update status.";
                     return PartialView("_EditTaskPartial", taskEditViewModel);
                 }
-            }
-
-            catch (Exception ex) { 
-            logger.LogError(ex, "An error occurred in Employee Edit POST action.");
-            TempData["Message"] = "Something wrong going";
-            return Json(new { success = true, redirectUrl = Url.Action("Task", "Employee") });
-            }
-            
+  
         }
+
         [HttpGet]
         [Authorize(Roles = "Employee,Manager,Admin")]
         public IActionResult DownloadFile(string fileName)
@@ -249,7 +220,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
            
             var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot","uploads", fileName);
 
-            // force download for any file type
             var contentType = "application/octet-stream";
             if (!System.IO.File.Exists(fullPath))
                 return NotFound("File not found on server.");

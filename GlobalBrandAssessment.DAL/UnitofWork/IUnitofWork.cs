@@ -9,21 +9,21 @@ using GlobalBrandAssessment.DAL.Repositories.Generic;
 
 namespace GlobalBrandAssessment.DAL.UnitofWork
 {
-    public interface IUnitofWork
+    public interface IUnitofWork :IDisposable
     {
-       
-        public  IAttachmentRepository attachmentRepository { get; }
+
+        public IAttachmentRepository attachmentRepository { get; }
         public ICommentRepository commentRepository { get; }
 
         public IEmployeeRepository employeeRepository { get; }
 
-       
+
 
         public ITaskRepository taskRepository { get; }
 
         public IManagerRepository ManagerRepository { get; }
 
-        public IDepartmentRepository departmentRepository { get;}
+        public IDepartmentRepository departmentRepository { get; }
         public Task<int> CompleteAsync();
 
 

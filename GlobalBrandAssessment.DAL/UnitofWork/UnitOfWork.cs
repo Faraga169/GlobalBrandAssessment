@@ -8,6 +8,7 @@ using GlobalBrandAssessment.DAL.Repositories;
 using GlobalBrandAssessment.DAL.Repositories.Attachment;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace GlobalBrandAssessment.DAL.UnitofWork
 {
@@ -51,6 +52,10 @@ namespace GlobalBrandAssessment.DAL.UnitofWork
             return await globalbrandDbContext.SaveChangesAsync();
         }
 
+        public void  Dispose()
+        {
+           globalbrandDbContext.Dispose();
+        }
 
         public IGenericRepository<T> Repository<T>() where T : class
         {
