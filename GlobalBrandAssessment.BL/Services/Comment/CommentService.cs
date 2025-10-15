@@ -32,17 +32,17 @@ namespace GlobalBrandAssessment.BL.Services
 
         public async Task<Comment?> GetByTaskIdAsync(int taskId)
         {
-            var result = await unitofWork.commentRepository.GetByTaskId(taskId);
+            var result = await unitofWork.Repository<ICommentRepository,Comment>().GetByTaskId(taskId);
             return result;
         }
 
         public async Task<int> DeleteAsync(int id)
         {
-            var comment = await unitofWork.commentRepository.GetByTaskId(id);
+            var comment = await unitofWork.Repository<ICommentRepository, Comment>().GetByTaskId(id);
             if (comment is null)
                 return 0;
 
-            await unitofWork.commentRepository.DeleteAsync(comment);
+            await unitofWork.Repository<ICommentRepository, Comment>().DeleteAsync(comment);
             var result = await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }

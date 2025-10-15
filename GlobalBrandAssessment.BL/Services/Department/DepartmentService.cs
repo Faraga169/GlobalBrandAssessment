@@ -40,7 +40,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
             return 0;
 
         
-        var department = await unitofWork.departmentRepository.GetDepartmentById(id);
+        var department = await unitofWork.Repository<IDepartmentRepository,Department>().GetDepartmentById(id);
 
         if (department == null)
             return 0;
@@ -60,7 +60,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
         }
 
 
-        await unitofWork.departmentRepository.DeleteAsync(department);
+        await unitofWork.Repository<IDepartmentRepository, Department>().DeleteAsync(department);
 
         var result = await unitofWork.CompleteAsync();
 
@@ -69,7 +69,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
 
     public async Task<List<GetAllandSearchDepartmentDTO>> GetDepartmentByManagerId(int? managerId) {
 
-        var department = await unitofWork.departmentRepository.GetDepartmentsByManagerId(managerId);
+        var department = await unitofWork.Repository<IDepartmentRepository,Department>().GetDepartmentsByManagerId(managerId);
         
         var GetDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(department);
         return GetDepartmentDTO;
@@ -78,7 +78,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
     public async Task<List<GetAllandSearchDepartmentDTO>> SearchAsync(string searchname)
     {
        
-        var departmentlist = await unitofWork.departmentRepository.SearchAsync(searchname);
+        var departmentlist = await unitofWork.Repository<IDepartmentRepository,Department>().SearchAsync(searchname);
         var SearchDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
         return SearchDepartmentDTO;
     }
@@ -86,7 +86,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
 
     public async Task< List<GetAllandSearchDepartmentDTO>> GetAllAsync()
     {
-        var departmentlist = await unitofWork.departmentRepository.GetAllAsync();
+        var departmentlist = await unitofWork.Repository<IDepartmentRepository, Department>().GetAllAsync();
         var GetAllDepartmentDTO = mapper.Map<List<Department>, List<GetAllandSearchDepartmentDTO>>(departmentlist);
         return GetAllDepartmentDTO;
     }
@@ -95,7 +95,7 @@ public class DepartmentService : GenericService<Department,AddAndUpdateDepartmen
 
     public async Task<AddAndUpdateDepartmentDTO?> GetDepartmentByIdAsync(int? id)
     {
-        var department =await unitofWork.departmentRepository.GetDepartmentById(id);
+        var department =await unitofWork.Repository<IDepartmentRepository,Department>().GetDepartmentById(id);
         if (department is null)
             return null;
         var GetDepartmentDTO = mapper.Map<Department, AddAndUpdateDepartmentDTO>(department);

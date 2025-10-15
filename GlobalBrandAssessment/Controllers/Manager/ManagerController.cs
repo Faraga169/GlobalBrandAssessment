@@ -41,57 +41,33 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
+        public async Task<IActionResult> Index(string? searchname,int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
         {
             var currentUser = await userManager.GetUserAsync(User);
             var managerId = currentUser?.EmployeeId;
 
-            var manager = await employeeService.GetEmployeesByManagerPagedAsync(managerId, pageno, pagesize, sortcolumn);
+            PagedResult<GetAllAndSearchManagerDTO> result;
 
-            Log.ForContext("UserName", currentUser.UserName)
-                .ForContext("ActionType", "Index")
-                .ForContext("Controller", "Manager")
-                .Information("Manager {ManagerName} viewed employee list ", currentUser.UserName);
-
-            return View(manager);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Search(string searchname)
-        {
-            if (string.IsNullOrWhiteSpace(searchname))
+            if (!string.IsNullOrEmpty(searchname))
             {
+                result = await managerService.SearchAsync(searchname, managerId, pageno, pagesize, sortcolumn);
                 Log.ForContext("UserName", User?.Identity?.Name)
                .ForContext("ActionType", "Search")
                .ForContext("Controller", "Manager")
-               .Warning("Empty search term provided by user {UserName}", User.Identity?.Name);
-                return PartialView("_IndexManagerPartial", new List<GetAllAndSearchManagerDTO>());
+                .Information("Search for {SearchTerm} by {UserName}", searchname, currentUser.UserName);
             }
-
-            var currentUser = await userManager.GetUserAsync(User);
-            var managerId = currentUser?.EmployeeId;
-
-            List<GetAllAndSearchManagerDTO> managerResults;
-
-            if (User.IsInRole("Manager"))
-                managerResults = await managerService.SearchAsync(searchname, managerId);
             else
-                managerResults = await managerService.SearchAsync(searchname, null);
-
-         
-            if (managerResults == null || !managerResults.Any())
-                Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Search")
+            {
+                result = await employeeService.GetEmployeesByManagerPagedAsync(managerId, pageno, pagesize, sortcolumn);
+                Log.ForContext("UserName", currentUser.UserName)
+               .ForContext("ActionType", "Index")
                .ForContext("Controller", "Manager")
-                .Warning("Search for '{SearchTerm}' by {UserName} returned no results", searchname, User.Identity?.Name);
-            else
-                Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Search")
-               .ForContext("Controller", "Manager")
-                .Information("Search for {SearchTerm} by {UserName}", searchname, User.Identity?.Name);
-
-            return PartialView("_IndexManagerPartial", managerResults ?? new List<GetAllAndSearchManagerDTO>());
+               .Information("Manager {ManagerName} viewed employee list ", currentUser.UserName);
+            }
+            return View(result);
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)

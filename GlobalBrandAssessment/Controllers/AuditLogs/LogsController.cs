@@ -24,19 +24,23 @@ namespace GlobalBrandAssessment.PL.Controllers.AuditLogs
             {
                 conn.Open();
 
-                
+                // Get total count of logs to calculate total pages
                 using (var countCmd = new SqlCommand("SELECT COUNT(*) FROM AuditLogs", conn))
                 {
+                    //Get Count of Logs from Row and column to convert it into scalar
                     totalCount = (int)countCmd.ExecuteScalar();
                 }
 
-             
+
+                // Fetch paginated logs that present in each page
                 string query = @"
                     SELECT Id, UserName, ActionType, Controller, Message, Level, TimeStamp
                     FROM AuditLogs
                     ORDER BY TimeStamp DESC
                     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 
+
+                //Passing The parameters to get audit logs with pagenation
                 using (var cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Offset", (page - 1) * pageSize);
@@ -62,7 +66,7 @@ namespace GlobalBrandAssessment.PL.Controllers.AuditLogs
                 }
             }
 
-           
+            // Calculate total pages
             int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
             ViewBag.CurrentPage = page;

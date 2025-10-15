@@ -38,32 +38,29 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
+        public async Task<IActionResult> Index(string? searchname,int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
         {
-            var manager = await employeeService.GetAllPagedAsync(pageno, pagesize, sortcolumn);
-            Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Index")
-               .ForContext("Controller", "Admin")
-               .Information("Admin viewed employee list ");
-            return View(manager);
-        }
+            PagedResult<GetAllAndSearchManagerDTO> result;
 
-        [HttpPost]
-        public async Task<IActionResult> Search(string searchname)
-        {
-            var manager = await managerService.SearchAsync(searchname, null);
-            Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Search")
-               .ForContext("Controller", "Admin")
-               .Information("Admin searched employees with keyword: {SearchKeyword}", searchname);
-
-
-            if (manager == null || !manager.Any())
+            if (!string.IsNullOrEmpty(searchname))
             {
-                return PartialView("_IndexAdminPartial", new List<GetAllAndSearchManagerDTO>());
+                result = await managerService.SearchAsync(searchname,null,pageno, pagesize, sortcolumn);
+                Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Search")
+              .ForContext("Controller", "Admin")
+              .Information("Admin searched employees with keyword: {SearchKeyword}", searchname);
             }
-
-            return PartialView("_IndexAdminPartial", manager);
+            else
+            {
+                result = await employeeService.GetAllPagedAsync(pageno, pagesize, sortcolumn);
+                Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("ActionType", "Index")
+              .ForContext("Controller", "Admin")
+              .Information("Admin viewed employee list ");
+            }
+          
+           
+            return View(result);
         }
 
         [HttpGet]

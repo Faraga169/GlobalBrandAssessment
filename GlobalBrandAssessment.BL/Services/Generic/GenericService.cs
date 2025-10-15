@@ -29,7 +29,7 @@ namespace GlobalBrandAssessment.BL.Services.Generic
         public async Task<int> AddAsync(Tdto dto)
         {
             var entity=mapper.Map<Tdto, T>(dto);
-            await unitofWork.Repository<T>().AddAsync(entity);
+            await unitofWork.Repository<IGenericRepository<T>,T>().AddAsync(entity);
             var result = await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }
@@ -39,7 +39,7 @@ namespace GlobalBrandAssessment.BL.Services.Generic
         public async Task<int> UpdateAsync(Tdto dto)
         {
             var entity= mapper.Map<Tdto, T>(dto);
-            await unitofWork.Repository<T>().UpdateAsync(entity);
+            await unitofWork.Repository<IGenericRepository<T>, T>().UpdateAsync(entity);
             var result = await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }

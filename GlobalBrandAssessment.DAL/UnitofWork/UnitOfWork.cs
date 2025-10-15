@@ -9,58 +9,50 @@ using GlobalBrandAssessment.DAL.Repositories.Attachment;
 using GlobalBrandAssessment.DAL.Repositories.Generic;
 using GlobalBrandAssessment.GlobalBrandDbContext;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GlobalBrandAssessment.DAL.UnitofWork
 {
     public class UnitOfWork : IUnitofWork
     {
-        private readonly GlobalbrandDbContext globalbrandDbContext;
-        private Lazy<IEmployeeRepository> _employeeRepository;
-        private Lazy<ITaskRepository> _taskRepository;
-        private Lazy<ICommentRepository> _commentRepository;
-        private Lazy<IAttachmentRepository> _attachmentRepository;
-        private Lazy<IManagerRepository> _managerRepository;
-        private Lazy<IDepartmentRepository> _departmentRepository;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly Dictionary<Type, object> _repositories = new();
+
+        // Constructor accepting IServiceProvider for dependency injection
+        public UnitOfWork(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
+
+        // Generic method to get repository instance
+        public TRepository Repository<TRepository, TEntity>()
+            where TRepository : IGenericRepository<TEntity>
+            where TEntity : class
+        {
+            // Get the type of the repository
+            var type = typeof(TRepository);
+
+            // Check if repository instance already exists in the dictionary
+            if (_repositories.ContainsKey(type))
+                return (TRepository)_repositories[type];
+
+
+            // Create new instance of repository through dependency Injection of IService provider
+            var repo = _serviceProvider.GetRequiredService<TRepository>();
+
+            // Add the new repository instance to the dictionary
+            _repositories.Add(type, repo);
+
+            // Return the repository instance
+            return repo;
+        }
+
+
+        // Save changes to the database
+        public async Task<int> CompleteAsync() =>
+            await _serviceProvider.GetRequiredService<GlobalbrandDbContext>().SaveChangesAsync();
+
       
-
-        public UnitOfWork(GlobalbrandDbContext globalbrandDbContext)
-        {
-            _commentRepository = new Lazy<ICommentRepository>(()=>new CommentRepository(globalbrandDbContext));
-            _employeeRepository = new Lazy<IEmployeeRepository>(()=>new EmployeeRepository(globalbrandDbContext));
-            _taskRepository = new Lazy<ITaskRepository>(()=>new TaskRepository(globalbrandDbContext));
-            _attachmentRepository = new Lazy<IAttachmentRepository>(() => new AttachmentRepository(globalbrandDbContext)); ;
-            _managerRepository = new Lazy<IManagerRepository>(()=>new ManagerRepository(globalbrandDbContext));
-            _departmentRepository = new Lazy<IDepartmentRepository>(()=>new DepartmentRepository(globalbrandDbContext));
-            this.globalbrandDbContext = globalbrandDbContext;
-           
-        }
-        public IAttachmentRepository attachmentRepository => _attachmentRepository.Value;
-
-        public ICommentRepository commentRepository => _commentRepository.Value;
-
-        public IEmployeeRepository employeeRepository => _employeeRepository.Value;
-
-
-        public ITaskRepository taskRepository => _taskRepository.Value;
-
-        public IManagerRepository ManagerRepository => _managerRepository.Value;
-
-        public IDepartmentRepository departmentRepository => _departmentRepository.Value;
-
-        public async Task<int> CompleteAsync()
-        {
-            return await globalbrandDbContext.SaveChangesAsync();
-        }
-
-        public void  Dispose()
-        {
-           globalbrandDbContext.Dispose();
-        }
-
-        public IGenericRepository<T> Repository<T>() where T : class
-        {
-            return new GenericRepository<T>(globalbrandDbContext);
-        }
 
     }
 }

@@ -12,7 +12,7 @@ namespace GlobalBrandAssessment.DAL.Data.Models
     public interface IManagerRepository:IGenericRepository<Employee>
     {
 
-        public Task<List<Employee>> SearchAsync(string searchname, int? managerid);
+        public Task<(List<Employee>,int TotalCount)> SearchAsync(string searchname, int? managerid,int pageno,int pagesize);
 
         public Task DemoteManagerToEmployeeAsync(int? managerId);
 

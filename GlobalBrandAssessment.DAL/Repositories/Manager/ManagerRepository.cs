@@ -22,7 +22,7 @@ namespace GlobalBrandAssessment.DAL.Repositories
         }
 
        
-        public async Task<List<Employee>> SearchAsync(string searchname, int? managerid)
+        public async Task<(List<Employee>,int TotalCount)> SearchAsync(string searchname, int? managerid,int pageno,int pagesize)
         {
             var query = globalbrandDbContext.Employees.Include(e => e.Department).AsQueryable();
 
@@ -41,8 +41,16 @@ namespace GlobalBrandAssessment.DAL.Repositories
 
             }
 
-            return await query.ToListAsync();
-            
+            var totalCount = await query.CountAsync();
+
+            var employees = await query
+                .OrderBy(e => e.FirstName)
+                .Skip((pageno - 1) * pagesize)
+                .Take(pagesize)
+                .ToListAsync();
+
+            return (employees, totalCount);
+
         }
 
         public async Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId)

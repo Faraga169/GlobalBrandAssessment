@@ -32,19 +32,19 @@ namespace GlobalBrandAssessment.BL.Services.Manager
         public async Task<int> Add(AddAndUpdateManagerDTO addAndUpdateManagerDTO)
         {
             var entity = mapper.Map<AddAndUpdateManagerDTO, Employee>(addAndUpdateManagerDTO);
-            await unitofWork.ManagerRepository.AddAsync(entity);
+            await unitofWork.Repository<IManagerRepository, Employee>().AddAsync(entity);
             await unitofWork.CompleteAsync();
             return entity.Id;
         }
 
         public async Task<int> DeleteAsync(int? id)
         {
-            var manager = await unitofWork.employeeRepository.GetEmployeeById(id);
+            var manager = await unitofWork.Repository<IEmployeeRepository, Employee>().GetEmployeeById(id);
             if (manager == null)
                 return 0;
 
             
-            var employees = await unitofWork.employeeRepository.GetAll();
+            var employees = await unitofWork.Repository<IEmployeeRepository, Employee>().GetAll();
             bool hasEmployees = employees.Any(e => e.ManagerId == id);
 
             if (hasEmployees)
@@ -53,7 +53,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
                 return -1;
             }
 
-            var departments = await unitofWork.departmentRepository.GetAllAsync();
+            var departments = await unitofWork.Repository<IDepartmentRepository,Department>().GetAllAsync();
             bool hasDepartment = departments.Any(d => d.ManagerId == id);
 
             if (hasDepartment)
@@ -62,31 +62,31 @@ namespace GlobalBrandAssessment.BL.Services.Manager
                 return -2;
             }
 
-            await unitofWork.ManagerRepository.DeleteAsync(manager);
+            await unitofWork.Repository<IManagerRepository,Employee>().DeleteAsync(manager);
             var result = await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }
 
         public async Task<int> DemoteManagerToEmployeeAsync(int? managerId) { 
-        await unitofWork.ManagerRepository.DemoteManagerToEmployeeAsync(managerId);
+        await unitofWork.Repository<IManagerRepository,Employee>().DemoteManagerToEmployeeAsync(managerId);
         var result= await unitofWork.CompleteAsync();
             return result > 0 ? result : 0;
         }
 
-        public async Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid)
+        public async Task<PagedResult<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int? managerid,int pageno,int pagesize,string sortColumn)
         {
-            //.And .Or Extension Methods for Expression Func Predicate
-            //Expression<Func<Employee, bool>> searchExpression = x => true;
-            //if (string.IsNullOrEmpty(searchname)) {
-
-            //    searchExpression = x => x.FirstName.Contains(searchname) || x.LastName.Contains(searchname);
-            //}
-
-            var employee = await unitofWork.ManagerRepository.SearchAsync(searchname,managerid);
+            var (employee,TotalCount) = await unitofWork.Repository<IManagerRepository, Employee>().SearchAsync(searchname,managerid,pageno,pagesize);
             var SearchManagerDTO = mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employee);
 
-           
-            return SearchManagerDTO;
+            return new PagedResult<GetAllAndSearchManagerDTO>
+            {
+                Items = SearchManagerDTO,
+                PageNumber = pageno,
+                PageSize = pagesize,
+                TotalCount = TotalCount
+            };
+            
+
         }
 
     
@@ -98,13 +98,13 @@ namespace GlobalBrandAssessment.BL.Services.Manager
         public Task<Employee?> GetManagerByDepartmentIdAsync(int? deptId)
         {
             
-            return unitofWork.ManagerRepository.GetManagerByDepartmentIdAsync(deptId) ;
+            return unitofWork.Repository<IManagerRepository, Employee>().GetManagerByDepartmentIdAsync(deptId) ;
         }
 
         public async Task<List<Employee>> GetAllManagersAsync()
         {
             
-            return await unitofWork.ManagerRepository.GetAllManagersAsync();
+            return await unitofWork.Repository<IManagerRepository, Employee>().GetAllManagersAsync();
         }
 
         

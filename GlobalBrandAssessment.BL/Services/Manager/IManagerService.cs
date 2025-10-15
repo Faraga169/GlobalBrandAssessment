@@ -18,7 +18,7 @@ namespace GlobalBrandAssessment.BL.Services.Manager
         public Task<int> DemoteManagerToEmployeeAsync(int? managerId);
         public Task<int> DeleteAsync(int? id);
 
-        public Task<List<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid);
+        public Task<PagedResult<GetAllAndSearchManagerDTO>> SearchAsync(string searchname,int?managerid,int pageno,int pagesize,string sortColumn);
 
 
 
