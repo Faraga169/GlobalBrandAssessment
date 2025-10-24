@@ -75,10 +75,7 @@ namespace GlobalBrandAssessment.BL.Services
         {
             var (employees, totalCount) = await unitOfWork.Repository<IEmployeeRepository, Employee>().GetEmployeesByManagerPaged(ManagerId,pageno,pagesize,sortcolumn);
 
-        
-
             var result= mapper.Map<List<Employee>, List<GetAllAndSearchManagerDTO>>(employees);
-            //var pagedResult=mapper.Map<List<GetAllAndSearchManagerDTO>, PagedResult<GetAllAndSearchManagerDTO>>(result);
             
             var pagedResult = new PagedResult<GetAllAndSearchManagerDTO>()
             {

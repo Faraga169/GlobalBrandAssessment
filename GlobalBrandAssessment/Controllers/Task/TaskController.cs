@@ -51,18 +51,18 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
                 var currentUser = await userManager.GetUserAsync(User);
                 var employeeId = currentUser?.EmployeeId;
                 Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Index")
-               .ForContext("Controller", "Task")
-               .Information("Manager {Username} is viewing tasks.", currentUser.UserName);
+                   .ForContext("ActionType", "ViewAssignedTasks")
+                   .ForContext("Controller", "TaskManagement")
+                   .Information("Manager {Username} viewed tasks assigned to their employees.", currentUser.UserName);
 
                 tasks = await taskService.GetAllTasksbyManagerIdAsync(employeeId);
             }
             else if (User.IsInRole("Admin"))
             {
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Index")
-              .ForContext("Controller", "Task")
-               .Information("Admin is viewing all tasks.");
+                   .ForContext("ActionType", "ViewAllTasks")
+                   .ForContext("Controller", "TaskManagement")
+                   .Information("Admin viewed all tasks in the system.");
                 tasks = await taskService.GetAll();
             }
             return View(tasks);
@@ -74,10 +74,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             var currentUser = await userManager.GetUserAsync(User);
             var managerId = currentUser?.EmployeeId;
             Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Search")
-              .ForContext("Controller", "Task")
-              .Information("Search requested by {UserName} with keyword: {SearchName}",
-                currentUser.UserName, searchname);
+               .ForContext("ActionType", "SearchTasks")
+               .ForContext("Controller", "TaskManagement")
+               .Information("{UserName} searched tasks with keyword: {SearchName}",
+                 currentUser?.UserName, searchname);
 
             var tasks = User.IsInRole("Manager")
                 ? await taskService.SearchAsync(searchname, managerId)
@@ -85,12 +85,13 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
 
             if (tasks == null || !tasks.Any())
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Search")
-              .ForContext("Controller", "Task")
-               .Warning("No search results found for: {SearchName}", searchname);
+                   .ForContext("ActionType", "SearchTasks")
+                   .ForContext("Controller", "TaskManagement")
+                   .Warning("No search results found for: {SearchName}", searchname);
 
             return PartialView("_IndexTaskPartial", tasks ?? new List<GetAllandSearchTaskDTO>());
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -98,43 +99,38 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             var currentUser = await userManager.GetUserAsync(User);
 
             var managerId = currentUser?.EmployeeId;
-                if (User.IsInRole("Manager"))
+            if (User.IsInRole("Manager"))
+            {
+                var employees = await employeeService.GetEmployeesByManagerId(managerId);
+                if (employees == null || !employees.Any())
                 {
-                    var employees = await employeeService.GetEmployeesByManagerId(managerId);
-                    if (employees == null || !employees.Any())
-                    {
-                        ViewBag._Employees = new List<SelectListItem>{
+                    ViewBag._Employees = new List<SelectListItem>{
         new SelectListItem { Value = "", Text = "No employees available" }
     };
-                    }
-                    else
-                    {
-                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
-                    }
                 }
-
-                else if (User.IsInRole("Admin"))
+                else
                 {
-                    var employees = await employeeService.GetAll();
-                    if (employees == null || !employees.Any())
-                    {
-                        ViewBag._Employees = new List<SelectListItem>{
-        new SelectListItem { Value = "", Text = "No employees available" }
-    };
-                    }
-                    else
-                    {
-                        ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
-                    }
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
                 }
-
-                return View();
-            
-           
-
-
             }
-        
+
+            else if (User.IsInRole("Admin"))
+            {
+                var employees = await employeeService.GetAll();
+                if (employees == null || !employees.Any())
+                {
+                    ViewBag._Employees = new List<SelectListItem>{
+        new SelectListItem { Value = "", Text = "No employees available" }
+    };
+                }
+                else
+                {
+                    ViewBag._Employees = new SelectList(employees, "Id", "FirstName");
+                }
+            }
+
+            return View();
+        }
 
 
         [HttpPost]
@@ -143,9 +139,9 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             if (!ModelState.IsValid)
             {
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Create")
-              .ForContext("Controller", "Task")
-               .Warning("Invalid model state during task creation.");
+                   .ForContext("ActionType", "CreateTask")
+                   .ForContext("Controller", "TaskManagement")
+                   .Warning("Invalid data while creating a task.");
                 return PartialView("_CreateTaskPartial", createtaskdto);
             }
 
@@ -154,80 +150,20 @@ namespace GlobalBrandAssessment.PL.Controllers.Task
             if (result > 0)
             {
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Create")
-              .ForContext("Controller", "Task")
-               .Information("Task created successfully: {Title}", createtaskdto.Title);
+                   .ForContext("ActionType", "CreateTask")
+                   .ForContext("Controller", "TaskManagement")
+                   .Information("Task '{Title}' created successfully by {UserName}.", createtaskdto.Title, User?.Identity?.Name);
                 TempData["Message"] = "Task created successfully.";
                 return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
             }
+
             Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Create")
-              .ForContext("Controller", "Task")
-            .Warning("Failed to create task: {Title}", createtaskdto.Title);
+               .ForContext("ActionType", "CreateTask")
+               .ForContext("Controller", "TaskManagement")
+               .Warning("Failed to create task: {Title}", createtaskdto.Title);
             TempData["Message"] = "Failed to create task.";
             return Json(new { success = false });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit([FromRoute] int id, AddandUpdateTaskDTO Edittaskdto)
-        {
-            if (!ModelState.IsValid)
-            {
-                Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Edit")
-              .ForContext("Controller", "Task")
-               .Warning("Invalid model state during edit for Task {Title}", Edittaskdto.Title);
-                return PartialView("_EditTaskPartial", Edittaskdto);
-            }
-
-            int result = await taskService.UpdateAsync(Edittaskdto);
-
-            if (result > 0)
-            {
-                Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Edit")
-              .ForContext("Controller", "Task")
-               .Information("Task updated successfully");
-                TempData["Message"] = "Task updated successfully.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
-            }
-            Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Edit")
-              .ForContext("Controller", "Task")
-            .Warning("Failed to update task {Title}", Edittaskdto.Title);
-            TempData["Message"] = "Failed to update task.";
-            return Json(new { success = false });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (!id.HasValue)
-            {
-                Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Delete")
-              .ForContext("Controller", "Task")
-              .Warning("Delete request with null TaskId.");
-                return BadRequest();
-            }
-
-            int result = await taskService.DeleteAsync(id);
-            if (result > 0)
-            {
-                Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Delete")
-              .ForContext("Controller", "Task")
-              .Information("Task deleted successfully by {UserName}", User?.Identity?.Name);
-                TempData["Message"] = "Task deleted successfully.";
-                return Json(new { success = true, redirectUrl = Url.Action("Index", "Task") });
-            }
-
-            Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Delete")
-              .ForContext("Controller", "Task")
-            .Warning("Failed to delete task by {UserName}", User?.Identity?.Name);
-            TempData["Message"] = "Task deletion failed.";
-            return Json(new { success = false });
-        }
     }
 }

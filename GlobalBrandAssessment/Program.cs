@@ -34,10 +34,7 @@ namespace GlobalBrandAssessment
                 .Enrich.FromLogContext()
 
    .MinimumLevel.Information() 
-
 .MinimumLevel.Override("Microsoft", LogEventLevel.Error)
-.MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
-.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Error)
 .MinimumLevel.Override("System", LogEventLevel.Error)
 
                 .WriteTo.Console()

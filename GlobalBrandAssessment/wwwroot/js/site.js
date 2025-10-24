@@ -33,18 +33,7 @@ $(document).ready(function () {
     });
 });
 
-    function toggleExtra() {
-        let status = document.getElementById("statusSelect").value;
-    let extra = document.getElementById("extraFields");
-    if (status === "In Progress") {
-        extra.style.display = "block";
-            } else {
-        extra.style.display = "none";
-            }
-        }
 
-    document.getElementById("statusSelect").addEventListener("change", toggleExtra);
-window.onload = toggleExtra;
 
 
  window.addEventListener("pageshow", function (event) {

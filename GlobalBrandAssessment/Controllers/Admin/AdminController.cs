@@ -38,30 +38,34 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? searchname,int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
+        public async Task<IActionResult> Index(string? searchname, int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
         {
             PagedResult<GetAllAndSearchManagerDTO> result;
 
             if (!string.IsNullOrEmpty(searchname))
             {
-                result = await managerService.SearchAsync(searchname,null,pageno, pagesize, sortcolumn);
+                result = await managerService.SearchAsync(searchname, null, pageno, pagesize, sortcolumn);
+
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Search")
-              .ForContext("Controller", "Admin")
-              .Information("Admin searched employees with keyword: {SearchKeyword}", searchname);
+                   .ForContext("Controller", "AdminController")
+                   .ForContext("ActionType", "SearchEmployee")
+                   .Information(" {UserName} searched employees with keyword '{SearchKeyword}' on page {PageNumber}",
+                                User?.Identity?.Name, searchname, pageno);
             }
             else
             {
                 result = await employeeService.GetAllPagedAsync(pageno, pagesize, sortcolumn);
+
                 Log.ForContext("UserName", User?.Identity?.Name)
-              .ForContext("ActionType", "Index")
-              .ForContext("Controller", "Admin")
-              .Information("Admin viewed employee list ");
+                   .ForContext("Controller", "AdminController")
+                   .ForContext("ActionType", "ViewEmployeeList")
+                   .Information("{UserName} viewed employee list on page {PageNumber}",
+                                User?.Identity?.Name, pageno);
             }
-          
-           
+
             return View(result);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -76,6 +80,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                     Text = r.ToString()
                 }).ToList();
             ViewBag.Roles = new SelectList(Roles, "Value", "Text");
+            Log.ForContext("UserName", User?.Identity?.Name)
+              .ForContext("Controller", "AdminController")
+              .ForContext("ActionType", "CreateEmployeeView")
+              .Information("{UserName} opened Create page to Create Employee",
+                           User?.Identity?.Name);
             return View();
         }
 
@@ -127,6 +136,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                     if (result.Succeeded)
                     {
                         await userManager.AddToRoleAsync(user, addORUpdateManagerDTO.Role);
+
                         if (addORUpdateManagerDTO.Role == "Manager" && addORUpdateManagerDTO.DeptId.HasValue)
                         {
                             if (department != null && department.ManagerId == null)
@@ -136,17 +146,19 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                                 await managerService.DemoteManagerToEmployeeAsync(department.ManagerId);
                             }
                         }
+
                         Log.ForContext("UserName", User?.Identity?.Name)
-                           .ForContext("ActionType", "Create")
-                           .ForContext("Controller", "Admin")
-                           .Information("Admin created employee {EmployeeName} with Role {Role} in Department {DeptId}", addORUpdateManagerDTO.FirstName, addORUpdateManagerDTO.Role, addORUpdateManagerDTO.DeptId);
+                           .ForContext("Controller", "AdminController")
+                           .ForContext("ActionType", "CreateEmployee")
+                           .Information("{UserName} created employee {EmployeeName} with Role {Role} in Department {DeptName}",
+                                        User?.Identity?.Name, addORUpdateManagerDTO.FirstName, addORUpdateManagerDTO.Role, department?.Name);
                     }
                     else
                     {
                         Log.ForContext("UserName", User?.Identity?.Name)
-                         .ForContext("ActionType", "Create")
-                         .ForContext("Controller", "Admin")
-                          .Warning("Admin failed to create employee {EmployeeName}", addORUpdateManagerDTO.FirstName);
+                           .ForContext("Controller", "AdminController")
+                           .ForContext("ActionType", "CreateEmployee")
+                           .Warning("{UserName} failed to create employee {EmployeeName}", User?.Identity?.Name, addORUpdateManagerDTO.FirstName);
                     }
 
                     TempData["Message"] = "Employee created successfully.";
@@ -155,7 +167,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                 else
                 {
                     TempData["Message"] = "Failed to create employee.";
-                    Log.Warning("Admin failed to create employee {EmployeeName}", addORUpdateManagerDTO.FirstName);
+                    Log.ForContext("UserName", User?.Identity?.Name)
+                       .ForContext("Controller", "AdminController")
+                       .ForContext("ActionType", "CreateEmployee")
+                       .Warning("{UserName} failed to create employee {EmployeeName}", User?.Identity?.Name, addORUpdateManagerDTO.FirstName);
+
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Admin") });
                 }
             }
@@ -164,14 +180,12 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
             ViewBag._Department = new SelectList(departments, "Id", "Name");
             var Roles = Enum.GetValues(typeof(Role))
                 .Cast<Role>()
-                .Select(r => new SelectListItem
-                {
-                    Value = r.ToString(),
-                    Text = r.ToString()
-                }).ToList();
+                .Select(r => new SelectListItem { Value = r.ToString(), Text = r.ToString() })
+                .ToList();
             ViewBag.Roles = new SelectList(Roles, "Value", "Text");
             return PartialView("_CreateAdminPartial", addORUpdateManagerDTO);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
@@ -192,10 +206,15 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                 .ToList();
             ViewBag.Roles = new SelectList(Roles, "Value", "Text", result.Role);
 
-            Log.Information("Admin editing employee {EmployeeName} (Id: {EmployeeId})", result.FirstName, result.Id);
+            Log.ForContext("UserName", User?.Identity?.Name)
+               .ForContext("Controller", "AdminController")
+               .ForContext("ActionType", "EditEmployeeView")
+               .Information("{UserName} opened edit page for employee {EmployeeName}",
+                            User?.Identity?.Name, result.FirstName);
 
             return View(result);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit([FromRoute] int id, AddAndUpdateManagerDTO addORUpdateManagerDTO)
@@ -253,10 +272,10 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                     }
 
                     Log.ForContext("UserName", User?.Identity?.Name)
-                       .ForContext("ActionType", "Edit")
-                       .ForContext("Controller", "Admin")
-                       .Information("Admin updated employee {EmployeeName} with Role {Role}", addORUpdateManagerDTO.FirstName, addORUpdateManagerDTO.Role);
-                  
+                       .ForContext("Controller", "AdminController")
+                       .ForContext("ActionType", "EditEmployee")
+                       .Information("{UserName} updated employee {EmployeeName} with Role {Role}",
+                                    User?.Identity?.Name, addORUpdateManagerDTO.FirstName, addORUpdateManagerDTO.Role);
 
                     TempData["Message"] = "Employee updated successfully.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Admin") });
@@ -264,9 +283,11 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                 else
                 {
                     Log.ForContext("UserName", User?.Identity?.Name)
-                       .ForContext("ActionType", "Edit")
-                       .ForContext("Controller", "Admin")
-                       .Warning("Admin failed to update employee {EmployeeName}", addORUpdateManagerDTO.FirstName);
+                       .ForContext("Controller", "AdminController")
+                       .ForContext("ActionType", "EditEmployee")
+                       .Warning("{UserName} failed to update employee {EmployeeName}",
+                                User?.Identity?.Name, addORUpdateManagerDTO.FirstName);
+
                     TempData["Message"] = "Failed to update employee.";
                     return Json(new { success = true, redirectUrl = Url.Action("Index", "Admin") });
                 }
@@ -283,6 +304,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
             return PartialView("_EditAdminPartial", addORUpdateManagerDTO);
         }
 
+
         [HttpPost]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -291,24 +313,27 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
 
             var result = await managerService.DeleteAsync(id);
             var user = await userManager.Users.FirstOrDefaultAsync(u => u.EmployeeId == id);
+
             if (result > 0)
             {
-              
                 if (user != null) await userManager.DeleteAsync(user);
 
                 Log.ForContext("UserName", User?.Identity?.Name)
-                   .ForContext("ActionType", "Delete")
-                   .ForContext("Controller", "Admin")
-                   .Information("Admin deleted employee  {FirstName}", user?.Employee?.FirstName);
+                   .ForContext("Controller", "AdminController")
+                   .ForContext("ActionType", "DeleteEmployee")
+                   .Information("{UserName} deleted employee {EmployeeName}",
+                                User?.Identity?.Name, user?.Employee?.FirstName, id);
+
                 TempData["Message"] = "Employee deleted successfully.";
                 return Json(new { success = true, redirectUrl = Url.Action("Index", "Admin") });
             }
             else
             {
                 Log.ForContext("UserName", User?.Identity?.Name)
-                   .ForContext("ActionType", "Delete")
-                   .ForContext("Controller", "Admin")
-                    .Warning("Admin failed to delete {FirstName}", user?.Employee?.FirstName);
+                   .ForContext("Controller", "AdminController")
+                   .ForContext("ActionType", "DeleteEmployee")
+                   .Warning("{UserName} failed to delete employee {EmployeeName}",
+                            User?.Identity?.Name, user?.Employee?.FirstName, id);
 
                 if (result == -1)
                     TempData["Message"] = "Can't delete this employee because he has employees under him.";
@@ -320,5 +345,6 @@ namespace GlobalBrandAssessment.PL.Controllers.Admin
                 return Json(new { success = true, redirectUrl = Url.Action("Index", "Admin") });
             }
         }
+
     }
 }

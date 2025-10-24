@@ -41,7 +41,7 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? searchname,int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
+        public async Task<IActionResult> Index(string? searchname, int pageno = 1, int pagesize = 5, string sortcolumn = "FirstName")
         {
             var currentUser = await userManager.GetUserAsync(User);
             var managerId = currentUser?.EmployeeId;
@@ -52,43 +52,41 @@ namespace GlobalBrandAssessment.PL.Controllers.Employee
             {
                 result = await managerService.SearchAsync(searchname, managerId, pageno, pagesize, sortcolumn);
                 Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Search")
-               .ForContext("Controller", "Manager")
-                .Information("Search for {SearchTerm} by {UserName}", searchname, currentUser.UserName);
+                   .ForContext("ActionType", "SearchEmployee")
+                   .ForContext("Controller", "ManagerController")
+                   .Information("Search for {SearchTerm} by {UserName}", searchname, currentUser?.UserName);
             }
             else
             {
                 result = await employeeService.GetEmployeesByManagerPagedAsync(managerId, pageno, pagesize, sortcolumn);
-                Log.ForContext("UserName", currentUser.UserName)
-               .ForContext("ActionType", "Index")
-               .ForContext("Controller", "Manager")
-               .Information("Manager {ManagerName} viewed employee list ", currentUser.UserName);
+                Log.ForContext("UserName", currentUser?.UserName)
+                   .ForContext("ActionType", "ViewEmployeeList")
+                   .ForContext("Controller", "ManagerController")
+                   .Information("Manager {ManagerName} viewed employee list ", currentUser?.UserName);
             }
             return View(result);
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var employee = await employeeService.GetEmployeeByIdAsync(id);
 
-           
             if (employee == null)
             {
                 Log.ForContext("UserName", User?.Identity?.Name)
-               .ForContext("ActionType", "Details")
-               .ForContext("Controller", "Manager")
-               .Warning("Manager {UserName} tried to view non-existent employee with ID {EmployeeId}", User.Identity?.Name, id);
+                   .ForContext("ActionType", "ViewEmployeeDetails")
+                   .ForContext("Controller", "ManagerController")
+                   .Warning("Manager {UserName} tried to view non-existent employee with ID {EmployeeId}", User?.Identity?.Name, id);
                 return NotFound();
             }
 
             Log.ForContext("UserName", User?.Identity?.Name)
-                .ForContext("ActionType", "Details")
-                .ForContext("Controller", "Manager")
-                .Information("Manager {UserName} viewed details for employee {EmployeeName}", User.Identity?.Name, employee.FirstName);
+                .ForContext("ActionType", "ViewEmployeeDetails")
+                .ForContext("Controller", "ManagerController")
+                .Information("Manager {UserName} viewed details for employee {EmployeeName}", User?.Identity?.Name, employee.FirstName);
             return View(employee);
         }
+
     }
 }
